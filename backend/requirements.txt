@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+databases
+asyncpg
+sqlalchemy
+passlib[bycrypt]
