@@ -1,9 +1,10 @@
 #TODO: Check if all these classes are needed or I can use only one class for each model
+from typing import Optional
 from pydantic import BaseModel
 
 #User base class which stores the mandatory fields before taking the test
 class UserBase(BaseModel):
-    id: int
+    id: Optional[int] = None
     first_name: str
     last_name: str
     email: str
@@ -13,7 +14,7 @@ class UserCreate(UserBase):
     password: str
 
 class User(BaseModel):
-    id: int
+    id: Optional[int] = None
     first_name: str
     last_name: str
     email: str

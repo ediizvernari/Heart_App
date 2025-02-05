@@ -11,13 +11,8 @@ async def get_user_by_email(db: AsyncSession, email: str):
     result = await db.execute(select(sql_models.User).filter(sql_models.User.email == email))
     return result.scalars().first()
 
-async def get_max_user_id(db: AsyncSession):
-    result = await db.execute(select(func.max(sql_models.User.id)))
-    max_id = result.scalar()
-    return max_id if max_id is not None else -1
-
 async def create_user(db: AsyncSession, user: schemas.UserCreate):
-    db_user = sql_models.User(name=user.username, email=user.email, hashed_password=user.password)
+    db_user = sql_models.User(first_name=user.first_name, last_name=user.last_name, email=user.email, password=user.password)
     db.add(db_user)
     await db.commit()
     await db.refresh(db_user)

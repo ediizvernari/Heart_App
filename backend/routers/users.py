@@ -9,9 +9,8 @@ router = APIRouter()
 # Create a new user
 @router.post("/", response_model=schemas.User)
 async def create_user(user: schemas.UserCreate, db: AsyncSession = Depends(get_db)):
-    db_user = await crud.get_user_by_username(db, username=user.username)
+    db_user = await crud.get_user_by_email(db, email=user.email)
     if db_user:
-        #TODO: Check the error code
         raise HTTPException(status_code=400, detail="Username already registered")
     return await crud.create_user(db=db, user=user)
 
@@ -20,3 +19,10 @@ async def get_all_users(db: AsyncSession = Depends(get_db)):
     users_dict = await crud.get_users(db)
     users_list = [schemas.User(id=user_id, **user_info) for user_id, user_info in users_dict.items()]
     return users_list
+
+@router.get("/check_email")
+async def check_email(email: str, db: AsyncSession = Depends(get_db)):
+    db_user = await crud.get_user_by_email(db, email=email)
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    return {"message": "Email available"}
