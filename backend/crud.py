@@ -12,7 +12,13 @@ async def get_user_by_email(db: AsyncSession, email: str):
     return result.scalars().first()
 
 async def create_user(db: AsyncSession, user: schemas.UserCreate):
-    db_user = sql_models.User(first_name=user.first_name, last_name=user.last_name, email=user.email, password=user.password)
+    db_user = sql_models.User(
+        first_name=user.first_name,
+        last_name=user.last_name,
+        email=user.email,
+        password=user.password,
+        is_admin=False  # Default value for is_admin
+    )
     db.add(db_user)
     await db.commit()
     await db.refresh(db_user)
