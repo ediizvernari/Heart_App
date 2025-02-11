@@ -3,4 +3,6 @@ uvicorn
 databases
 asyncpg
 sqlalchemy
+argon2-cffi
+cryptoraphy
 passlib[bycrypt]

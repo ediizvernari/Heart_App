@@ -2,6 +2,10 @@ from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from . import sql_models, schemas
 from sqlalchemy import func
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
+
+ph = PasswordHasher()
 
 async def get_user_by(db: AsyncSession, user_id: int):
     result = await db.execute(select(sql_models.User).filter(sql_models.User.id == user_id))
@@ -12,16 +16,18 @@ async def get_user_by_email(db: AsyncSession, email: str):
     return result.scalars().first()
 
 async def create_user(db: AsyncSession, user: schemas.UserCreate):
+    hashed_password = ph.hash(user.password)
     db_user = sql_models.User(
         first_name=user.first_name,
         last_name=user.last_name,
         email=user.email,
-        password=user.password,
+        password=hashed_password,
         is_admin=False  # Default value for is_admin
     )
     db.add(db_user)
     await db.commit()
     await db.refresh(db_user)
+    print("User created with email: " + user.email + " and password: " + hashed_password)
     return db_user
 
 async def get_medical_record(db: AsyncSession, record_id: int):
