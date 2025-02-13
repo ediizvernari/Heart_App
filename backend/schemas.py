@@ -1,4 +1,3 @@
-#TODO: Check if all these classes are needed or I can use only one class for each model
 from pydantic import BaseModel
 
 #User base class which stores the mandatory fields before taking the test
@@ -18,6 +17,13 @@ class User(BaseModel):
 
     class Config:
         orm_mode = True
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class UserWithToken(User):
+    token: Token
 
 class MedicalRecordsBase(BaseModel):
     male: int

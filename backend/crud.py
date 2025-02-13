@@ -1,5 +1,6 @@
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from backend.auth import create_access_token
 from . import sql_models, schemas
 from sqlalchemy import func
 from argon2 import PasswordHasher
@@ -27,7 +28,7 @@ async def create_user(db: AsyncSession, user: schemas.UserCreate):
     db.add(db_user)
     await db.commit()
     await db.refresh(db_user)
-    print("User created with email: " + user.email + " and password: " + hashed_password)
+    print("User created with email: " + user.email + " and password: " + hashed_password) #TODO: Remove this after making sure everything works as planned
     return db_user
 
 async def get_medical_record(db: AsyncSession, record_id: int):
