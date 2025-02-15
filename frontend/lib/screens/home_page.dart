@@ -28,7 +28,7 @@ class HomePage extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => LoginPage()),
                 );
               },
-              child: const Text('Sign In'),
+              child: const Text('Log In'),
             ),
             const SizedBox(height: 10),
             ElevatedButton(

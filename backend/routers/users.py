@@ -1,9 +1,9 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
+from jose import jwt #Remove this line after verifications
 from .. import crud, schemas
-from ..auth import create_access_token, verify_password, get_current_user
+from ..auth import ALGORITHM, SECRET_KEY, create_access_token, verify_password, get_current_user
 from ..database import get_db
 
 router = APIRouter()
@@ -15,22 +15,25 @@ async def create_user(user: schemas.UserCreate, db: AsyncSession = Depends(get_d
         raise HTTPException(status_code=400, detail="Username already registered")
     user = await crud.create_user(db=db, user=user)
     access_token = create_access_token(data={"sub": user.email})
+    print("Decoded email: ") #TODO: Remove this line and the next
+    print(jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM]))
     return schemas.Token(access_token=access_token, token_type="bearer")
 
-@router.post("/token", response_model=schemas.Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
-    user = await crud.get_user_by_email(db, email=form_data.username)
-    if not user or not verify_password(form_data.password, user.password):
+@router.post("/login", response_model=schemas.Token)
+async def login_for_access_token(email: str, password: str, db: AsyncSession = Depends(get_db)):
+    user = await crud.get_user_by_email(db, email=email)
+    if not user or not verify_password(password, user.password):
         raise HTTPException(
             status_code=400,
-            detail="Incorrect username or password",
+            detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.get("/me", response_model=schemas.User)
+@router.get("/me", response_model=schemas.User, description="Get the current logged-in user")
 async def read_users_me(current_user: schemas.User = Depends(get_current_user)):
+    print("verificare")
     return current_user
 
 @router.get("/users", response_model=List[schemas.User])

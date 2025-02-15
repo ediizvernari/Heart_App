@@ -78,3 +78,15 @@ Future<String?> validateAllFieldsForSignUp(String email, String password, String
   }
   return null;
 }
+
+Future<String?> validateAllFieldsForLogin(String email, String password) async {
+  final String? emailError = await validateEmail(email);
+  if (emailError != null) {
+    return emailError;
+  }
+  final String? passwordError = validatePassword(password);
+  if (passwordError != null) {
+    return passwordError;
+  }
+  return null;
+}
