@@ -20,16 +20,16 @@ async def create_user(user: schemas.UserCreate, db: AsyncSession = Depends(get_d
     return schemas.Token(access_token=access_token, token_type="bearer")
 
 @router.post("/login", response_model=schemas.Token)
-async def login_for_access_token(email: str, password: str, db: AsyncSession = Depends(get_db)):
-    user = await crud.get_user_by_email(db, email=email)
-    if not user or not verify_password(password, user.password):
+async def login_for_access_token(login: schemas.Login, db: AsyncSession = Depends(get_db)):
+    user = await crud.get_user_by_email(db, email=login.email)
+    if not user or not verify_password(login.password, user.password):
         raise HTTPException(
             status_code=400,
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token = create_access_token(data={"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return schemas.Token(access_token=access_token, token_type="bearer")
 
 @router.get("/me", response_model=schemas.User, description="Get the current logged-in user")
 async def read_users_me(current_user: schemas.User = Depends(get_current_user)):

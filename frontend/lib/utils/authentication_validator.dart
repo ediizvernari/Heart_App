@@ -1,12 +1,9 @@
 import 'package:http/http.dart' as http;
 
 Future<String?> validateEmail(String email) async {
-  if (email.isEmpty) {
-    return 'Email cannot be empty';
-  }
-  final RegExp emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-  if (!emailRegex.hasMatch(email)) {
-    return 'Invalid email format';
+  String? emailError = await validateEmailFormat(email);
+  if (emailError != null) {
+    return emailError;
   }
   
 final response = await http.get(Uri.parse('http://10.0.2.2:8000/users/check_email?email=$email'));
@@ -14,6 +11,18 @@ final response = await http.get(Uri.parse('http://10.0.2.2:8000/users/check_emai
     return 'Email already registered';
   } else if (response.statusCode != 200) {
     return 'Error checking email';
+  }
+
+  return null;
+}
+
+Future<String?> validateEmailFormat(String email) async {
+  if (email.isEmpty) {
+    return 'Email cannot be empty';
+  }
+  final RegExp emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+  if (!emailRegex.hasMatch(email)) {
+    return 'Invalid email format';
   }
 
   return null;
@@ -80,7 +89,7 @@ Future<String?> validateAllFieldsForSignUp(String email, String password, String
 }
 
 Future<String?> validateAllFieldsForLogin(String email, String password) async {
-  final String? emailError = await validateEmail(email);
+  final String? emailError = await validateEmailFormat(email);
   if (emailError != null) {
     return emailError;
   }

@@ -1,13 +1,14 @@
 from pydantic import BaseModel
 
-#User base class which stores the mandatory fields before taking the test
-class UserBase(BaseModel):
+class Login(BaseModel):
+    email: str
+    password: str
+
+#Clasa asta mosteneste clasa UserBase si are in plus un password
+class UserCreate(BaseModel):
     first_name: str
     last_name: str
     email: str
-
-#Clasa asta mosteneste clasa UserBase si are in plus un password
-class UserCreate(UserBase):
     password: str
 
 class User(BaseModel):
