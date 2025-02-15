@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
+import 'login_page.dart'; // Import your login page
 
 class ClientPersonalDataInsertionPage extends StatefulWidget {
   const ClientPersonalDataInsertionPage({super.key});
@@ -20,6 +22,33 @@ class ClientPersonalDataInsertionPageState extends State<ClientPersonalDataInser
   int? _prevalentStroke;
   int? _prevalentHyp;
   int? _diabetes;
+
+  @override
+  void initState() {
+    super.initState();
+    _verifyToken();
+  }
+
+  Future<void> _verifyToken() async {
+    final storage = FlutterSecureStorage();
+    String? token = await storage.read(key: 'auth_token');
+
+    print('Token: $token'); // Debugging line
+
+    if (token == null) {
+      print('Token is null'); // Debugging line
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) =>  LoginPage()),
+      );
+    } else if (JwtDecoder.isExpired(token)) {
+      print('Token is expired'); // Debugging line
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) =>  LoginPage()),
+      );
+    } else {
+      print('Token is valid'); // Debugging line
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
