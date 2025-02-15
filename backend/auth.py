@@ -6,6 +6,8 @@ from jose import ExpiredSignatureError, JWTError, jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from backend import crud
+from backend.database import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
@@ -27,7 +29,7 @@ def create_access_token(data: dict):
     encoded_jwt = jwt.encode(data_to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -36,28 +38,19 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-
-        if payload.get("typ") != "access":
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token type",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-
         email: str = payload.get("sub")
         if email is None:
             raise credentials_exception
-
     except ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    except JWTError as e:
+    except JWTError:
         raise credentials_exception
 
-    user = await crud.get_user_by_email(email=email)
+    user = await crud.get_user_by_email(db, email=email)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

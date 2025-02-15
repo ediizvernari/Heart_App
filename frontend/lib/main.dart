@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:frontend/screens/login_page.dart';
 import 'screens/home_page.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'client_personal_data_insertion_page.dart';
 import '../utils/authentication_validator.dart';
 import 'package:http/http.dart' as http;
@@ -10,6 +11,7 @@ class SignUpPage extends StatelessWidget {
   final TextEditingController confirmPasswordController = TextEditingController();
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
+  final storage = const FlutterSecureStorage();
 
   SignUpPage({super.key});
 
@@ -109,10 +111,45 @@ class SignUpPage extends StatelessWidget {
                   );
 
                   if (response.statusCode == 200) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ClientPersonalDataInsertionPage()),
+                    final responseBody = jsonDecode(response.body);
+                    final token = responseBody['access_token'];
+
+                    // Store the token securely
+                    await storage.write(key: 'token', value: token);
+
+                    // Verify the token
+                    final verifyResponse = await http.get(
+                      Uri.parse('http://10.0.2.2:8000/users/me'),
+                      headers: <String, String>{
+                        'Content-Type': 'application/json; charset=UTF-8',
+                        'Authorization': 'Bearer $token',
+                      },
                     );
+
+                    if (verifyResponse.statusCode == 200) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ClientPersonalDataInsertionPage()),
+                      );
+                    } else {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Error'),
+                            content: const Text('Failed to verify token'),
+                            actions: <Widget>[
+                              TextButton(
+                                child: const Text('OK'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
                   } else {
                     showDialog(
                       context: context,
