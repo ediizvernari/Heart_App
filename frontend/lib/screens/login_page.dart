@@ -86,7 +86,7 @@ class LoginPage extends StatelessWidget {
       final String token = responseBody['access_token'];
 
       // Store the token securely
-      await storage.write(key: 'token', value: token);
+      await storage.write(key: 'auth_token', value: token);
 
       return true;
     } else {
