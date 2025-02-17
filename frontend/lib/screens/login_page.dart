@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/client_main_page.dart';
-import 'package:frontend/screens/client_personal_data_insertion_page.dart';
 import '../utils/authentication_validator.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';

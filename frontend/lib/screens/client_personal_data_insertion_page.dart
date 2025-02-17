@@ -30,7 +30,7 @@ class ClientPersonalDataInsertionPageState extends State<ClientPersonalDataInser
   }
 
   Future<void> _verifyToken() async {
-    final storage = FlutterSecureStorage();
+    const storage = FlutterSecureStorage();
     String? token = await storage.read(key: 'auth_token');
 
     print('Token: $token'); // Debugging line

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:frontend/screens/client_personal_data_insertion_page.dart';
 import 'package:frontend/screens/home_page.dart';
 import 'package:frontend/screens/login_page.dart';
 
@@ -13,25 +14,18 @@ class ClientMainPage extends StatelessWidget {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       String? token = await storage.read(key: 'auth_token');
       if (token == null || token.isEmpty) {
-        Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginPage()),
-                      );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
       }
     });
 
-    // Determine the grid column count dynamically
     int crossAxisCount = MediaQuery.of(context).size.width > 600 ? 3 : 2;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Welcome, Edi Izvernari'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _handleLogout(context),
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -45,21 +39,24 @@ class ClientMainPage extends StatelessWidget {
           itemCount: _menuItems.length,
           itemBuilder: (context, index) {
             final item = _menuItems[index];
-            return _buildGridItem(context, item['icon'], item['label'], item['route']);
+            return _buildGridItem(context, item);
           },
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: ElevatedButton(
-          onPressed: () => _handleLogout(context),
-          child: const Text('Quick Logout'),
+        padding: const EdgeInsets.all(12.0),
+        child: SizedBox(
+          width: double.infinity,
+          height: 60, // Increased button height
+          child: ElevatedButton(
+            onPressed: () => _handleLogout(context),
+            child: const Text('Logout', style: TextStyle(fontSize: 18)),
+          ),
         ),
       ),
     );
   }
 
-  // Logout confirmation dialog
   void _handleLogout(BuildContext context) {
     showDialog(
       context: context,
@@ -68,17 +65,16 @@ class ClientMainPage extends StatelessWidget {
         content: const Text("Are you sure you want to logout?"),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context), // Cancel
+            onPressed: () => Navigator.pop(context),
             child: const Text("Cancel"),
           ),
           TextButton(
             onPressed: () async {
-              // Perform logout actions (clear session, etc.)
               await storage.delete(key: 'auth_token');
-              Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const HomePage()),
-                      );
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomePage()),
+              );
             },
             child: const Text("Logout"),
           ),
@@ -87,20 +83,19 @@ class ClientMainPage extends StatelessWidget {
     );
   }
 
-  // Build grid items dynamically
-  Widget _buildGridItem(BuildContext context, IconData icon, String label, String route) {
+  Widget _buildGridItem(BuildContext context, Map<String, dynamic> item) {
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, route),
+      onTap: () => item['onTap'](context),
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 4,
-        color: Colors.blueGrey[50], // Subtle background color
+        color: Colors.blueGrey[50],
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 50, color: Colors.blueGrey[800]),
+            Icon(item['icon'], size: 50, color: Colors.blueGrey[800]),
             const SizedBox(height: 10),
-            Text(label, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(item['label'], style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -108,10 +103,28 @@ class ClientMainPage extends StatelessWidget {
   }
 }
 
-// Define menu items in a structured way
+//TODO: Add functionality for each of the menu Items
 final List<Map<String, dynamic>> _menuItems = [
-  {'icon': Icons.calendar_today, 'label': 'Appointments', 'route': '/appointments'},
-  {'icon': Icons.chat, 'label': 'Doctor Chat', 'route': '/doctor_chat'},
-  {'icon': Icons.insert_chart, 'label': 'Data Insertion', 'route': '/data_insertion'},
-  {'icon': Icons.chat_bubble, 'label': 'Chatbot', 'route': '/chatbot'},
+  {
+    'icon': Icons.calendar_today,
+    'label': 'Appointments',
+    'onTap': (context) => Navigator.pushNamed(context, '/appointments'),
+  },
+  {
+    'icon': Icons.chat,
+    'label': 'Doctor Chat',
+    'onTap': (context) => Navigator.pushNamed(context, '/doctor_chat'),
+  },
+  {
+    'icon': Icons.insert_chart,
+    'label': 'Data Insertion',
+    'onTap': (context) => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ClientPersonalDataInsertionPage())),
+  },
+  {
+    'icon': Icons.chat_bubble,
+    'label': 'Chatbot',
+    'onTap': (context) => Navigator.pushNamed(context, '/chatbot'),
+  },
 ];
