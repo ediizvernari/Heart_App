@@ -24,6 +24,8 @@ def verify_password(plain_password, hashed_password):
     
 def create_access_token(data: dict):
     data_to_encode = data.copy()
+    if "sub" in data_to_encode:
+        data_to_encode["sub"] = str(data_to_encode["sub"])
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     data_to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(data_to_encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -38,9 +40,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        if email is None:
+        print(f"Payload: {payload}")
+        id: int = payload.get("sub")
+        if id is None:
             raise credentials_exception
+        id = int(id)
     except ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -50,7 +54,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
     except JWTError:
         raise credentials_exception
 
-    user = await crud.get_user_by_email(db, email=email)
+    user = await crud.get_user_by_id(db, user_id=id)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -58,3 +62,4 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
         )
     
     return user
+

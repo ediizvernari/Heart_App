@@ -9,7 +9,7 @@ from .utils.encryption_utils import encrypt_data, decrypt_data
 
 ph = PasswordHasher()
 
-async def get_user_by(db: AsyncSession, user_id: int):
+async def get_user_by_id(db: AsyncSession, user_id: int):
     result = await db.execute(select(sql_models.User).filter(sql_models.User.id == user_id))
     return result.scalars().first()
 
