@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'client_personal_data_insertion_page.dart';
+import 'package:frontend/screens/client_main_page.dart';
 import '../utils/authentication_validator.dart';
 import 'package:http/http.dart' as http;
 
@@ -114,8 +114,7 @@ class SignUpPage extends StatelessWidget {
                     final responseBody = jsonDecode(response.body);
                     final token = responseBody['access_token'];
 
-                    // Store the token securely
-                    await storage.write(key: 'token', value: token);
+                    await storage.write(key: 'auth_token', value: token);
 
                     // Verify the token
                     final verifyResponse = await http.get(
@@ -129,7 +128,7 @@ class SignUpPage extends StatelessWidget {
                     if (verifyResponse.statusCode == 200) {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const ClientPersonalDataInsertionPage()),
+                        MaterialPageRoute(builder: (context) => const ClientMainPage()),
                       );
                     } else {
                       showDialog(

@@ -7,18 +7,25 @@ aes_key = base64.b64decode(AES_KEY)
 
 def encrypt_data(data: str) -> str:
     iv = os.urandom(12)
-    cipher = Cipher(algorithms.AES(aes_key), modes.GCM(iv))  # AES-GCM mode with generated IV
+    cipher = Cipher(algorithms.AES(aes_key), modes.GCM(iv))
     encryptor = cipher.encryptor()
     encrypted = encryptor.update(data.encode()) + encryptor.finalize()
-    encrypted_data = iv + encryptor.tag + encrypted # Concatenate IV, tag, and encrypted data
+    encrypted_data = iv + encryptor.tag + encrypted
     return base64.b64encode(encrypted_data).decode()
 
 
 def decrypt_data(encrypted_data_b64: str) -> str:
-    encrypted_data = base64.b64decode(encrypted_data_b64)  # Decode the base64-encoded data
-    iv = encrypted_data[:12]
-    tag = encrypted_data[12:28]
-    cipher = Cipher(algorithms.AES(aes_key), modes.GCM(iv, tag))
-    decryptor = cipher.decryptor()
-    decrypted = decryptor.update(encrypted_data[28:]) + decryptor.finalize()
-    return decrypted.decode()
+    try:
+        encrypted_data = base64.b64decode(encrypted_data_b64)
+
+        iv = encrypted_data[:12]
+        tag = encrypted_data[12:28]
+        ciphertext = encrypted_data[28:]
+
+        cipher = Cipher(algorithms.AES(aes_key), modes.GCM(iv, tag))
+        decryptor = cipher.decryptor()
+        decrypted = decryptor.update(ciphertext) + decryptor.finalize()
+        return decrypted.decode()
+    except Exception as e:
+        print(f"Decryption failed: {e}")
+        return "[DECRYPTION ERROR]"

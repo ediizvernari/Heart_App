@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/screens/client_personal_data_insertion_page.dart';
 import 'package:frontend/screens/home_page.dart';
-import 'package:frontend/screens/login_page.dart';
 
 class ClientMainPage extends StatelessWidget {
   final FlutterSecureStorage storage = const FlutterSecureStorage();
@@ -16,7 +15,7 @@ class ClientMainPage extends StatelessWidget {
       if (token == null || token.isEmpty) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
+          MaterialPageRoute(builder: (context) => const HomePage()),
         );
       }
     });
