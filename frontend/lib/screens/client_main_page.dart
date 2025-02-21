@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/screens/client_personal_data_insertion_page.dart';
 import 'package:frontend/screens/home_page.dart';
+import 'package:frontend/utils/token_validator.dart'; 
 
 class ClientMainPage extends StatelessWidget {
   final FlutterSecureStorage storage = const FlutterSecureStorage();
@@ -11,13 +12,7 @@ class ClientMainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      String? token = await storage.read(key: 'auth_token');
-      if (token == null || token.isEmpty) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
-      }
+      await verifyToken(context);
     });
 
     int crossAxisCount = MediaQuery.of(context).size.width > 600 ? 3 : 2;
