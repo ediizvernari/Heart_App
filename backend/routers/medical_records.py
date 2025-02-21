@@ -9,7 +9,6 @@ router = APIRouter(
     responses={404: {"description": "Not found"}}
     )
 
-# Create a new medical record
 #TODO: Maybe create a function that searches the user by ID
 @router.post("/", response_model=schemas.MedicalRecord)
 async def create_medical_record(medical_record: schemas.MedicalRecordsCreate, db: AsyncSession = Depends(get_db)):

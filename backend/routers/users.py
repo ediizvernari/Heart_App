@@ -1,9 +1,8 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from jose import jwt #Remove this line after verifications
 from .. import crud, schemas
-from ..auth import ALGORITHM, SECRET_KEY, create_access_token, verify_password, get_current_user
+from ..auth import create_access_token, verify_password, get_current_user
 from ..database import get_db
 
 router = APIRouter()

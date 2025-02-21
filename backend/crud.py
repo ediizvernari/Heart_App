@@ -1,6 +1,6 @@
+from fastapi import HTTPException   #TODO: Maybe move this check into the router file
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from backend.auth import create_access_token
 from . import sql_models, schemas
 from sqlalchemy import func
 from argon2 import PasswordHasher
@@ -33,6 +33,59 @@ async def create_user(db: AsyncSession, user: schemas.UserCreate):
     await db.commit()
     await db.refresh(db_user)
     return db_user
+
+async def create_or_update_personal_data(db: AsyncSession, user_id: int, personal_data: schemas.UserPersonalData):
+    try:
+        print(f"[DEBUG] Received personal data for user_id={user_id}")
+
+        # Prepare encrypted data where all values are stored as strings (encrypted)
+        encrypted_data = {
+            "birth_date": encrypt_data(str(personal_data.birth_date)),
+            "height": encrypt_data(str(personal_data.height)),  # Ensure all fields are encrypted as strings
+            "weight": encrypt_data(str(personal_data.weight)),  # Same for weight
+            "is_male": encrypt_data(str(personal_data.is_male)),  # Encrypt even boolean fields as strings
+            "education": encrypt_data(str(personal_data.education)),
+            "current_smoker": encrypt_data(str(personal_data.current_smoker)),
+            "cigs_per_day": encrypt_data(str(personal_data.cigs_per_day)),
+            "BPMeds": encrypt_data(str(personal_data.BPMeds)),
+            "prevalentStroke": encrypt_data(str(personal_data.prevalentStroke)),
+            "prevalentHyp": encrypt_data(str(personal_data.prevalentHyp)),
+            "diabetes": encrypt_data(str(personal_data.diabetes)),
+            "totChol": encrypt_data(str(personal_data.totChol)),
+            "glucose": encrypt_data(str(personal_data.glucose)),
+        }
+
+        print(f"[DEBUG] Encrypted data keys for user_id={user_id}: {list(encrypted_data.keys())}")
+
+        existing_data = await db.execute(
+            select(sql_models.UserPersonalData).filter(sql_models.UserPersonalData.user_id == user_id)
+        )
+        existing_data = existing_data.scalars().first()
+
+        if existing_data:
+            print(f"[DEBUG] Updating existing personal data for user_id={user_id}")
+            for key, value in encrypted_data.items():
+                setattr(existing_data, key, value)
+
+            db.add(existing_data)
+            await db.commit()
+            await db.refresh(existing_data)
+            print(f"[DEBUG] Successfully updated data for user_id={user_id}")
+            return existing_data
+        else:
+            print(f"[DEBUG] Creating new personal data entry for user_id={user_id}")
+            db_personal_data = sql_models.UserPersonalData(user_id=user_id, **encrypted_data)
+            db.add(db_personal_data)
+            await db.commit()
+            await db.refresh(db_personal_data)
+            print(f"[DEBUG] Successfully created data for user_id={user_id}")
+            return db_personal_data
+
+    except Exception as e:
+        await db.rollback()  # Roll back transaction on failure
+        print(f"[ERROR] Database error for user_id={user_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
 
 async def get_medical_record(db: AsyncSession, record_id: int):
     result = await db.execute(select(sql_models.MedicalRecords).filter(sql_models.MedicalRecords.id == record_id))

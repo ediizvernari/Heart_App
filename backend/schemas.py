@@ -11,7 +11,8 @@ class UserCreate(BaseModel):
     email: str
     password: str
 
-class User(BaseModel):
+#TODO: Add the rest of the fields at the data insertion later
+class User(UserCreate):
     id: int
     #TODO: Remove the init value when the admin will be implemented
     is_admin: bool = False
@@ -19,12 +20,27 @@ class User(BaseModel):
     class Config:
         orm_mode = True
 
+class UserPersonalData(BaseModel):
+    birth_date: str
+    height: int
+    weight: int
+    is_male: int
+    education: int
+    current_smoker: int
+    cigs_per_day: int
+    BPMeds: int
+    prevalentStroke: int
+    prevalentHyp: int
+    diabetes: int
+    totChol: int
+    glucose: int
+
+    class Config:
+        orm_mode : True
+
 class Token(BaseModel):
     access_token: str
     token_type: str
-
-class UserWithToken(User):
-    token: Token
 
 class MedicalRecordsBase(BaseModel):
     male: int
@@ -32,9 +48,9 @@ class MedicalRecordsBase(BaseModel):
     education: int
     currentSmoker: int
     cigsPerDay: int
-    BPMeds: int
-    prevalentStroke: int
-    prevalentHyp: int
+    BPMeds: int #Blood pressure medication
+    prevalentStroke: int #Stroke prevalent in family history
+    prevalentHyp: int #Hypertension prevalent in family history
     diabetes: int
     totChol: int
     sysBP: float

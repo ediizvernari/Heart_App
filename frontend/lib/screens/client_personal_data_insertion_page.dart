@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:frontend/utils/personal_data_validator.dart';
 import 'package:http/http.dart' as http;
 import 'package:frontend/utils/token_validator.dart';
 import 'package:frontend/screens/client_main_page.dart';
@@ -14,6 +16,9 @@ class ClientPersonalDataInsertionPage extends StatefulWidget {
 
 class ClientPersonalDataInsertionPageState
     extends State<ClientPersonalDataInsertionPage> {
+
+  final FlutterSecureStorage storage = const FlutterSecureStorage();
+
   final TextEditingController birthDateController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
@@ -32,77 +37,9 @@ class ClientPersonalDataInsertionPageState
   @override
   void initState() {
     super.initState();
-    verifyToken(context); // Token verification at the start
+    verifyToken(context);
   }
 
-  bool _isValidInteger(String value) {
-    final intValue = int.tryParse(value);
-    return intValue != null && intValue >= 0; // Valid non-negative integer
-  }
-
-  bool _isFieldEmpty(String value) {
-    return value.isEmpty;
-  }
-
-  Future<void> _submitPersonalData() async {
-    // Validate input fields
-    if (_isFieldEmpty(birthDateController.text) ||
-        _isFieldEmpty(heightController.text) ||
-        _isFieldEmpty(weightController.text) ||
-        _isFieldEmpty(cigarettesController.text) ||
-        _isFieldEmpty(cholesterolController.text) ||
-        _isFieldEmpty(glucoseController.text)) {
-      _showErrorPopup('All fields must be filled out.');
-      return;
-    }
-
-    if (!_isValidInteger(heightController.text)) {
-      _showErrorPopup('Height must be a valid non-negative integer.');
-      return;
-    }
-
-    if (!_isValidInteger(weightController.text)) {
-      _showErrorPopup('Weight must be a valid non-negative integer.');
-      return;
-    }
-
-    if (!_isValidInteger(cigarettesController.text)) {
-      _showErrorPopup('Cigarettes per day must be a valid non-negative integer.');
-      return;
-    }
-
-    if (!_isValidInteger(cholesterolController.text)) {
-      _showErrorPopup('Cholesterol must be a valid non-negative integer.');
-      return;
-    }
-
-    if (!_isValidInteger(glucoseController.text)) {
-      _showErrorPopup('Glucose must be a valid non-negative integer.');
-      return;
-    }
-
-    // Prepare the data to be sent to the backend
-    final Map<String, dynamic> data = {
-      "birthDate": birthDateController.text, // Store the birth date as a string
-      "height": int.parse(heightController.text), // Convert to integer
-      "weight": int.parse(weightController.text), // Convert to integer
-      "sex": _selectedSex,
-      "educationLevel": _selectedEducationLevel,
-      "currentSmoker": _currentSmoker,
-      "BPMeds": _BPMeds,
-      "prevalentStroke": _prevalentStroke,
-      "prevalentHyp": _prevalentHyp,
-      "diabetes": _diabetes,
-      "cigarettesPerDay": int.parse(cigarettesController.text), // Integer value
-      "cholesterol": int.parse(cholesterolController.text), // Integer value (mg/dl)
-      "glucose": int.parse(glucoseController.text), // Integer value (mg/dl)
-    };
-
-    // Send the data to the backend here...
-    // You would call an API or some other service to submit the data
-  }
-
-  // Show a pop-up error message
   void _showErrorPopup(String message) {
     showDialog(
       context: context,
@@ -113,7 +50,7 @@ class ClientPersonalDataInsertionPageState
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the pop-up
+                Navigator.of(context).pop();
               },
               child: const Text('OK'),
             ),
@@ -122,6 +59,68 @@ class ClientPersonalDataInsertionPageState
       },
     );
   }
+
+  Future<void> _submitPersonalData() async {
+    bool isValid = FormValidators.validatePersonalData(
+      birthDate: birthDateController.text,
+      height: heightController.text,
+      weight: weightController.text,
+      cigarettesPerDay: cigarettesController.text,
+      cholesterol: cholesterolController.text,
+      glucose: glucoseController.text,
+      selectedSex: _selectedSex,
+      selectedEducationLevel: _selectedEducationLevel,
+      currentSmoker: _currentSmoker,
+      bpmMed: _BPMeds,
+      prevalentStroke: _prevalentStroke,
+      prevalentHyp: _prevalentHyp,
+      diabetes: _diabetes,
+    );
+
+    if (!isValid) {
+      _showErrorPopup('Please fill out all fields correctly.');
+      return;
+    }
+
+    final Map<String, dynamic> data = {
+    "birth_date": birthDateController.text,
+    "height": int.parse(heightController.text),
+    "weight": int.parse(weightController.text),
+    "is_male": _selectedSex == "Male" ? 1 : 0,  // Assuming is_male is 1 for Male and 0 for Female
+    "education": _selectedEducationLevel,
+    "current_smoker": _currentSmoker != null ? 1 : 0,  // Assuming current_smoker is 1 for true and 0 for false
+    "cigs_per_day": int.parse(cigarettesController.text),
+    "BPMeds": _BPMeds != null ? 1 : 0,  // Assuming BPMeds is 1 for true and 0 for false
+    "prevalentStroke": _prevalentStroke != null ? 1 : 0,  // Assuming prevalence is boolean (1 for true)
+    "prevalentHyp": _prevalentHyp != null ? 1 : 0,  // Same as above
+    "diabetes": _diabetes != null ? 1 : 0,  // Same as above
+    "totChol": int.parse(cholesterolController.text),
+    "glucose": int.parse(glucoseController.text),
+    };
+
+    String? token = await storage.read(key: 'auth_token');
+
+    final response = await http.post(
+      Uri.parse('http://10.0.2.2:8000/personal_data/'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(data),
+    );
+
+
+
+    if (response.statusCode == 200) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const ClientMainPage()),
+      );
+    } else {
+      print('Response body: ${response.body}');
+      _showErrorPopup('An error occurred. Please try again.');
+      }
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -228,9 +227,30 @@ class ClientPersonalDataInsertionPageState
                 },
               ),
               DropdownButtonFormField<int>(
+                value: _currentSmoker,
+                decoration: const InputDecoration(
+                  labelText: 'Current Smoker',
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 1,
+                    child: Text('Yes'),
+                  ),
+                  DropdownMenuItem(
+                    value: 0,
+                    child: Text('No'),
+                  ),
+                ],
+                onChanged: (int? newValue) {
+                  setState(() {
+                    _currentSmoker = newValue;
+                  });
+                },
+              ),
+              DropdownButtonFormField<int>(
                 value: _BPMeds,
                 decoration: const InputDecoration(
-                  labelText: 'Do you take blood pressure medications?',
+                  labelText: 'Currently on BP Meds',
                 ),
                 items: const [
                   DropdownMenuItem(
@@ -251,7 +271,7 @@ class ClientPersonalDataInsertionPageState
               DropdownButtonFormField<int>(
                 value: _prevalentStroke,
                 decoration: const InputDecoration(
-                  labelText: 'Do you have prevalent stroke issues?',
+                  labelText: 'Prevalent Stroke',
                 ),
                 items: const [
                   DropdownMenuItem(
@@ -272,7 +292,7 @@ class ClientPersonalDataInsertionPageState
               DropdownButtonFormField<int>(
                 value: _prevalentHyp,
                 decoration: const InputDecoration(
-                  labelText: 'Do you have prevalent hypertension?',
+                  labelText: 'Prevalent Hypertension',
                 ),
                 items: const [
                   DropdownMenuItem(
@@ -293,7 +313,7 @@ class ClientPersonalDataInsertionPageState
               DropdownButtonFormField<int>(
                 value: _diabetes,
                 decoration: const InputDecoration(
-                  labelText: 'Do you have diabetes?',
+                  labelText: 'Diabetes',
                 ),
                 items: const [
                   DropdownMenuItem(
