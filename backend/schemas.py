@@ -14,8 +14,6 @@ class UserCreate(BaseModel):
 #TODO: Add the rest of the fields at the data insertion later
 class User(UserCreate):
     id: int
-    #TODO: Remove the init value when the admin will be implemented
-    is_admin: bool = False
 
     class Config:
         orm_mode = True

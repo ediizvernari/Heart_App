@@ -26,8 +26,7 @@ async def create_user(db: AsyncSession, user: schemas.UserCreate):
         first_name=encrypted_first_name,
         last_name=encrypted_last_name,
         email=user.email,
-        password=hashed_password,
-        is_admin=False
+        password=hashed_password
     )
     db.add(db_user)
     await db.commit()
