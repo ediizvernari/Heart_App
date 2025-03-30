@@ -16,23 +16,15 @@ class ClientPersonalDataInsertionPage extends StatefulWidget {
 
 class ClientPersonalDataInsertionPageState
     extends State<ClientPersonalDataInsertionPage> {
-
   final FlutterSecureStorage storage = const FlutterSecureStorage();
 
   final TextEditingController birthDateController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
-  final TextEditingController cigarettesController = TextEditingController();
-  final TextEditingController cholesterolController = TextEditingController();
-  final TextEditingController glucoseController = TextEditingController();
+  final TextEditingController systolicBPController = TextEditingController();
+  final TextEditingController diastolicBPController = TextEditingController();
 
-  int? _selectedSex;
-  int? _selectedEducationLevel;
-  int? _currentSmoker;
-  int? _BPMeds;
-  int? _prevalentStroke;
-  int? _prevalentHyp;
-  int? _diabetes;
+  int? _cholesterolLevel;
 
   @override
   void initState() {
@@ -65,16 +57,9 @@ class ClientPersonalDataInsertionPageState
       birthDate: birthDateController.text,
       height: heightController.text,
       weight: weightController.text,
-      cigarettesPerDay: cigarettesController.text,
-      cholesterol: cholesterolController.text,
-      glucose: glucoseController.text,
-      selectedSex: _selectedSex,
-      selectedEducationLevel: _selectedEducationLevel,
-      currentSmoker: _currentSmoker,
-      bpmMed: _BPMeds,
-      prevalentStroke: _prevalentStroke,
-      prevalentHyp: _prevalentHyp,
-      diabetes: _diabetes,
+      systolicBP: systolicBPController.text,
+      diastolicBP: diastolicBPController.text,
+      cholesterolLevel: _cholesterolLevel,
     );
 
     if (!isValid) {
@@ -83,25 +68,18 @@ class ClientPersonalDataInsertionPageState
     }
 
     final Map<String, dynamic> data = {
-    "birth_date": birthDateController.text,
-    "height": int.parse(heightController.text),
-    "weight": int.parse(weightController.text),
-    "is_male": _selectedSex == "Male" ? 1 : 0,  // Assuming is_male is 1 for Male and 0 for Female
-    "education": _selectedEducationLevel,
-    "current_smoker": _currentSmoker != null ? 1 : 0,  // Assuming current_smoker is 1 for true and 0 for false
-    "cigs_per_day": int.parse(cigarettesController.text),
-    "BPMeds": _BPMeds != null ? 1 : 0,  // Assuming BPMeds is 1 for true and 0 for false
-    "prevalentStroke": _prevalentStroke != null ? 1 : 0,  // Assuming prevalence is boolean (1 for true)
-    "prevalentHyp": _prevalentHyp != null ? 1 : 0,  // Same as above
-    "diabetes": _diabetes != null ? 1 : 0,  // Same as above
-    "totChol": int.parse(cholesterolController.text),
-    "glucose": int.parse(glucoseController.text),
+      "birth_date": birthDateController.text,
+      "height": int.parse(heightController.text),
+      "weight": int.parse(weightController.text),
+      "ap_hi": int.parse(systolicBPController.text),
+      "ap_lo": int.parse(diastolicBPController.text),
+      "cholesterol_level": _cholesterolLevel,
     };
 
     String? token = await storage.read(key: 'auth_token');
 
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:8000/personal_data/'),
+      Uri.parse('http://10.0.2.2:8000/user_health_data/'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $token',
@@ -109,18 +87,15 @@ class ClientPersonalDataInsertionPageState
       body: jsonEncode(data),
     );
 
-
-
     if (response.statusCode == 200) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const ClientMainPage()),
       );
     } else {
-      print('Response body: ${response.body}');
       _showErrorPopup('An error occurred. Please try again.');
-      }
     }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +107,6 @@ class ClientPersonalDataInsertionPageState
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextField(
                 controller: birthDateController,
@@ -162,172 +136,37 @@ class ClientPersonalDataInsertionPageState
                 keyboardType: TextInputType.number,
               ),
               TextField(
-                controller: cigarettesController,
-                decoration: const InputDecoration(labelText: 'Cigarettes per day'),
+                controller: systolicBPController,
+                decoration: const InputDecoration(labelText: 'Systolic BP (mmHg)'),
                 keyboardType: TextInputType.number,
               ),
               TextField(
-                controller: cholesterolController,
-                decoration: const InputDecoration(labelText: 'Cholesterol (mg/dl)'),
-                keyboardType: TextInputType.number,
-              ),
-              TextField(
-                controller: glucoseController,
-                decoration: const InputDecoration(labelText: 'Glucose (mg/dl)'),
+                controller: diastolicBPController,
+                decoration: const InputDecoration(labelText: 'Diastolic BP (mmHg)'),
                 keyboardType: TextInputType.number,
               ),
               DropdownButtonFormField<int>(
-                value: _selectedSex,
+                value: _cholesterolLevel,
                 decoration: const InputDecoration(
-                  labelText: 'Select Sex',
+                  labelText: 'Cholesterol Level',
                 ),
                 items: const [
                   DropdownMenuItem(
                     value: 1,
-                    child: Text('Male'),
-                  ),
-                  DropdownMenuItem(
-                    value: 0,
-                    child: Text('Female'),
-                  ),
-                ],
-                onChanged: (int? newValue) {
-                  setState(() {
-                    _selectedSex = newValue;
-                  });
-                },
-              ),
-              DropdownButtonFormField<int>(
-                value: _selectedEducationLevel,
-                decoration: const InputDecoration(
-                  labelText: 'Select Education Level',
-                ),
-                items: const [
-                  DropdownMenuItem(
-                    value: 1,
-                    child: Text('Less than high school education'),
+                    child: Text('Normal'),
                   ),
                   DropdownMenuItem(
                     value: 2,
-                    child: Text('High school diploma or equivalent'),
+                    child: Text('Above Normal'),
                   ),
                   DropdownMenuItem(
                     value: 3,
-                    child: Text('Some college or vocational training'),
-                  ),
-                  DropdownMenuItem(
-                    value: 4,
-                    child: Text('College degree or higher'),
+                    child: Text('Way Above Normal'),
                   ),
                 ],
                 onChanged: (int? newValue) {
                   setState(() {
-                    _selectedEducationLevel = newValue;
-                  });
-                },
-              ),
-              DropdownButtonFormField<int>(
-                value: _currentSmoker,
-                decoration: const InputDecoration(
-                  labelText: 'Current Smoker',
-                ),
-                items: const [
-                  DropdownMenuItem(
-                    value: 1,
-                    child: Text('Yes'),
-                  ),
-                  DropdownMenuItem(
-                    value: 0,
-                    child: Text('No'),
-                  ),
-                ],
-                onChanged: (int? newValue) {
-                  setState(() {
-                    _currentSmoker = newValue;
-                  });
-                },
-              ),
-              DropdownButtonFormField<int>(
-                value: _BPMeds,
-                decoration: const InputDecoration(
-                  labelText: 'Currently on BP Meds',
-                ),
-                items: const [
-                  DropdownMenuItem(
-                    value: 1,
-                    child: Text('Yes'),
-                  ),
-                  DropdownMenuItem(
-                    value: 0,
-                    child: Text('No'),
-                  ),
-                ],
-                onChanged: (int? newValue) {
-                  setState(() {
-                    _BPMeds = newValue;
-                  });
-                },
-              ),
-              DropdownButtonFormField<int>(
-                value: _prevalentStroke,
-                decoration: const InputDecoration(
-                  labelText: 'Prevalent Stroke',
-                ),
-                items: const [
-                  DropdownMenuItem(
-                    value: 1,
-                    child: Text('Yes'),
-                  ),
-                  DropdownMenuItem(
-                    value: 0,
-                    child: Text('No'),
-                  ),
-                ],
-                onChanged: (int? newValue) {
-                  setState(() {
-                    _prevalentStroke = newValue;
-                  });
-                },
-              ),
-              DropdownButtonFormField<int>(
-                value: _prevalentHyp,
-                decoration: const InputDecoration(
-                  labelText: 'Prevalent Hypertension',
-                ),
-                items: const [
-                  DropdownMenuItem(
-                    value: 1,
-                    child: Text('Yes'),
-                  ),
-                  DropdownMenuItem(
-                    value: 0,
-                    child: Text('No'),
-                  ),
-                ],
-                onChanged: (int? newValue) {
-                  setState(() {
-                    _prevalentHyp = newValue;
-                  });
-                },
-              ),
-              DropdownButtonFormField<int>(
-                value: _diabetes,
-                decoration: const InputDecoration(
-                  labelText: 'Diabetes',
-                ),
-                items: const [
-                  DropdownMenuItem(
-                    value: 1,
-                    child: Text('Yes'),
-                  ),
-                  DropdownMenuItem(
-                    value: 0,
-                    child: Text('No'),
-                  ),
-                ],
-                onChanged: (int? newValue) {
-                  setState(() {
-                    _diabetes = newValue;
+                    _cholesterolLevel = newValue;
                   });
                 },
               ),

@@ -43,7 +43,7 @@ class UserHealthData(Base):
     user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
     user = relationship("User", back_populates="health_data")
     
-    age = Column(String)
+    birth_date = Column(String)
     height = Column(String)
     weight = Column(String)
     cholesterol_level = Column(String)

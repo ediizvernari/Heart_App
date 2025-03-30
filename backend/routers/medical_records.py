@@ -9,9 +9,8 @@ router = APIRouter(
     responses={404: {"description": "Not found"}}
     )
 
-#TODO: Maybe create a function that searches the user by ID
 @router.post("/", response_model=schemas.MedicalRecord)
-async def create_medical_record(medical_record: schemas.MedicalRecordsCreate, db: AsyncSession = Depends(get_db)):
+async def create_medical_record(medical_record: schemas.MedicalRecordCreate, db: AsyncSession = Depends(get_db)):
     db_user = await crud.get_user_by_id(db, user_id=medical_record.user_id)
     if not db_user:
         raise HTTPException(status_code=400, detail="User not found")

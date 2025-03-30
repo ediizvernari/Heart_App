@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.database import engine, Base, get_db
 from backend import crud, schemas
 from typing import List
-from backend.routers import users, personal_data
+from backend.routers import user_health_data, users
 from fastapi.middleware.cors import CORSMiddleware
 
 async def create_tables():
@@ -38,4 +38,4 @@ async def read_root():
     return {"message": "Welcome to the FastAPI application"}
 
 app.include_router(users.router, prefix="/users")
-app.include_router(personal_data.router, prefix="/personal_data")
+app.include_router(user_health_data.router, prefix="/user_health_data")

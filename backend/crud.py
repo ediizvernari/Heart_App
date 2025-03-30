@@ -33,7 +33,7 @@ async def create_user(db: AsyncSession, user: schemas.UserCreate):
     await db.refresh(db_user)
     return db_user
 
-async def create_or_update_personal_data(db: AsyncSession, user_id: int, personal_data: schemas.UserPersonalData):
+async def create_or_update_user_health_data(db: AsyncSession, user_id: int, personal_data: schemas.UserHealthData):
     try:
         print(f"[DEBUG] Received personal data for user_id={user_id}")
 
@@ -42,22 +42,15 @@ async def create_or_update_personal_data(db: AsyncSession, user_id: int, persona
             "birth_date": encrypt_data(str(personal_data.birth_date)),
             "height": encrypt_data(str(personal_data.height)),  # Ensure all fields are encrypted as strings
             "weight": encrypt_data(str(personal_data.weight)),  # Same for weight
-            "is_male": encrypt_data(str(personal_data.is_male)),  # Encrypt even boolean fields as strings
-            "education": encrypt_data(str(personal_data.education)),
-            "current_smoker": encrypt_data(str(personal_data.current_smoker)),
-            "cigs_per_day": encrypt_data(str(personal_data.cigs_per_day)),
-            "BPMeds": encrypt_data(str(personal_data.BPMeds)),
-            "prevalentStroke": encrypt_data(str(personal_data.prevalentStroke)),
-            "prevalentHyp": encrypt_data(str(personal_data.prevalentHyp)),
-            "diabetes": encrypt_data(str(personal_data.diabetes)),
-            "totChol": encrypt_data(str(personal_data.totChol)),
-            "glucose": encrypt_data(str(personal_data.glucose)),
+            "cholesterol_level": encrypt_data(str(personal_data.cholesterol_level)),
+            "ap_hi": encrypt_data(str(personal_data.ap_hi)),
+            "ap_lo": encrypt_data(str(personal_data.ap_lo))
         }
 
         print(f"[DEBUG] Encrypted data keys for user_id={user_id}: {list(encrypted_data.keys())}")
 
         existing_data = await db.execute(
-            select(sql_models.UserPersonalData).filter(sql_models.UserPersonalData.user_id == user_id)
+            select(sql_models.UserHealthData).filter(sql_models.UserHealthData.user_id == user_id)
         )
         existing_data = existing_data.scalars().first()
 
@@ -73,7 +66,7 @@ async def create_or_update_personal_data(db: AsyncSession, user_id: int, persona
             return existing_data
         else:
             print(f"[DEBUG] Creating new personal data entry for user_id={user_id}")
-            db_personal_data = sql_models.UserPersonalData(user_id=user_id, **encrypted_data)
+            db_personal_data = sql_models.UserHealthData(user_id=user_id, **encrypted_data)
             db.add(db_personal_data)
             await db.commit()
             await db.refresh(db_personal_data)
@@ -85,13 +78,42 @@ async def create_or_update_personal_data(db: AsyncSession, user_id: int, persona
         print(f"[ERROR] Database error for user_id={user_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
+#TODO: Change the signature of this to return a list of users and their health data
+async def get_all_users_health_data(db: AsyncSession):
+    result = await db.execute(select(sql_models.UserHealthData))
+    users_health_data = result.scalars().all()
+    users_health_data_dict = {}
+
+    for user_health_data in users_health_data:
+        try:
+            birth_date = decrypt_data(user_health_data.birth_date)
+            height = decrypt_data(user_health_data.height)
+            weight = decrypt_data(user_health_data.weight)
+            cholesterol_level = decrypt_data(user_health_data.cholesterol_level)
+            ap_hi = decrypt_data(user_health_data.ap_hi)
+            ap_lo = decrypt_data(user_health_data.ap_lo)
+        except Exception as e:
+            print(f"Decryption error: {e}")
+            continue  
+
+        user_info = {
+            "birth_date": birth_date,
+            "height": height,
+            "weight": weight,
+            "cholesterol_level": cholesterol_level,
+            "ap_hi": ap_hi,
+            "ap_lo": ap_lo,
+        }
+        users_health_data_dict[user_health_data.user_id] = user_info
+
+    return users_health_data_dict
 
 async def get_medical_record(db: AsyncSession, record_id: int):
-    result = await db.execute(select(sql_models.MedicalRecords).filter(sql_models.MedicalRecords.id == record_id))
+    result = await db.execute(select(sql_models.MedicalRecord).filter(sql_models.MedicalRecord.id == record_id))
     return result.scalars().first()
 
-async def create_medical_record(db: AsyncSession, record: schemas.MedicalRecordsCreate):
-    db_record = sql_models.MedicalRecords(**record.model_dump())
+async def create_medical_record(db: AsyncSession, record: schemas.MedicalRecordCreate):
+    db_record = sql_models.MedicalRecord(**record.model_dump())
     db.add(db_record)
     await db.commit()
     await db.refresh(db_record)
@@ -119,7 +141,6 @@ async def get_users(db: AsyncSession):
             "last_name": last_name,
             "email": email,
             "password": password,
-            "is_admin": user.is_admin
         }
         print(f"Decrypted first_name: {first_name}")
         print(f"Decrypted last_name: {last_name}")

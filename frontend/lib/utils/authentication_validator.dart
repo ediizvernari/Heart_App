@@ -10,7 +10,7 @@ final response = await http.get(Uri.parse('http://10.0.2.2:8000/users/check_emai
   if (response.statusCode == 400) {
     return 'Email already registered';
   } else if (response.statusCode != 200) {
-    return 'Error checking email';
+    return 'Status Code: ${response.statusCode}, Message: Error checking email';
   }
 
   return null;

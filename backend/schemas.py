@@ -18,20 +18,13 @@ class User(UserCreate):
     class Config:
         orm_mode = True
 
-class UserPersonalData(BaseModel):
+class UserHealthData(BaseModel):
     birth_date: str
     height: int
     weight: int
-    is_male: int
-    education: int
-    current_smoker: int
-    cigs_per_day: int
-    BPMeds: int
-    prevalentStroke: int
-    prevalentHyp: int
-    diabetes: int
-    totChol: int
-    glucose: int
+    cholesterol_level: int
+    ap_hi: int
+    ap_lo: int
 
     class Config:
         orm_mode : True
@@ -40,28 +33,20 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-class MedicalRecordsBase(BaseModel):
-    male: int
+class MedicalRecordBase(BaseModel):
     age: int
-    education: int
-    currentSmoker: int
-    cigsPerDay: int
-    BPMeds: int #Blood pressure medication
-    prevalentStroke: int #Stroke prevalent in family history
-    prevalentHyp: int #Hypertension prevalent in family history
-    diabetes: int
-    totChol: int
-    sysBP: float
-    diaBP: float
+    ap_hi: int
+    ap_lo: int
+    cholesterol: int
     BMI: float
-    heartRate: int
-    glucose: int
-    TenYearCHD: int
 
-class MedicalRecordsCreate(MedicalRecordsBase):
+    class Config:
+        orm_mode = True
+
+class MedicalRecordCreate(MedicalRecordBase):
     pass
 
-class MedicalRecord(MedicalRecordsBase):
+class MedicalRecord(MedicalRecordBase):
     id: int
     user_id: int
 
