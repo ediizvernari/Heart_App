@@ -17,10 +17,10 @@ async def on_startup():
     await create_tables()
 
 origins = [
-    "http://10.0.2.2",
-    "http://10.0.2.2:8000",
-    "http://localhost",
-    "http://localhost:8000",
+    "https://10.0.2.2",
+    "https://10.0.2.2:8000",
+    "https://localhost",
+    "https://localhost:8000",
 ]
 
 app.add_event_handler("startup", on_startup)
