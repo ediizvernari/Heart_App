@@ -6,7 +6,7 @@ Future<String?> validateEmail(String email) async {
     return emailError;
   }
   
-final response = await http.get(Uri.parse('http://10.0.2.2:8000/users/check_email?email=$email'));
+final response = await http.get(Uri.parse('https://10.0.2.2:8000/users/check_email?email=$email'));
   if (response.statusCode == 400) {
     return 'Email already registered';
   } else if (response.statusCode != 200) {

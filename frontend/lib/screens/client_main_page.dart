@@ -1,20 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:frontend/controllers/client_cvd_controller.dart';
 import 'package:frontend/screens/client_personal_data_insertion_page.dart';
 import 'package:frontend/screens/home_page.dart';
-import 'package:frontend/utils/token_validator.dart'; 
+import 'package:frontend/utils/token_validator.dart';
 
-class ClientMainPage extends StatelessWidget {
-  final FlutterSecureStorage storage = const FlutterSecureStorage();
-
+class ClientMainPage extends StatefulWidget {
   const ClientMainPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  State<ClientMainPage> createState() => _ClientMainPageState();
+}
+
+class _ClientMainPageState extends State<ClientMainPage> {
+  final FlutterSecureStorage storage = const FlutterSecureStorage();
+  String? token;
+
+  @override
+  void initState() {
+    super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await verifyToken(context);
+      final storedToken = await storage.read(key: 'auth_token');
+      setState(() {
+        token = storedToken;
+      });
     });
+  }
 
+  @override
+  Widget build(BuildContext context) {
     int crossAxisCount = MediaQuery.of(context).size.width > 600 ? 3 : 2;
 
     return Scaffold(
@@ -30,9 +45,9 @@ class ClientMainPage extends StatelessWidget {
             crossAxisSpacing: 16,
             childAspectRatio: 1.2,
           ),
-          itemCount: _menuItems.length,
+          itemCount: _menuItems(context).length,
           itemBuilder: (context, index) {
-            final item = _menuItems[index];
+            final item = _menuItems(context)[index];
             return _buildGridItem(context, item);
           },
         ),
@@ -41,7 +56,7 @@ class ClientMainPage extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: SizedBox(
           width: double.infinity,
-          height: 60, // Increased button height
+          height: 60,
           child: ElevatedButton(
             onPressed: () => _handleLogout(context),
             child: const Text('Logout', style: TextStyle(fontSize: 18)),
@@ -95,30 +110,30 @@ class ClientMainPage extends StatelessWidget {
       ),
     );
   }
-}
 
-//TODO: Add functionality for each of the menu Items
-final List<Map<String, dynamic>> _menuItems = [
-  {
-    'icon': Icons.calendar_today,
-    'label': 'Appointments',
-    'onTap': (context) => Navigator.pushNamed(context, '/appointments'),
-  },
-  {
-    'icon': Icons.chat,
-    'label': 'Doctor Chat',
-    'onTap': (context) => Navigator.pushNamed(context, '/doctor_chat'),
-  },
-  {
-    'icon': Icons.insert_chart,
-    'label': 'Data Insertion',
-    'onTap': (context) => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const ClientPersonalDataInsertionPage())),
-  },
-  {
-    'icon': Icons.chat_bubble,
-    'label': 'Chatbot',
-    'onTap': (context) => Navigator.pushNamed(context, '/chatbot'),
-  },
-];
+  List<Map<String, dynamic>> _menuItems(BuildContext context) => [
+        {
+          'icon': Icons.calendar_today,
+          'label': 'Appointments',
+          'onTap': (context) => Navigator.pushNamed(context, '/appointments'),
+        },
+        {
+          'icon': Icons.health_and_safety,
+          'label': 'Predict Risk of Cardiovascular Disease',
+          'onTap': (context) => handleCVDPredictionButtonTap(context, token),
+        },
+        {
+          'icon': Icons.insert_chart,
+          'label': 'Data Insertion',
+          'onTap': (context) => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ClientPersonalDataInsertionPage()),
+              ),
+        },
+        {
+          'icon': Icons.chat_bubble,
+          'label': 'Chatbot',
+          'onTap': (context) => Navigator.pushNamed(context, '/chatbot'),
+        },
+      ];
+}

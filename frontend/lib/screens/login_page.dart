@@ -67,7 +67,7 @@ class LoginPage extends StatelessWidget {
   } 
 
   Future<bool> authenticateWithBackend(String email, String password) async {
-    const String url = 'http://10.0.2.2:8000/users/login';
+    const String url = 'https://10.0.2.2:8000/users/login';
     final Map<String, String> body = {
       'email': email,
       'password': password,

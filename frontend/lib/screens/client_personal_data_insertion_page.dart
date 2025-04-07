@@ -79,7 +79,7 @@ class ClientPersonalDataInsertionPageState
     String? token = await storage.read(key: 'auth_token');
 
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:8000/user_health_data/'),
+      Uri.parse('https://10.0.2.2:8000/user_health_data/'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $token',

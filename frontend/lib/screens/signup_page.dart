@@ -98,7 +98,7 @@ class SignUpPage extends StatelessWidget {
                   );
                 } else {
                   final response = await http.post(
-                    Uri.parse('http://10.0.2.2:8000/users/'),
+                    Uri.parse('https://10.0.2.2:8000/users/'),
                     headers: <String, String>{
                       'Content-Type': 'application/json; charset=UTF-8',
                     },
@@ -118,7 +118,7 @@ class SignUpPage extends StatelessWidget {
 
                     // Verify the token
                     final verifyResponse = await http.get(
-                      Uri.parse('http://10.0.2.2:8000/users/me'),
+                      Uri.parse('https://10.0.2.2:8000/users/me'),
                       headers: <String, String>{
                         'Content-Type': 'application/json; charset=UTF-8',
                         'Authorization': 'Bearer $token',
