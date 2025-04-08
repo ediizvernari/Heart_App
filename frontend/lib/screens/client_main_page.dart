@@ -119,7 +119,7 @@ class _ClientMainPageState extends State<ClientMainPage> {
         },
         {
           'icon': Icons.health_and_safety,
-          'label': 'Predict Risk of Cardiovascular Disease',
+          'label': 'Predict Risk of CVD',
           'onTap': (context) => handleCVDPredictionButtonTap(context, token),
         },
         {

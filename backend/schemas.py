@@ -15,8 +15,9 @@ class UserCreate(BaseModel):
 class User(UserCreate):
     id: int
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
 
 class UserHealthData(BaseModel):
     birth_date: str
@@ -26,8 +27,9 @@ class UserHealthData(BaseModel):
     ap_hi: int
     ap_lo: int
 
-    class Config:
-        orm_mode : True
+    model_config = {
+    "from_attributes": True
+    }
 
 class Token(BaseModel):
     access_token: str
@@ -40,8 +42,12 @@ class MedicalRecordBase(BaseModel):
     cholesterol: int
     BMI: float
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
+
+class PredictionResult(BaseModel):
+    prediction: float
 
 class MedicalRecordCreate(MedicalRecordBase):
     pass
@@ -50,5 +56,6 @@ class MedicalRecord(MedicalRecordBase):
     id: int
     user_id: int
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }

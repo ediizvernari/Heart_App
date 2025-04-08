@@ -4,7 +4,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .. import crud, schemas
 from ..auth import create_access_token, verify_password, get_current_user
 from ..database import get_db
-from ..utils.user_health_data_validator import check_user_has_health_data
 
 router = APIRouter()
 
@@ -45,10 +44,3 @@ async def check_email(email: str, db: AsyncSession = Depends(get_db)):
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     return {"message": "Email available"}
-
-@router.get("/user_has_health_data")
-async def user_has_health_data(db: AsyncSession = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
-    user_id = current_user.id
-    has_health_data = await check_user_has_health_data(user_id, db)
-    
-    return has_health_data

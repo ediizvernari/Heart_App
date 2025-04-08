@@ -1,7 +1,8 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from .. import crud, schemas
+from ..utils import user_health_data_utils
+from .. import schemas
 from ..auth import get_current_user
 from ..database import get_db
 
@@ -14,11 +15,30 @@ async def create_or_update_user_health_data(
     current_user: schemas.User = Depends(get_current_user)
 ):
     user_id = current_user.id 
-    await crud.create_or_update_user_health_data(db=db, user_id=user_id, personal_data=personal_data)
+    await user_health_data_utils.create_or_update_user_health_data(db=db, user_id=user_id, personal_data=personal_data)
     return {"status": "success"}
 
 @router.get("/get_all_users_health_data", response_model=List[schemas.UserHealthData])
 async def get_all_users_health_data(db: AsyncSession = Depends(get_db)):
-    users_health_data = await crud.get_all_users_health_data(db=db)
+    users_health_data = await user_health_data_utils.get_all_users_health_data(db=db)
     return users_health_data
 
+@router.get("/user_has_health_data")
+async def user_has_health_data(db: AsyncSession = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    current_user_id = current_user.id
+    has_health_data = await user_health_data_utils.check_user_has_health_data(db=db, user_id=current_user_id)
+    
+    return has_health_data
+
+@router.get("/get_user_health_data_for_user", response_model=schemas.UserHealthData)
+async def get_user_health_data_for_user(db:AsyncSession = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    current_user_id = current_user.id
+    user_health_data = await user_health_data_utils.get_user_health_data_for_user_id(db=db, user_id=current_user_id)
+    
+    return user_health_data
+
+@router.get("/predict_cvd_probability", response_model=schemas.PredictionResult)
+async def get_prediction_for_user(db: AsyncSession = Depends(get_db), current_user: schemas.User = Depends(get_current_user)
+):
+    prediction = await user_health_data_utils.predict_cvd_probability_for_user(db, current_user.id)
+    return {"prediction": prediction}
