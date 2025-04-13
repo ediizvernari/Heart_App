@@ -30,6 +30,11 @@ class Medic(Base):
     email = Column(String, unique=True, index=True)
     password = Column(String)
 
+    street_address = Column(String)
+    city = Column(String)
+    postal_code = Column(String)
+    country = Column(String)
+
     patients = relationship("User", back_populates="medic")
 
     class Config:

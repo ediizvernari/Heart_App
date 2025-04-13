@@ -2,8 +2,16 @@ import base64
 from datetime import date
 import os
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-
 from backend import sql_models
+
+ENCRYPTED_FIELDS = {
+    "birth_date",
+    "height",
+    "weight",
+    "cholesterol_level",
+    "ap_hi",
+    "ap_lo",
+}
 
 AES_KEY = os.getenv("AES_KEY")
 aes_key = base64.b64decode(AES_KEY)
@@ -35,12 +43,18 @@ def decrypt_data(encrypted_data_b64: str) -> str:
     
 def decrypt_health_data_fields_for_user(encrypted_user_health_data: dict) -> dict:
     decrypted_user_health_data = {}
+    
     for key, value in encrypted_user_health_data.items():
-        try:
-            decrypted_user_health_data[key] = decrypt_data(value)
-        except Exception as e:
-            print(f"[ERROR] Decryption failed for field {key}: {e}")
-            decrypted_user_health_data[key] = "[DECRYPTION ERROR]"
+        if key in ENCRYPTED_FIELDS and isinstance(value, (str, bytes)):
+            try:
+                decrypted_user_health_data[key] = decrypt_data(value)
+                print(f"[DEBUG] Decrypted {key}: {decrypted_user_health_data[key]}")
+            except Exception as e:
+                print(f"[ERROR] Decryption failed for field '{key}': {e}")
+                decrypted_user_health_data[key] = "[DECRYPTION ERROR]"
+        else:
+            decrypted_user_health_data[key] = value
+            print(f"[DEBUG] Skipped decryption for field '{key}', kept value: {value}")
     
     return decrypted_user_health_data
 

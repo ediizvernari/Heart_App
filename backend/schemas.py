@@ -31,6 +31,16 @@ class UserHealthData(BaseModel):
     "from_attributes": True
     }
 
+class MedicCreate(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    password: str
+    street_address: str
+    city: str
+    postal_code: str
+    country:str
+
 class Token(BaseModel):
     access_token: str
     token_type: str

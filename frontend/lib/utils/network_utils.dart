@@ -55,3 +55,66 @@ Future<double> getCVDPredictionPercentage(String? token) async {
     throw Exception("Failed to fetch CVD prediction: ${response.body}");
   }
 }
+
+Future<String?> loginUser(String email, String password) async {
+  const String url = 'https://10.0.2.2:8000/users/login';
+
+  final response = await http.post(
+    Uri.parse(url),
+    headers: <String, String> {
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, String> {
+      'email': email,
+      'password': password,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> responseBody = jsonDecode(response.body);
+    return responseBody['access_token'];
+  } else {
+    throw Exception('Failed to log in: ${response.body}');
+  }
+}
+
+Future<String?> registerAccount ({
+  required Map<String, String> dataForSignup,
+  required bool isMedic,
+}) async {
+  final String url = isMedic
+  ? 'https://10.0.2.2:8000/users/signup_for_medic'
+  : 'https://10.0.2.2:8000/users/';
+
+  final response = await http.post(
+    Uri.parse(url),
+    headers: <String, String> {
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(dataForSignup),
+  );
+
+  final body = json.decode(response.body);
+  if(response.statusCode == 200) {
+    return body['access_token'];
+  } else {
+    return body['detail'];
+  }
+}
+
+Future<bool> isEmailAvailableForSignup(String email, {required bool isMedic}) async {
+  final String baseUrl = isMedic
+      ? 'https://10.0.2.2:8000/users/check_email_for_medic'
+      : 'https://10.0.2.2:8000/users/check_email';
+
+  final response = await http.get(Uri.parse('$baseUrl?email=$email'));
+
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> body = jsonDecode(response.body);
+    return body['available'] == true;
+  } else if (response.statusCode == 400) {
+    return false;
+  } else {
+    throw Exception('Error checking email availability: ${response.body}');
+  }
+}

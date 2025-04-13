@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'utils/auto_check.dart';
 import 'dart:io';
 
+//TODO: Not the place for this todo to be here but handle the back button
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {

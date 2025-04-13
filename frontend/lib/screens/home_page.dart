@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart';
 import 'signup_page.dart';
+import 'signup_medic_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -21,6 +22,7 @@ class HomePage extends StatelessWidget {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
+
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -30,7 +32,9 @@ class HomePage extends StatelessWidget {
               },
               child: const Text('Log In'),
             ),
+
             const SizedBox(height: 10),
+
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -38,7 +42,19 @@ class HomePage extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => SignUpPage()),
                 );
               },
-              child: const Text('Sign Up'),
+              child: const Text('Sign Up as User'),
+            ),
+
+            const SizedBox(height: 10),
+
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SignUpMedicPage()),
+                );
+              },
+              child: const Text('Sign Up as Medic'),
             ),
           ],
         ),

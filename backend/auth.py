@@ -31,7 +31,7 @@ def create_access_token(data: dict):
     encoded_jwt = jwt.encode(data_to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
+async def get_current_account(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -40,10 +40,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        id: int = payload.get("sub")
-        if id is None:
+        account_id: int = payload.get("sub")
+        role = payload.get("role")
+        if account_id is None or role is None:
             raise credentials_exception
-        id = int(id)
+        account_id = int(account_id)
     except ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -53,11 +54,17 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
     except JWTError:
         raise credentials_exception
 
-    user = await crud.get_user_by_id(db, user_id=id)
-    if user is None:
+    if role == 'user':
+        account = await crud.get_user_by_id(db, user_id=account_id)
+    elif role == 'medic':
+        account = await crud.get_medic_by_id(db, medic_id=account_id)
+    else:
+        raise credentials_exception
+    
+    if account is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
+            detail="Account not found",
         )
     
-    return user
+    return account

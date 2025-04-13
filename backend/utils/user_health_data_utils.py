@@ -35,26 +35,12 @@ async def create_or_update_user_health_data(db: AsyncSession, user_id: int, pers
 
         encrypted_data = {
             "birth_date": encrypt_data(str(personal_data.birth_date)),
-            "height": encrypt_data(str(personal_data.height)),  # Ensure all fields are encrypted as strings
-            "weight": encrypt_data(str(personal_data.weight)),  # Same for weight
+            "height": encrypt_data(str(personal_data.height)),
+            "weight": encrypt_data(str(personal_data.weight)),
             "cholesterol_level": encrypt_data(str(personal_data.cholesterol_level)),
             "ap_hi": encrypt_data(str(personal_data.ap_hi)),
             "ap_lo": encrypt_data(str(personal_data.ap_lo))
         }
-
-        print("age", data_predictor.calculate_age(personal_data.birth_date))
-
-        entry = {
-            'age' : data_predictor.calculate_age(personal_data.birth_date),
-            'ap_hi' : personal_data.ap_hi,
-            'ap_lo' : personal_data.ap_lo,
-            'cholesterol' : personal_data.cholesterol_level,
-            'BMI' : personal_data.weight / ((personal_data.height / 100) ** 2)
-        }
-
-        print("probability of having a cardiovascular disease", data_predictor.predict(entry))
-
-        print(f"[DEBUG] Encrypted data keys for user_id={user_id}: {list(encrypted_data.keys())}")
 
         existing_data = await db.execute(
             select(sql_models.UserHealthData).filter(sql_models.UserHealthData.user_id == user_id)
@@ -81,7 +67,7 @@ async def create_or_update_user_health_data(db: AsyncSession, user_id: int, pers
             return db_personal_data
 
     except Exception as e:
-        await db.rollback()  # Roll back transaction on failure
+        await db.rollback()
         print(f"[ERROR] Database error for user_id={user_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
@@ -132,6 +118,9 @@ async def get_user_health_data_for_user_id(db: AsyncSession, user_id: int) -> sc
 
         decrypted_user_health_data = decrypt_health_data_fields_for_user(encrypted_user_health_data_dict)
 
+        for key, value in decrypted_user_health_data.items():
+            print(f"[DEBUG] Decrypted {key}: {value}")
+
         return schemas.UserHealthData(**decrypted_user_health_data)
     except Exception as e:
         print(f"[ERROR] Error fetching health data for user_id={user_id}: {e}")
@@ -143,6 +132,7 @@ async def get_parsed_user_health_data(db: AsyncSession, user_id: int) -> dict:
         select(sql_models.UserHealthData).filter(sql_models.UserHealthData.user_id == user_id)
     )
     encrypted_user_health_data = result.scalar_one()
+    print(f"[DEBUG] The data for user_id={user_id} is aaa{encrypted_user_health_data.ap_hi}")
     encrypted_user_health_data_dict = dict(encrypted_user_health_data.__dict__)
     encrypted_user_health_data_dict.pop('_sa_instance_state', None)
 

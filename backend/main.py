@@ -1,4 +1,5 @@
 import asyncio
+import sys
 from fastapi import FastAPI, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.database import engine, Base, get_db
@@ -6,6 +7,9 @@ from backend import crud, schemas
 from typing import List
 from backend.routers import user_health_data, users
 from fastapi.middleware.cors import CORSMiddleware
+
+if sys.platform.startswith("win"):
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 async def create_tables():
     async with engine.begin() as conn:

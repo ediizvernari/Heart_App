@@ -5,18 +5,15 @@ import 'package:frontend/screens/client_cvd_prediction_results_page.dart';
 
 Future<void> handleCVDPredictionButtonTap(BuildContext context, String? token) async {
   try {
-    // Check if the user has enough health data for prediction
     final bool userHasHealthDataForPrediction = await checkUserHasHealthData(token);
 
     if (!context.mounted) return;
 
     if (userHasHealthDataForPrediction) {
-      // Fetch the health data to be used for prediction
       final Map<String, dynamic> healthDataUsedForPrediction = await fetchUserHealthDataDataForPrediction(token);
 
       if (!context.mounted) return;
 
-      // Show confirmation dialog with the user's health data
       showDialog(
         context: context,
         builder: (BuildContext dialogContext) {
@@ -43,12 +40,10 @@ Future<void> handleCVDPredictionButtonTap(BuildContext context, String? token) a
                 onPressed: () async {
                   Navigator.of(dialogContext).pop();
 
-                  // Fetch the predicted percentage
                   final double predictedProbability = await getCVDPredictionPercentage(token);
 
                   if (!context.mounted) return;
 
-                  // Navigate to the results page
                   Navigator.push(
                     context,
                     MaterialPageRoute(
