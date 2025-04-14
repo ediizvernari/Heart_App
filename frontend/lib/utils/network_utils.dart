@@ -41,7 +41,7 @@ Future<Map<String, dynamic>> fetchUserHealthDataDataForPrediction(String? token)
 
 Future<double> getCVDPredictionPercentage(String? token) async {
   final response = await http.get(
-    Uri.parse('https://10.0.2.2:8000/user_health_data/predict_cvd_probability'),
+    Uri.parse('https://10.0.2.2:8000/cvd_prediction/predict_cvd_probability'),
     headers: {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json; charset=UTF-8',
@@ -57,7 +57,7 @@ Future<double> getCVDPredictionPercentage(String? token) async {
 }
 
 Future<String?> loginUser(String email, String password) async {
-  const String url = 'https://10.0.2.2:8000/users/login';
+  const String url = 'https://10.0.2.2:8000/auth/login';
 
   final response = await http.post(
     Uri.parse(url),
@@ -83,8 +83,8 @@ Future<String?> registerAccount ({
   required bool isMedic,
 }) async {
   final String url = isMedic
-  ? 'https://10.0.2.2:8000/users/signup_for_medic'
-  : 'https://10.0.2.2:8000/users/';
+  ? 'https://10.0.2.2:8000/auth/medic_signup'
+  : 'https://10.0.2.2:8000/auth/user_signup';
 
   final response = await http.post(
     Uri.parse(url),
@@ -104,8 +104,8 @@ Future<String?> registerAccount ({
 
 Future<bool> isEmailAvailableForSignup(String email, {required bool isMedic}) async {
   final String baseUrl = isMedic
-      ? 'https://10.0.2.2:8000/users/check_email_for_medic'
-      : 'https://10.0.2.2:8000/users/check_email';
+      ? 'https://10.0.2.2:8000/auth/check_email_for_medic'
+      : 'https://10.0.2.2:8000/auth/check_email_for_user';
 
   final response = await http.get(Uri.parse('$baseUrl?email=$email'));
 

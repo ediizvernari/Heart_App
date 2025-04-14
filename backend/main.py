@@ -1,11 +1,8 @@
 import asyncio
 import sys
-from fastapi import FastAPI, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from backend.database import engine, Base, get_db
-from backend import crud, schemas
-from typing import List
-from backend.routers import user_health_data, users
+from fastapi import FastAPI
+from backend.database.connection import engine, Base
+from backend.routers import user_health_data, users, auth, cvd_prediction
 from fastapi.middleware.cors import CORSMiddleware
 
 if sys.platform.startswith("win"):
@@ -43,3 +40,5 @@ async def read_root():
 
 app.include_router(users.router, prefix="/users")
 app.include_router(user_health_data.router, prefix="/user_health_data")
+app.include_router(auth.router, prefix="/auth")
+app.include_router(cvd_prediction.router, prefix="/cvd_prediction")

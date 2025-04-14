@@ -2,7 +2,7 @@ import base64
 from datetime import date
 import os
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from backend import sql_models
+from backend.database import sql_models
 
 ENCRYPTED_FIELDS = {
     "birth_date",
