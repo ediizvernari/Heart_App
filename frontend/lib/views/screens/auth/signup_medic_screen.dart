@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../controllers/auth_controller.dart';
+import '../../../controllers/auth_controller.dart';
 
-class SignUpMedicPage extends StatefulWidget {
-  const SignUpMedicPage({super.key});
+class SignUpMedicScreen extends StatefulWidget {
+  const SignUpMedicScreen({super.key});
 
   @override
-  State<SignUpMedicPage> createState() => _SignUpMedicPageState();
+  State<SignUpMedicScreen> createState() => _SignUpMedicPageState();
 }
 
-class _SignUpMedicPageState extends State<SignUpMedicPage> {
+class _SignUpMedicPageState extends State<SignUpMedicScreen> {
   final _pageController = PageController();
   final _authController = AuthController();
 

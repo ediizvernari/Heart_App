@@ -1,4 +1,4 @@
-class FormValidators {
+class UserHealthDataValidator {
   static bool isFieldEmpty(String value) {
     return value.isEmpty;
   }
@@ -12,20 +12,20 @@ class FormValidators {
     return value == null;
   }
 
-  static bool validatePersonalData({
-  required String birthDate,
-  required String height,
-  required String weight,
-  required int? cholesterolLevel,
-  required String diastolicBP,
-  required String systolicBP
-}) {
-  if (isFieldEmpty(birthDate) ||
-      isFieldEmpty(height) ||
-      isFieldEmpty(weight) ||
-      isFieldEmpty(diastolicBP) ||
-      isFieldEmpty(systolicBP) ||
-      cholesterolLevel == null) { 
+  static bool validateUserHealthData({
+    required String birthDate,
+    required String height,
+    required String weight,
+    required int? cholesterolLevel,
+    required String diastolicBP,
+    required String systolicBP,
+  }) {
+    if (isFieldEmpty(birthDate) ||
+        isFieldEmpty(height) ||
+        isFieldEmpty(weight) ||
+        isFieldEmpty(diastolicBP) ||
+        isFieldEmpty(systolicBP) ||
+        cholesterolLevel == null) {
       return false;
     }
 

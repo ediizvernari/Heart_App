@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:frontend/utils/personal_data_validator.dart';
+import 'package:frontend/utils/validators/user_health_data_validator.dart';
 import 'package:http/http.dart' as http;
-import 'package:frontend/utils/token_validator.dart';
-import 'package:frontend/screens/client_main_page.dart';
+import 'package:frontend/utils/validators/sessio_validator.dart';
+import 'package:frontend/views/screens/client_main_page.dart';
 
 class ClientPersonalDataInsertionPage extends StatefulWidget {
   const ClientPersonalDataInsertionPage({super.key});
@@ -29,8 +29,11 @@ class ClientPersonalDataInsertionPageState
   @override
   void initState() {
     super.initState();
-    verifyToken(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      SessionValidator.verifyToken(context);
+    });
   }
+
 
   void _showErrorPopup(String message) {
     showDialog(
@@ -53,7 +56,7 @@ class ClientPersonalDataInsertionPageState
   }
 
   Future<void> _submitPersonalData() async {
-    bool isValid = FormValidators.validatePersonalData(
+    bool isValid = UserHealthDataValidator.validateUserHealthData(
       birthDate: birthDateController.text,
       height: heightController.text,
       weight: weightController.text,

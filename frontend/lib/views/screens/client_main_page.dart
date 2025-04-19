@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:frontend/controllers/client_cvd_controller.dart';
-import 'package:frontend/screens/client_personal_data_insertion_page.dart';
-import 'package:frontend/screens/home_page.dart';
-import 'package:frontend/utils/token_validator.dart';
+import 'package:frontend/handlers/client_cvd_prediction_button_handler.dart';
+import 'package:frontend/views/screens/client_personal_data_insertion_page.dart';
+import 'package:frontend/views/screens/auth/home_screen.dart';
+import 'package:frontend/utils/validators/sessio_validator.dart';
 
 class ClientMainPage extends StatefulWidget {
   const ClientMainPage({super.key});
@@ -20,7 +20,7 @@ class _ClientMainPageState extends State<ClientMainPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await verifyToken(context);
+      await SessionValidator.verifyToken(context);
       final storedToken = await storage.read(key: 'auth_token');
       setState(() {
         token = storedToken;
@@ -82,7 +82,7 @@ class _ClientMainPageState extends State<ClientMainPage> {
               await storage.delete(key: 'auth_token');
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const HomePage()),
+                MaterialPageRoute(builder: (context) => const HomeScreen()),
               );
             },
             child: const Text("Logout"),

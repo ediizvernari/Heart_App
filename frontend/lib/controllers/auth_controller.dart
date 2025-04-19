@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import '../utils/authentication_validator.dart';
+import '../utils/validators/auth_form_validator.dart';
+import '../utils/validators/auth_validator.dart';
 import '../utils/network_utils.dart';
-import '../screens/client_main_page.dart';
-import '../screens/medic_main_page.dart';
+import '../views/screens/client_main_page.dart';
+import '../views/screens/medic_main_page.dart';
+import '../utils/ui/dialog_utils.dart';
 
+
+//TODO: Split this file into multiple files for better organization (only if needed)
 class AuthController {
   final FlutterSecureStorage storage = const FlutterSecureStorage();
 
@@ -13,11 +17,11 @@ class AuthController {
   required BuildContext context,
   required String email,
   required String password,
-}) async {
-  final String? loginError = await validateAllFieldsForLogin(email: email, password: password);
+  }) async {
+  final String? loginError = await AuthValidator.validateAllFieldsForLogin(email: email, password: password);
 
   if (loginError != null) {
-    _showDialog(context, "Login Error", loginError);
+    DialogUtils.showAlertDialog(context, "Login Error", loginError);
     return;
   }
 
@@ -25,7 +29,7 @@ class AuthController {
     final String? token = await loginUser(email, password);
 
       if (token == null) {
-        _showDialog(context, "Login Error", "Invalid credentials.");
+        DialogUtils.showAlertDialog(context, "Login Error", "Invalid credentials.");
         return;
       }
 
@@ -43,10 +47,10 @@ class AuthController {
           MaterialPageRoute(builder: (context) => const MedicMainPage()),
         );
       } else {
-        _showDialog(context, "Login Error", "Invalid user role.");
+        DialogUtils.showAlertDialog(context, "Login Error", "Invalid user role.");
       }
     } catch (e) {
-      _showDialog(context, "Login Failed", "Incorrect email or password.");
+      DialogUtils.showAlertDialog(context, "Login Failed", "Incorrect email or password.");
     }
   }
 
@@ -66,7 +70,7 @@ class AuthController {
     required String firstName,
     required String lastName,
   }) async {
-    final String? signUpError = await validateAllFieldsForSignUp(
+    final String? signUpError = await AuthValidator.validateAllFieldsForSignUp(
       email: email,
       password: password,
       confirmPassword: confirmPassword,
@@ -76,7 +80,7 @@ class AuthController {
     );
 
     if (signUpError != null) {
-      _showDialog(context, "Error While Signing Up", signUpError);
+      DialogUtils.showAlertDialog(context, "Error While Signing Up", signUpError);
       return;
     }
 
@@ -93,7 +97,7 @@ class AuthController {
     );
 
     if (token == null) {
-      _showDialog(context, "Error While Signing Up", "The account could not be created");
+      DialogUtils.showAlertDialog(context, "Error While Signing Up", "The account could not be created");
       return;
     }
 
@@ -106,26 +110,9 @@ class AuthController {
         MaterialPageRoute(builder: (context) => const ClientMainPage()),
       );
     } else {
-      _showDialog(context, "Error While Signing Up", "Invalid user role");  
+      DialogUtils.showAlertDialog(context, "Error While Signing Up", "Invalid user role");  
     }
-  }
-
-  //TODO: Implement the UI utils for showing dialogs alerts and so on
-  void _showDialog(BuildContext context, String title, String message) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text("OK"),
-          ),
-        ],
-      )
-    );
-  }
+  }  
 
   Future<String?> validateMedicStepOneFields({
   required String email,
@@ -134,7 +121,7 @@ class AuthController {
   required String firstName,
   required String lastName,
   }) async {
-    return await validateAllFieldsForSignUp(
+    return await AuthValidator.validateAllFieldsForSignUp(
       email: email,
       password: password,
       confirmPassword: confirmPassword,
@@ -150,14 +137,13 @@ class AuthController {
   required String postalCode,
   required String country,
   }) async {
-    return await validateMedicAddressFields(
+    return await AuthFormValidator.validateMedicAddressFields(
       streetAddress: streetAddress,
       city: city,
       postalCode: postalCode,
       country: country,
     );
   }
-
 
   Future<void> handleMedicSignUpButton({
   required BuildContext context,
@@ -187,7 +173,7 @@ class AuthController {
     );
 
     if (token == null) {
-      _showDialog(context, "Sign-Up Failed", "Unable to create the medic account.");
+      DialogUtils.showAlertDialog(context, "Sign-Up Failed", "Unable to create the medic account.");
       return;
     }
 
@@ -200,7 +186,7 @@ class AuthController {
         MaterialPageRoute(builder: (_) => const MedicMainPage()),
       );
     } else {
-      _showDialog(context, "Error", "Invalid medic role returned.");
+      DialogUtils.showAlertDialog(context, "Error", "Invalid medic role returned.");
     }
   }
 

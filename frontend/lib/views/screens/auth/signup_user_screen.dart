@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../controllers/auth_controller.dart';
+import '../../../controllers/auth_controller.dart';
 
-class SignUpPage extends StatelessWidget {
-  SignUpPage({super.key});
+class SignUpUserScreen extends StatelessWidget {
+  SignUpUserScreen({super.key});
 
   final _authController = AuthController();
 

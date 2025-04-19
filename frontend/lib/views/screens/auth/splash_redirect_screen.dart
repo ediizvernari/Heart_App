@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import '../screens/home_page.dart';
-import '../screens/client_main_page.dart';
+import 'home_screen.dart';
+import '../client_main_page.dart';
 
 class AutoCheck extends StatefulWidget {
   const AutoCheck({super.key});
@@ -33,7 +33,7 @@ class _AutoCheckState extends State<AutoCheck> {
       // Navigate to HomePage if no valid token
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     }
   }

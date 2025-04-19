@@ -1,8 +1,7 @@
-import 'package:flutter/material.dart';
-import 'utils/auto_check.dart';
 import 'dart:io';
+import 'package:flutter/material.dart';
+import 'views/screens/auth/splash_redirect_screen.dart'; // update based on your new structure
 
-//TODO: Not the place for this todo to be here but handle the back button
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
@@ -13,18 +12,20 @@ class MyHttpOverrides extends HttpOverrides {
 
 void main() {
   HttpOverrides.global = MyHttpOverrides();
-  runApp(const MyApp());
+  runApp(const HealthApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class HealthApp extends StatelessWidget {
+  const HealthApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter and FastAPI',
+      title: 'Health App',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+        useMaterial3: true,
       ),
       home: const AutoCheck(),
     );
