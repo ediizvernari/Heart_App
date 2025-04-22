@@ -11,7 +11,6 @@ class UserCreateSchema(BaseModel):
     email: str
     password: str
 
-#TODO: Add the rest of the fields at the data insertion later
 class UserSchema(UserCreateSchema):
     id: int
 
@@ -19,3 +18,5 @@ class UserSchema(UserCreateSchema):
         "from_attributes": True
     }
     
+class MedicAssignmentRequest(BaseModel):
+    medic_id: int

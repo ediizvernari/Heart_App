@@ -10,6 +10,9 @@ class User(Base):
     last_name = Column(String)
     email = Column(String, unique=True, index=True)
     password = Column(String)
+
+    #TODO: Check if this is necessary
+    share_data_with_medic = Column(Boolean, default=False)
     
     medic_id = Column(Integer, ForeignKey("medics.id"), nullable=True)
     medic = relationship("Medic", back_populates="patients")
@@ -32,7 +35,7 @@ class Medic(Base):
 
     street_address = Column(String)
     city = Column(String)
-    postal_code = Column(String)
+    region = Column(String)
     country = Column(String)
 
     patients = relationship("User", back_populates="medic")

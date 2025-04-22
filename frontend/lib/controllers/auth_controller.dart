@@ -3,7 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../utils/validators/auth_form_validator.dart';
 import '../utils/validators/auth_validator.dart';
-import '../utils/network_utils.dart';
+import '../services/auth_service.dart';
 import '../views/screens/client_main_page.dart';
 import '../views/screens/medic_main_page.dart';
 import '../utils/ui/dialog_utils.dart';
@@ -26,7 +26,7 @@ class AuthController {
   }
 
   try {
-    final String? token = await loginUser(email, password);
+    final String? token = await AuthService.loginUser(email, password);
 
       if (token == null) {
         DialogUtils.showAlertDialog(context, "Login Error", "Invalid credentials.");
@@ -91,7 +91,7 @@ class AuthController {
       'last_name': lastName,
     };
 
-    final String? token = await registerAccount(
+    final String? token = await AuthService.registerAccount(
       dataForSignup: dataForUserSignUp,
       isMedic: false,
     );
@@ -134,13 +134,13 @@ class AuthController {
   Future<String?> validateMedicStepTwoFields({
   required String streetAddress,
   required String city,
-  required String postalCode,
+  required String region,
   required String country,
   }) async {
     return await AuthFormValidator.validateMedicAddressFields(
       streetAddress: streetAddress,
       city: city,
-      postalCode: postalCode,
+      region: region,
       country: country,
     );
   }
@@ -153,7 +153,7 @@ class AuthController {
   required String lastName,
   required String streetAddress,
   required String city,
-  required String postalCode,
+  required String region,
   required String country,
   }) async {
     final Map<String, String> dataForMedicSignUp = {
@@ -163,11 +163,11 @@ class AuthController {
       'last_name': lastName,
       'street_address': streetAddress,
       'city': city,
-      'postal_code': postalCode,
+      'region': region,
       'country': country,
     };
 
-    final String? token = await registerAccount(
+    final String? token = await AuthService.registerAccount(
       dataForSignup: dataForMedicSignUp,
       isMedic: true,
     );

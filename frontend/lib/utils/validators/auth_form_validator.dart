@@ -33,12 +33,12 @@ class AuthFormValidator {
   static String? validateMedicAddressFields({
     required String streetAddress,
     required String city,
-    required String postalCode,
+    required String region,
     required String country,
   }) {
     if (streetAddress.isEmpty) return 'Street address field cannot be empty';
     if (city.isEmpty) return 'City field cannot be empty';
-    if (postalCode.isEmpty) return 'Postal code field cannot be empty';
+    if (region.isEmpty) return 'Region field cannot be empty';
     if (country.isEmpty) return 'Country field cannot be empty';
     return null;
   }

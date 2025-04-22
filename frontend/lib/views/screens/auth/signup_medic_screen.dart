@@ -20,7 +20,7 @@ class _SignUpMedicPageState extends State<SignUpMedicScreen> {
 
   final _streetAddressController = TextEditingController();
   final _cityController = TextEditingController();
-  final _postalCodeController = TextEditingController();
+  final _regionController = TextEditingController();
   final _countryController = TextEditingController();
 
   @override
@@ -70,7 +70,7 @@ class _SignUpMedicPageState extends State<SignUpMedicScreen> {
       children: [
         _buildField(_streetAddressController, "Street Address"),
         _buildField(_cityController, "City"),
-        _buildField(_postalCodeController, "Postal Code"),
+        _buildField(_regionController, "Region"),
         _buildField(_countryController, "Country"),
         const SizedBox(height: 20),
         ElevatedButton(
@@ -78,7 +78,7 @@ class _SignUpMedicPageState extends State<SignUpMedicScreen> {
             final error = await _authController.validateMedicStepTwoFields(
               streetAddress: _streetAddressController.text,
               city: _cityController.text,
-              postalCode: _postalCodeController.text,
+              region: _regionController.text,
               country: _countryController.text,
             );
             if (error != null) {
@@ -94,7 +94,7 @@ class _SignUpMedicPageState extends State<SignUpMedicScreen> {
               lastName: _lastNameController.text,
               streetAddress: _streetAddressController.text,
               city: _cityController.text,
-              postalCode: _postalCodeController.text,
+              region: _regionController.text,
               country: _countryController.text,
             );
           },
