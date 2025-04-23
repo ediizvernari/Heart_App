@@ -36,4 +36,22 @@ class AuthService {
       throw Exception ('Failed to check email availability: ${response.body}');
     }
   }
+
+  static Future<String?> registerAccount ({
+  required Map<String, String> dataForSignup,
+  required bool isMedic,
+  }) async {
+    final String url = isMedic
+    ? APIConstants.medicSignupUrl
+    : APIConstants.userSignupUrl;
+
+    final response = await APIClient.post(url, dataForSignup);
+
+    if (response.statusCode == 200) {
+      final body = json.decode(response.body);
+      return body['access_token'];
+    } else {
+      throw Exception('Failed to register account: ${response.body}');
+    }
+  }  
 }

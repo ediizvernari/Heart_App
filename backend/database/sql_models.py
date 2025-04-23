@@ -34,11 +34,34 @@ class Medic(Base):
     password = Column(String)
 
     street_address = Column(String)
-    city = Column(String)
-    region = Column(String)
-    country = Column(String)
+
+    city_id = Column(Integer, ForeignKey("cities.id"))
+    city = relationship("City")
 
     patients = relationship("User", back_populates="medic")
+
+    class Config:
+        orm_mode = True
+
+class Country(Base):
+    __tablename__ = 'countries'
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    name = Column(String, unique=True, index=True)
+
+    cities = relationship("City", back_populates="country", cascade="all, delete-orphan")
+
+    class Config:
+        orm_mode = True
+
+class City(Base):
+    __tablename__ = 'cities'
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    name = Column(String, index=True)
+    country_id = Column(Integer, ForeignKey("countries.id"))
+
+    country = relationship("Country", back_populates="cities")
 
     class Config:
         orm_mode = True

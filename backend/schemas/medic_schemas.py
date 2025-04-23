@@ -7,6 +7,14 @@ class MedicCreate(BaseModel):
     password: str
     street_address: str
     city: str
-    postal_code: str
     country:str
-    
+
+
+class MedicOut(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    email: str #no need for decryption
+    street_address: str
+    city: str
+    country: str

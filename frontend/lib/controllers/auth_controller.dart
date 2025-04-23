@@ -134,13 +134,11 @@ class AuthController {
   Future<String?> validateMedicStepTwoFields({
   required String streetAddress,
   required String city,
-  required String region,
   required String country,
   }) async {
     return await AuthFormValidator.validateMedicAddressFields(
       streetAddress: streetAddress,
       city: city,
-      region: region,
       country: country,
     );
   }
@@ -153,7 +151,6 @@ class AuthController {
   required String lastName,
   required String streetAddress,
   required String city,
-  required String region,
   required String country,
   }) async {
     final Map<String, String> dataForMedicSignUp = {
@@ -163,7 +160,6 @@ class AuthController {
       'last_name': lastName,
       'street_address': streetAddress,
       'city': city,
-      'region': region,
       'country': country,
     };
 
