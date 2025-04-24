@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:frontend/views/screens/medic_main_page.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'home_screen.dart';
 import '../client_main_page.dart';
@@ -21,22 +22,35 @@ class _AutoCheckState extends State<AutoCheck> {
   }
 
   Future<void> _checkToken() async {
-    String? token = await storage.read(key: 'auth_token');
+  String? token = await storage.read(key: 'auth_token');
 
-    if (token != null && !JwtDecoder.isExpired(token)) {
-      // Navigate to ClientMainPage if token is valid
+  if (token != null && !JwtDecoder.isExpired(token)) {
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+    String role = decodedToken['role'];
+
+    if (role == 'user') {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const ClientMainPage()),
       );
+    } else if (role == 'medic') {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MedicMainPage()),
+      );
     } else {
-      // Navigate to HomePage if no valid token
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     }
+  } else {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {
