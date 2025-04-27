@@ -4,13 +4,14 @@ import joblib
 import pandas as pd
 from datetime import datetime
 
-
+#TODO :Rename file names so they are more professional
+#TODO: In case of no modifications needed keep the old files without the _modif in their names because they do not include the standard dev
 xgb_model = xgb.XGBClassifier()
-xgb_model.load_model('c:\\Users\\ediiz\\Desktop\\Heart_App\\backend\\utils\\xgb_model.json')
+xgb_model.load_model('c:\\Users\\ediiz\\Desktop\\Heart_App\\backend\\utils\\xgb_model_nebunie.json')
 
-kmeans_model = joblib.load('c:\\Users\\ediiz\\Desktop\\Heart_App\\backend\\utils\\kmeans_model.pkl')
-feature_scaler = joblib.load('c:\\Users\\ediiz\\Desktop\\Heart_App\\backend\\utils\\feature_scaler.pkl')
-cluster_scaler = joblib.load('c:\\Users\\ediiz\\Desktop\\Heart_App\\backend\\utils\\cluster_scaler.pkl')
+kmeans_model = joblib.load('c:\\Users\\ediiz\\Desktop\\Heart_App\\backend\\utils\\kmeans_model_modif.pkl')
+feature_scaler = joblib.load('c:\\Users\\ediiz\\Desktop\\Heart_App\\backend\\utils\\feature_scaler_modif.pkl')
+cluster_scaler = joblib.load('c:\\Users\\ediiz\\Desktop\\Heart_App\\backend\\utils\\cluster_scaler_modif.pkl')
 
 def calculate_age(birth_date:str) -> int:
     birth_date = pd.to_datetime(birth_date)
@@ -21,22 +22,33 @@ def calculate_age(birth_date:str) -> int:
 def calculate_bmi(weight: int, height: int) -> float:
     return weight / ((height / 100) ** 2)
 
+def calculate_deviation_for_ap_hi(ap_hi:int, mean=126) -> float:
+    return (ap_hi - mean) ** 2
+
+def calculate_deviation_for_ap_lo(ap_lo:int, mean=81) -> float:
+    return (ap_lo - mean) ** 2
+
 def build_model_input_features_for_prediction(user_info: dict) -> dict:
     age = calculate_age(user_info["birth_date"])
     bmi = calculate_bmi(user_info["weight"], user_info["height"])
+    ap_hi_sq_dev = calculate_deviation_for_ap_hi(user_info["ap_hi"])
+    ap_lo_sq_dev = calculate_deviation_for_ap_lo(user_info["ap_lo"])
 
     return {
         "age": age,
-        "ap_hi": user_info["ap_hi"],
-        "ap_lo": user_info["ap_lo"],
+        "ap_hi_sq_dev": ap_hi_sq_dev,
+        "ap_lo_sq_dev": ap_lo_sq_dev,
         "cholesterol": user_info["cholesterol_level"],
         "BMI": bmi
     }
  
+def format_cvd_risk_percentage(cvd_risk: float) -> str:
+    risk_percentage = cvd_risk * 100
+    return f"{risk_percentage:.2f}"
 
 def predict_probability_of_having_a_cvd(entry):
-    expected_columns = ['age', 'ap_hi', 'ap_lo', 'cholesterol', 'BMI']
-    features = ['age', 'ap_hi', 'ap_lo', 'cholesterol', 'BMI']
+    expected_columns = ['age', 'ap_hi_sq_dev', 'ap_lo_sq_dev', 'cholesterol', 'BMI']
+    features = ['age', 'ap_hi_sq_dev', 'ap_lo_sq_dev', 'cholesterol', 'BMI']
 
     if not all (column in entry for column in expected_columns):
         return (f"Entry must contain the following columns: {expected_columns}")
@@ -51,5 +63,6 @@ def predict_probability_of_having_a_cvd(entry):
 
     predicted_probability = xgb_model.predict_proba(entry_df[features + ['Cluster']])[0]
     probability_of_having_a_cvd = predicted_probability[1]
+    formated_cvd_risk = format_cvd_risk_percentage(probability_of_having_a_cvd)
 
-    return probability_of_having_a_cvd * 100
+    return formated_cvd_risk

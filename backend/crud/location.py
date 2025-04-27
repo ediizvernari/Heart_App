@@ -3,7 +3,7 @@ from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.database.sql_models import City, Country
 from ..utils.encryption_utils import encrypt_data, decrypt_data
-from ..schemas.location_schemas import LocationSchema, CitySchema, CountrySchema
+from ..schemas.location_schemas import CityWithCountrySchema, CountrySchema
 
 async def get_country_id_by_name(db: AsyncSession, country_name: str) -> int:
     encrypted_name = encrypt_data(country_name)
@@ -18,10 +18,13 @@ async def get_country_id_by_name(db: AsyncSession, country_name: str) -> int:
 
 async def create_country(db: AsyncSession, country: CountrySchema) -> Country:
     encrypted_country_name = encrypt_data(country.name)
+
     db_country = Country(name=encrypted_country_name)
     db.add(db_country)
+
     await db.commit()
     await db.refresh(db_country)
+    
     return db_country
 
 async def is_city_from_country(db: AsyncSession, city_name: str, country_name: str) -> bool:
@@ -41,15 +44,15 @@ async def is_city_from_country(db: AsyncSession, city_name: str, country_name: s
     )
     return result.scalar_one_or_none() is not None
         
-async def create_city(db: AsyncSession, city: CitySchema):
-    encrypted_country_name = encrypt_data(city.country)
-    encrypted_city_name = encrypt_data(city.name)
+async def create_city(db: AsyncSession, city_with_country: CityWithCountrySchema):
+    encrypted_country_name = encrypt_data(city_with_country.country)
+    encrypted_city_name = encrypt_data(city_with_country.city)
 
     result = await db.execute(select(Country).where(Country.name == encrypted_country_name))
     country = result.scalar_one_or_none()
 
     if not country:
-        country = await create_country(db, CountrySchema(name=city.country))
+        country = await create_country(db, CountrySchema(name=city_with_country.country))
     country_id = country.id
 
     db_city = City(name=encrypted_city_name, country_id=country_id)
@@ -58,3 +61,11 @@ async def create_city(db: AsyncSession, city: CitySchema):
     await db.refresh(db_city)
 
     return db_city
+
+async def get_all_cities_with_countries(db: AsyncSession):
+    result = await db.execute(select(City, Country).join(Country))
+    return result.all()
+
+async def get_all_countries(db: AsyncSession):
+    result = await db.execute(select(Country))
+    return result.scalars().all()

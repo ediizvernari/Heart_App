@@ -16,4 +16,12 @@ class APIClient {
       body: jsonEncode(body),
     );
   }
+
+  static Future<http.Response> patch(String url, dynamic body, {Map<String, String>? headers}) async {
+    return await http.patch(
+      Uri.parse(url),
+      headers: headers ?? {'Content-Type': 'application/json; charset=UTF-8'},
+      body: jsonEncode(body),
+    );
+  }  
 }

@@ -14,7 +14,10 @@ class MedicOut(BaseModel):
     id: int
     first_name: str
     last_name: str
-    email: str #no need for decryption
+    email: str
     street_address: str
     city: str
     country: str
+
+    class Config:
+        from_attributes = True

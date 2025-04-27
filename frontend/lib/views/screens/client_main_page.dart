@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/handlers/client_cvd_prediction_button_handler.dart';
+import 'package:frontend/handlers/available_medics_button_handler.dart';  // <-- import your new handler
 import 'package:frontend/views/screens/client_personal_data_insertion_page.dart';
 import 'package:frontend/views/screens/auth/home_screen.dart';
-import 'package:frontend/utils/validators/sessio_validator.dart';
+import 'package:frontend/utils/validators/session_validator.dart';
 
 class ClientMainPage extends StatefulWidget {
   const ClientMainPage({super.key});
@@ -104,7 +105,8 @@ class _ClientMainPageState extends State<ClientMainPage> {
           children: [
             Icon(item['icon'], size: 50, color: Colors.blueGrey[800]),
             const SizedBox(height: 10),
-            Text(item['label'], style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(item['label'],
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -115,25 +117,25 @@ class _ClientMainPageState extends State<ClientMainPage> {
         {
           'icon': Icons.calendar_today,
           'label': 'Appointments',
-          'onTap': (context) => Navigator.pushNamed(context, '/appointments'),
+          'onTap': (ctx) => Navigator.pushNamed(ctx, '/appointments'),
         },
         {
           'icon': Icons.health_and_safety,
           'label': 'Predict Risk of CVD',
-          'onTap': (context) => handleCVDPredictionButtonTap(context, token),
+          'onTap': (ctx) => handleCVDPredictionButtonTap(ctx, token),
         },
         {
           'icon': Icons.insert_chart,
           'label': 'Data Insertion',
-          'onTap': (context) => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ClientPersonalDataInsertionPage()),
+          'onTap': (ctx) => Navigator.push(
+                ctx,
+                MaterialPageRoute(builder: (ctx) => const ClientPersonalDataInsertionPage()),
               ),
         },
         {
-          'icon': Icons.chat_bubble,
-          'label': 'Chatbot',
-          'onTap': (context) => Navigator.pushNamed(context, '/chatbot'),
+          'icon': Icons.medical_services,
+          'label': 'Find a Medic',
+          'onTap': (ctx) => AvailableMedicsButtonHandler.navigateToFindMedicPage(ctx),
         },
       ];
 }

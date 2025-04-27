@@ -12,5 +12,13 @@ class UserHealthDataSchema(BaseModel):
     "from_attributes": True
     }
 
+class UserHealthDataOutSchema(BaseModel):
+    date_of_birth: str
+    height_cm: str
+    weight_kg: str
+    cholesterol_level: str
+    systolic_blood_pressure: str
+    diastolic_blood_pressure: str
+
 class PredictionResultSchema(BaseModel):
     prediction: float

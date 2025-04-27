@@ -1,13 +1,9 @@
 from pydantic import BaseModel
 
-class CitySchema(BaseModel):
-    name: str
+class CityWithCountrySchema(BaseModel):
+    city: str
     country: str
 
 class CountrySchema(BaseModel):
     name: str
-
-class LocationSchema(BaseModel):
-    city: CitySchema
-    country: CountrySchema
     

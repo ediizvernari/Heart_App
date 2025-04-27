@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/utils/validators/user_health_data_validator.dart';
 import 'package:http/http.dart' as http;
-import 'package:frontend/utils/validators/sessio_validator.dart';
+import 'package:frontend/utils/validators/session_validator.dart';
 import 'package:frontend/views/screens/client_main_page.dart';
 
 class ClientPersonalDataInsertionPage extends StatefulWidget {

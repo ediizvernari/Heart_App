@@ -2,8 +2,9 @@ from fastapi import HTTPException   #TODO: Maybe move this check into the router
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from argon2 import PasswordHasher
-from ..database.sql_models import User
+from ..database.sql_models import User, Medic
 from ..schemas.user_schemas import UserCreateSchema
+from ..schemas.medic_schemas import MedicOut
 from ..utils.encryption_utils import encrypt_data, decrypt_data
 
 ph = PasswordHasher()
@@ -61,3 +62,5 @@ async def get_users(db: AsyncSession):
         users_dict[user.id] = user_info
 
     return users_dict
+
+
