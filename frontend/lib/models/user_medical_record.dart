@@ -14,6 +14,7 @@ class UserMedicalRecord extends UserHealthData {
     required super.dateOfBirth,
     required super.heightCm,
     required super.weightKg,
+    //TODO: Make something that allows the cholesterol level to have a label instead of a number
     required super.cholesterolLevel,
     required super.systolicBloodPressure,
     required super.diastolicBloodPressure,
@@ -23,7 +24,7 @@ class UserMedicalRecord extends UserHealthData {
     return UserMedicalRecord(
       id: json['id'] as int,
       userId: json['user_id'] as int,
-      cvdRiskPercentage: json['cvd_risk_percentage'] as String,
+      cvdRiskPercentage: json['cvd_risk'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       dateOfBirth: json['birth_date'] as String,
       heightCm: json['height'] as String,

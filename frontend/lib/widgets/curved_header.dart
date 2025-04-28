@@ -33,9 +33,9 @@ class CurvedHeader extends StatelessWidget {
           ),
         ),
         if (showBack)
-          SafeArea(
+          const SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(8.0),
               child: BackButton(color: AppColors.primaryRed),
             ),
           ),

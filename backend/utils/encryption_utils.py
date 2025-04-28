@@ -2,7 +2,8 @@ import base64
 from datetime import date
 import os
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from backend.database import sql_models
+from ..database.sql_models import UserHealthData, Medic, City, Country
+from ..schemas.medic_schemas import MedicOut
 
 ENCRYPTED_FIELDS = {
     "birth_date",
@@ -11,6 +12,14 @@ ENCRYPTED_FIELDS = {
     "cholesterol_level",
     "ap_hi",
     "ap_lo",
+}
+
+ENCRYPTED_MEDIC_FIELDS = {
+    "first_name",
+    "last_name",
+    "street_address",
+    "city",
+    "country",
 }
 
 AES_KEY = os.getenv("AES_KEY")
@@ -24,6 +33,19 @@ def encrypt_data(data: str) -> str:
     encrypted_data = iv + encryptor.tag + encrypted
     return base64.b64encode(encrypted_data).decode()
 
+def encrypt_fields(obj: object | dict, fields: list[str]) -> dict:
+    encrypted = {}
+    for field in fields:
+        value = obj[field] if isinstance(obj, dict) else getattr(obj, field, None)
+        if value is not None:
+            try:
+                encrypted[field] = encrypt_data(str(value))
+            except Exception as e:
+                print(f"[ERROR] Encryption failed for '{field}': {e}")
+                encrypted[field] = "[ENCRYPTION ERROR]"
+        else:
+            encrypted[field] = None
+    return encrypted
 
 def decrypt_data(encrypted_data_b64: str) -> str:
     try:
@@ -40,7 +62,19 @@ def decrypt_data(encrypted_data_b64: str) -> str:
     except Exception as e:
         print(f"Decryption failed: {e}")
         return "[DECRYPTION ERROR]"
-    
+
+def decrypt_fields(obj, fields: list[str]) -> dict:
+    decrypted = {}
+    for field in fields:
+        try:
+            value = getattr(obj, field)
+            decrypted[field] = decrypt_data(value) if value else None
+        except Exception as e:
+            print(f"[ERROR] Decryption failed for field '{field}': {e}")
+            decrypted[field] = "[DECRYPTION ERROR]"
+    return decrypted
+
+#TODO: Use the decrypt_fields function for refactoring other functions across the project
 def decrypt_health_data_fields_for_user(encrypted_user_health_data: dict) -> dict:
     decrypted_user_health_data = {}
     
@@ -58,7 +92,7 @@ def decrypt_health_data_fields_for_user(encrypted_user_health_data: dict) -> dic
     
     return decrypted_user_health_data
 
-def decrypt_health_data_fields_for_user_prediction(encrypted_data: sql_models.UserHealthData) -> dict:
+def decrypt_health_data_fields_for_user_prediction(encrypted_data: UserHealthData) -> dict:
     data = dict(encrypted_data.__dict__)
     data.pop('_sa_instance_state', None)
 
@@ -84,3 +118,19 @@ def decrypt_health_data_fields_for_user_prediction(encrypted_data: sql_models.Us
     except Exception as e:
         print(f"[ERROR] Failed to parse decrypted data: {e}")
         raise ValueError("Invalid decrypted health data format")
+
+#TODO: Use the decrypt_fields function for refactoring other functions across the project    
+def decrypt_medic_fields(medic: Medic, city: City, country: Country) -> MedicOut:
+    decrypted_medic_fields = decrypt_fields(medic, ["first_name", "last_name", "street_address"])
+    city_name = decrypt_data(city.name)
+    country_name = decrypt_data(country.name)
+
+    return MedicOut(
+        id=medic.id,
+        first_name=decrypted_medic_fields["first_name"],
+        last_name=decrypted_medic_fields["last_name"],
+        email=medic.email,
+        street_address=decrypted_medic_fields["street_address"],
+        city=city_name,
+        country=country_name,
+    )

@@ -3,19 +3,17 @@ from fastapi import HTTPException   #TODO: Maybe move this check into the router
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from argon2 import PasswordHasher
-from backend.schemas.location_schemas import CitySchema
-from ..database.sql_models import City, Country, Medic
+from backend.schemas.location_schemas import CityWithCountrySchema
+from ..database.sql_models import City, Country, Medic, User
 from ..schemas.medic_schemas import MedicCreate
 from ..utils.encryption_utils import decrypt_data, encrypt_data
 from ..crud.location import is_city_from_country, create_city
 
 ph = PasswordHasher()
 
-#TODO: Reimplement this function
-#DONE for now
 async def create_medic(db: AsyncSession, medic: MedicCreate):
     if not await is_city_from_country(db, medic.city, medic.country):
-        await create_city(db, CitySchema(name=medic.city, country=medic.country))
+        await create_city(db, CityWithCountrySchema(city=medic.city, country=medic.country))
 
     result = await db.execute(select(City, Country).join(Country))
     rows = result.all()
@@ -48,22 +46,30 @@ async def create_medic(db: AsyncSession, medic: MedicCreate):
 
 
 async def get_medic_by_id(db: AsyncSession, medic_id: int):
-    result = await db.execute(select(Medic).where(Medic.id == medic_id))
+    result = await db.execute(
+        select(Medic)
+        .where(Medic.id == medic_id)
+    )
     return result.scalar_one_or_none()
 
 async def get_medic_by_email(db: AsyncSession, email: str):
-    result = await db.execute(select(Medic).where(Medic.email == email))
+    result = await db.execute(
+        select(Medic)
+        .where(Medic.email == email)
+    )
     return result.scalar_one_or_none()
 
+async def get_all_medics_with_location(db: AsyncSession):
+    result = await db.execute(
+        select(Medic, City, Country)
+        .join(City, Medic.city_id == City.id)
+        .join(Country, City.country_id == Country.id)
+    )
+    return result.all()
 
-#TODO: Reimplement this function
-async def get_filtered_medics(db: AsyncSession,city: Optional[str] = None, region: Optional[str] = None, country: Optional[str] = None):
-    query = select(Medic)
-    if city:
-        query = query.where(Medic.city == city)
-    if region:
-        query = query.where(Medic.region == region)
-    if country:
-        query = query.where(Medic.country == country)
-    result = await db.execute(query)
+async def get_encrypted_patients_assigned_to_medic(db: AsyncSession, medic_id: int):
+    result = await db.execute(
+        select(User)
+        .where(User.medic_id == medic_id)
+    )
     return result.scalars().all()

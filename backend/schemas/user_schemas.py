@@ -20,3 +20,16 @@ class UserSchema(UserCreateSchema):
     
 class MedicAssignmentRequest(BaseModel):
     medic_id: int
+
+class UserAssignmentStatus(BaseModel):
+    has_assigned_medic: bool
+    shares_data_with_medic: bool
+
+class PatientOut(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    shares_data_with_medic: bool
+
+    class Config:
+        from_attributes = True
