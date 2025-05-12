@@ -8,7 +8,7 @@ from backend.schemas.user_health_data_schemas import UserHealthDataOutSchema
 from backend.schemas.user_medical_records_schemas import UserMedicalRecordOutSchema
 from backend.schemas.user_schemas import PatientOut
 from backend.services.account_service import get_current_account
-from backend.services.medic_service import filter_medics_by_location, get_all_patients_assigned_to_medic, get_shared_patient_health_data
+from backend.services.medic import filter_medics_by_location, get_all_patients_assigned_to_medic, get_shared_patient_health_data
 from backend.services.user_medical_record_service import get_all_user_medical_records_for_specific_assigned_user, get_latest_user_medical_record_for_specific_assigned_user
 
 router = APIRouter()

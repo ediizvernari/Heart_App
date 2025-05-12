@@ -1,4 +1,3 @@
-from typing import Optional
 from fastapi import HTTPException   #TODO: Maybe move this check into the router file
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession

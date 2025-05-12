@@ -4,7 +4,7 @@ from backend.schemas import user_schemas, medic_schemas, token_schema
 from backend.database.connection import get_db
 from backend.database.sql_models import User
 from backend.services.user_service import signup_user, check_user_email_availability
-from backend.services.medic_service import signup_medic, check_medic_email_availability
+from backend.services.medic import signup_medic, check_medic_email_availability
 from backend.services.account_service import login_account, get_current_account
 
 router = APIRouter()
