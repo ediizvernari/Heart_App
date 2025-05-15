@@ -2,6 +2,7 @@ import base64
 from datetime import date
 import os
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+
 from ..database.sql_models import UserHealthData, Medic, City, Country
 from ..schemas.medic_schemas import MedicOut
 
@@ -118,19 +119,3 @@ def decrypt_health_data_fields_for_user_prediction(encrypted_data: UserHealthDat
     except Exception as e:
         print(f"[ERROR] Failed to parse decrypted data: {e}")
         raise ValueError("Invalid decrypted health data format")
-
-#TODO: Use the decrypt_fields function for refactoring other functions across the project    
-def decrypt_medic_fields(medic: Medic, city: City, country: Country) -> MedicOut:
-    decrypted_medic_fields = decrypt_fields(medic, ["first_name", "last_name", "street_address"])
-    city_name = decrypt_data(city.name)
-    country_name = decrypt_data(country.name)
-
-    return MedicOut(
-        id=medic.id,
-        first_name=decrypted_medic_fields["first_name"],
-        last_name=decrypted_medic_fields["last_name"],
-        email=medic.email,
-        street_address=decrypted_medic_fields["street_address"],
-        city=city_name,
-        country=country_name,
-    )

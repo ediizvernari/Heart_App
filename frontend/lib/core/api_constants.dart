@@ -45,4 +45,49 @@ class APIConstants {
   //User Medical Record
   static const getAllMedicalRecordsForUserUrl = '$baseUrl/user_medical_records/all';
   static const getLatestMedicalRecordForUserUrl = '$baseUrl/user_medical_records/latest';
+
+  //Medical Services
+  static const getMedicalServicesTypesUrl = '$baseUrl/medical_service/medical_service_types';
+  static const getMedicalServicesUrl = '$baseUrl/medical_service/medical_services';
+  static const createMedicalServiceUrl = '$baseUrl/medical_service/create_medical_service';
+  static String updateMedicalServiceUrl(int id) {
+    return '$baseUrl/medical_service/$id';
+  }
+  static String deleteMedicalServiceUrl(int id) {
+    return '$baseUrl/medical_service/$id';
+  }
+  static String getMedicalServicesByMedicIdUrl(int medicID) =>
+    '$baseUrl/medical_service/by_medic/$medicID';
+ 
+
+  //Appointments
+  static const getAllUserAppointmentsUrl = '$baseUrl/appointments/my_appointments';
+  static const getAllMedicAppointmentsUrl = '$baseUrl/appointments/medic_appointments';
+  static const bookAppointmentUrl = '$baseUrl/appointments/';
+  //TODO: Maybe this will throw a 404
+  static String changeAppointmentStatusUrl(int id, String status) =>
+    '$baseUrl/appointments/$id/status?new_appointment_status=$status';
+
+  //Appointment_Suggestions
+  static String appointmentSuggestionForUser(int userId) {
+    return '$baseUrl/suggestions/users/$userId';
+  }
+   static String changeAppointmentSuggestionStatusUrl(int appointmentSuggestionId, String appointmentSuggestionStatus) =>
+      '$baseUrl/suggestions/$appointmentSuggestionId/status?new_appointment_suggestion_status=$appointmentSuggestionStatus';
+  //TODO: Maybe do a router just for pending appointment suggestions that should be used by the users
+  static const getAllUsersSuggestionsUrl = '$baseUrl/suggestions/mine';
+  static const getAllMedicSuggestionsUrl = '$baseUrl/suggestions/for_medic';
+  static String getAppointmentSuggestionById(int suggestionId) {
+    return '$baseUrl/suggestions/$suggestionId';
+  } 
+  //TODO: Add the update suggestion status routers
+
+  //Medic Availability
+  static const String getMyAvailabilitiesUrl = '$baseUrl/medic_availability/all';
+  static const String createMyAvailabilityUrl = '$baseUrl/medic_availability/create';
+  static String deleteMyAvailabilityUrl(int slotId) => '$baseUrl/medic_availability/$slotId';
+
+  //Scheduling
+  static const medicFreeSlotsUrl = '$baseUrl/scheduling/medic';
+  static const myAssignedMedicFreeTimeSlots = '$baseUrl/scheduling/me/free_time_slots';
 }

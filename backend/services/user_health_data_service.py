@@ -24,7 +24,7 @@ async def check_user_has_health_data(db: AsyncSession, user_id: int) -> bool:
         print(f"DEBUG: Error checking health data for user {user_id}: {e}")
         return False
 
-
+#TODO: Use this as an example for logging and throwing exceptions
 async def create_or_update_user_health_data_for_user(db: AsyncSession, user_id: int, user_health_data: UserHealthDataSchema):
     try:
         print(f"[DEBUG] Received personal data for user_id={user_id}")

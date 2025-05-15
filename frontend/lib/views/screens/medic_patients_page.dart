@@ -7,6 +7,7 @@ import '../../utils/validators/session_validator.dart';
 import '../../controllers/assigned_users_controller.dart';
 import '../../models/user.dart';
 import '../../widgets/user_medical_record_card.dart';
+import '../../widgets/appointment_medic_suggestion_form_dialog.dart';
 
 class MedicPatientsPage extends StatefulWidget {
   const MedicPatientsPage({Key? key}) : super(key: key);
@@ -71,7 +72,6 @@ class _MedicPatientsPageState extends State<MedicPatientsPage> {
                 final User u = c.assignedUsers[i];
                 final shared = u.sharesDataWithMedic;
                 final hd = c.assignedUsersHealthDataMap[u.id];
-                // get only the latest record
                 final rec = c.assignedUsersLatestRecordMap[u.id];
 
                 return Card(
@@ -92,14 +92,7 @@ class _MedicPatientsPageState extends State<MedicPatientsPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('Birth Date: ${hd.dateOfBirth}'),
-                              Text('Height: ${hd.heightCm} cm'),
-                              Text('Weight: ${hd.weightKg} kg'),
-                              Text(
-                                  'Cholesterol: ${hd.cholesterolLevel} mg/dL'),
-                              Text(
-                                  'AP High: ${hd.systolicBloodPressure}'),
-                              Text(
-                                  'AP Low: ${hd.diastolicBloodPressure}'),
+                              // …
                             ],
                           ),
                         ),
@@ -108,13 +101,34 @@ class _MedicPatientsPageState extends State<MedicPatientsPage> {
                       if (rec == null)
                         const Padding(
                           padding: EdgeInsets.all(8.0),
-                          child:
-                              Text('No medical record available.'),
+                          child: Text('No medical record available.'),
                         )
                       else
                         UserMedicalRecordCard(
                           assignedUserMedicalRecord: rec,
                         ),
+
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.send),
+                            label: const Text('Suggest Appointment'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryRed,
+                            ),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (_) => SuggestionFormDialog(
+                                  userId: u.id,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 );

@@ -4,7 +4,7 @@ from backend.database.sql_models import User
 from ..crud.user import get_user_by_id, get_user_by_email, create_user
 from ..schemas.user_schemas import UserAssignmentStatus, UserSchema, UserCreateSchema
 from ..core.auth import create_access_token
-from ..services.medic_service import get_existing_medic_by_id
+from .medic import get_existing_medic_by_id
 
 async def signup_user(db: AsyncSession, user: UserCreateSchema):
     is_user_found = await get_user_by_email(db, email=user.email)

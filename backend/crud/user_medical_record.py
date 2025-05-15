@@ -3,6 +3,7 @@ from fastapi import HTTPException   #TODO: Maybe move this check into the router
 from sqlalchemy import desc
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from backend.crud.utils import create_entity
 from backend.utils.encryption_utils import decrypt_fields, encrypt_data, encrypt_fields
 from ..database.sql_models import UserMedicalRecord
 from ..schemas.user_medical_records_schemas import UserMedicalRecordOutSchema, UserMedicalRecordSchema
@@ -11,16 +12,12 @@ from ..schemas.user_medical_records_schemas import UserMedicalRecordOutSchema, U
 async def create_user_medical_record(db: AsyncSession, medical_record: UserMedicalRecordSchema):
     encrypted_fields = encrypt_fields(medical_record, ["birth_date", "height", "weight", "cholesterol_level", "ap_hi", "ap_lo"])
     encrypted_cvd_risk = encrypt_data(medical_record.cvd_risk)
-    
-    new_record = UserMedicalRecord(
-        user_id=medical_record.user_id,
-        cvd_risk=encrypted_cvd_risk,
+    payload = {
+        "user_id": medical_record.user_id,
+        "cvd_risk": encrypted_cvd_risk,
         **encrypted_fields
-    )
-
-    db.add(new_record)
-    await db.commit()
-    await db.refresh(new_record)
+    }
+    new_record = await create_entity(db, UserMedicalRecord, **payload)
     return new_record
 
 async def get_user_medical_records_by_user_id(db: AsyncSession, user_id: int) -> List[UserMedicalRecordOutSchema]:

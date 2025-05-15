@@ -23,5 +23,13 @@ class APIClient {
       headers: headers ?? {'Content-Type': 'application/json; charset=UTF-8'},
       body: jsonEncode(body),
     );
-  }  
+  }
+
+  static Future<http.Response> delete(String url, dynamic body, {Map<String, String>? headers}) async {
+    return await http.delete(
+      Uri.parse(url),
+      headers: headers ?? {'Content-Type': 'application/json; charset=UTF-8'},
+      body: jsonEncode(body),
+    );
+  }
 }

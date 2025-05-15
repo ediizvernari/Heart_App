@@ -48,7 +48,7 @@ class DialogUtils {
               child: const Text("Confirm & View Prediction Results"),
               onPressed: () async {
                 Navigator.of(dialogContext).pop();
-                onConfirm(); // Call the provided callback function
+                onConfirm();
               },
             )
           ],

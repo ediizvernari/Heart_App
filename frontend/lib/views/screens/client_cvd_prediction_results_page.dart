@@ -4,6 +4,7 @@ class ClientCVDPredictionResultsPage extends StatelessWidget {
   final Map<String, dynamic> healthData;
   final double predictedProbability;
 
+  //TODO: Apply the token verification here as well (Available for every page)
   const ClientCVDPredictionResultsPage({
     Key? key,
     required this.healthData,

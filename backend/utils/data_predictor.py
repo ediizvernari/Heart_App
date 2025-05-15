@@ -22,24 +22,38 @@ def calculate_age(birth_date:str) -> int:
 def calculate_bmi(weight: int, height: int) -> float:
     return weight / ((height / 100) ** 2)
 
-def calculate_deviation_for_ap_hi(ap_hi:int, mean=126) -> float:
-    return (ap_hi - mean) ** 2
 
-def calculate_deviation_for_ap_lo(ap_lo:int, mean=81) -> float:
-    return (ap_lo - mean) ** 2
+
+MEAN_HI = 126.0
+MEAN_LO =  81.0
+C_HI    =  16.0
+C_LO    =  11.0
+
+def piecewise_dev(value: float, mean: float, c: float, p_small: float = 0.8, p_large: float = 1.5) -> float:
+
+    d = abs(value - mean)
+    if d <= c:
+        return d**p_small
+    return (c**p_small) + ((d - c)**p_large)
+
+def calculate_deviation_for_ap_hi(ap_hi: int) -> float:
+    return piecewise_dev(ap_hi, MEAN_HI, C_HI)
+
+def calculate_deviation_for_ap_lo(ap_lo: int) -> float:
+    return piecewise_dev(ap_lo, MEAN_LO, C_LO)
 
 def build_model_input_features_for_prediction(user_info: dict) -> dict:
     age = calculate_age(user_info["birth_date"])
     bmi = calculate_bmi(user_info["weight"], user_info["height"])
-    ap_hi_sq_dev = calculate_deviation_for_ap_hi(user_info["ap_hi"])
-    ap_lo_sq_dev = calculate_deviation_for_ap_lo(user_info["ap_lo"])
+    ap_hi_pw = calculate_deviation_for_ap_hi(user_info["ap_hi"])
+    ap_lo_pw = calculate_deviation_for_ap_lo(user_info["ap_lo"])
 
     return {
-        "age": age,
-        "ap_hi_sq_dev": ap_hi_sq_dev,
-        "ap_lo_sq_dev": ap_lo_sq_dev,
+        "age":         age,
+        "ap_hi_pw":    ap_hi_pw,
+        "ap_lo_pw":    ap_lo_pw,
         "cholesterol": user_info["cholesterol_level"],
-        "BMI": bmi
+        "BMI":         bmi
     }
  
 def format_cvd_risk_percentage(cvd_risk: float) -> str:
@@ -47,8 +61,8 @@ def format_cvd_risk_percentage(cvd_risk: float) -> str:
     return f"{risk_percentage:.2f}"
 
 def predict_probability_of_having_a_cvd(entry):
-    expected_columns = ['age', 'ap_hi_sq_dev', 'ap_lo_sq_dev', 'cholesterol', 'BMI']
-    features = ['age', 'ap_hi_sq_dev', 'ap_lo_sq_dev', 'cholesterol', 'BMI']
+    expected_columns = ['age', 'ap_hi_pw', 'ap_lo_pw', 'cholesterol', 'BMI']
+    features = ['age', 'ap_hi_pw', 'ap_lo_pw', 'cholesterol', 'BMI']
 
     if not all (column in entry for column in expected_columns):
         return (f"Entry must contain the following columns: {expected_columns}")

@@ -4,7 +4,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import '../utils/validators/auth_form_validator.dart';
 import '../utils/validators/auth_validator.dart';
 import '../services/auth_service.dart';
-import '../views/screens/client_main_page.dart';
+import '../views/screens/user_main_page.dart';
 import '../views/screens/medic_main_page.dart';
 import '../utils/ui/dialog_utils.dart';
 
