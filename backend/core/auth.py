@@ -12,7 +12,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60
 ph = PasswordHasher()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-#TODO: Maybe move this function in another file
 def verify_password(plain_password, hashed_password):
     try:
         return ph.verify(hashed_password, plain_password)

@@ -2,9 +2,20 @@ import asyncio
 import sys
 from fastapi import FastAPI
 from backend.database.connection import SessionLocal, engine, Base
-from backend.routers import appointment_suggestions, appointments, medic_availability, medical_service, scheduling, user_health_data, user_medical_records, users, auth, cvd_prediction, medics, location
+from backend.features.appointments.core import appointments
+from backend.features.appointments.medic_availability import medic_availability
+from backend.features.appointments.suggestions import appointment_suggestions
+from backend.features.auth import auth
+from backend.features.cvd_prediction import cvd_prediction
+from backend.features.location import location
+from backend.features.medical_service import medical_service
+from backend.features.medics import medics
+from backend.features.user_health_data import user_health_data
+from backend.features.user_medical_record import user_medical_records
+from backend.features.users import users
+from backend.features.appointments.scheduling import scheduling
 from fastapi.middleware.cors import CORSMiddleware
-from backend.utils.medical_service_seed import seed_cardiology_medical_service_types
+from backend.scripts.medical_service_seed import seed_cardiology_medical_service_types
 
 if sys.platform.startswith("win"):
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -41,7 +52,6 @@ app.add_middleware(
 async def read_root():
     return {"message": "Welcome to the FastAPI application"}
 
-#TODO: Not the place but maybe add a message schema, also add the medical services and appointments schemas
 app.include_router(users.router, prefix="/users")
 app.include_router(user_health_data.router, prefix="/user_health_data")
 app.include_router(auth.router, prefix="/auth")

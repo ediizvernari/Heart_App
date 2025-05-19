@@ -1,9 +1,10 @@
-from typing import Type, TypeVar, Any, Sequence
+from typing import Optional, Type, TypeVar, Any, Sequence
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import DeclarativeMeta
+from sqlalchemy.orm import DeclarativeMeta, InstrumentedAttribute
 
 T = TypeVar("T", bound=DeclarativeMeta)
+F = TypeVar("F")
 
 async def create_entity(
     db: AsyncSession,
@@ -73,3 +74,26 @@ async def list_entities(
     
     result = await db.execute(listing_statement)
     return result.scalars().all()
+
+async def get_entity_by_field(
+    db: AsyncSession,
+    model: Type[T],
+    *filters: Any,
+) -> Optional[T]:
+    statement = select(model)
+    for filter in filters:
+        statement = statement.where(filter)
+    result = await db.execute(statement)
+    return result.scalars().first()
+
+async def get_entity_field_by_id(
+    db: AsyncSession,
+    model: Type[T],
+    field: InstrumentedAttribute[F],
+    object_id: int,
+    id_attr: InstrumentedAttribute
+) -> Optional[F]:
+    id_col = id_attr or getattr(model, "id")
+    statement = select(field).where(id_col == object_id)
+    result = await db.execute(statement)
+    return result.scalar_one_or_none()

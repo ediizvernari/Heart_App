@@ -4,7 +4,7 @@ import os
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 from ..database.sql_models import UserHealthData, Medic, City, Country
-from ..schemas.medic_schemas import MedicOut
+from ..features.medics.medic_schemas import MedicOutSchema
 
 ENCRYPTED_FIELDS = {
     "birth_date",
@@ -83,13 +83,10 @@ def decrypt_health_data_fields_for_user(encrypted_user_health_data: dict) -> dic
         if key in ENCRYPTED_FIELDS and isinstance(value, (str, bytes)):
             try:
                 decrypted_user_health_data[key] = decrypt_data(value)
-                print(f"[DEBUG] Decrypted {key}: {decrypted_user_health_data[key]}")
             except Exception as e:
-                print(f"[ERROR] Decryption failed for field '{key}': {e}")
                 decrypted_user_health_data[key] = "[DECRYPTION ERROR]"
         else:
             decrypted_user_health_data[key] = value
-            print(f"[DEBUG] Skipped decryption for field '{key}', kept value: {value}")
     
     return decrypted_user_health_data
 
