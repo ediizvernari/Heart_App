@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/curved_header.dart';
 import 'package:frontend/widgets/rounded_button.dart';
-import 'package:frontend/constants/app_colors.dart';
+import 'package:frontend/core/constants/app_colors.dart';
 import 'login_screen.dart';
 import 'signup_user_screen.dart';
 import 'signup_medic_screen.dart';

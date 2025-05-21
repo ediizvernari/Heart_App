@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:frontend/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:frontend/widgets/curved_header.dart';
 import 'package:frontend/widgets/rounded_button.dart';
-import 'package:frontend/constants/app_colors.dart';
+import 'package:frontend/core/constants/app_colors.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});

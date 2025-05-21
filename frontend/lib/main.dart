@@ -1,13 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:frontend/features/appointments/appointments_suggestions/data/repositories/appointment_suggestion_repository_impl.dart';
+import 'package:frontend/features/appointments/scheduling/data/repositories/schedule_repository_impl.dart';
 import 'package:frontend/features/auth/presentation/screens/splash_redirect_screen.dart';
 import 'package:provider/provider.dart';
 
-import 'package:frontend/controllers/free_slot_controller.dart';
-import 'package:frontend/controllers/medic_appointment_suggestion_controller.dart';
+import 'package:frontend/features/appointments/scheduling/presentation/medic_schedule_controller.dart';
+import 'package:frontend/features/appointments/appointments_suggestions/presentation/controllers/medic_appointment_suggestion_controller.dart';
 import 'package:frontend/controllers/medical_service_controller.dart';
-import 'package:frontend/controllers/user_appointments_controller.dart';
-import 'package:frontend/features/auth/data/auth_repository_impl.dart';
+import 'package:frontend/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:frontend/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:frontend/utils/auth_store.dart';
 import 'package:frontend/services/user_service.dart';
@@ -36,12 +37,9 @@ void main() {
             return controller;
           },
         ),
-        ChangeNotifierProvider<AuthController>(
-          create: (_) => AuthController(AuthRepositoryImpl()),
-        ),
-        ChangeNotifierProvider(create: (_) => FreeSlotController()),
-        ChangeNotifierProvider(create: (_) => UserAppointmentsController()),
-        ChangeNotifierProvider(create: (_) => MedicAppointmentSuggestionController()),
+        ChangeNotifierProvider<AuthController>(create: (_) => AuthController(AuthRepositoryImpl())),
+        ChangeNotifierProvider(create: (_) => MedicScheduleController(ScheduleRepositoryImpl())),
+        ChangeNotifierProvider(create: (_) => MedicAppointmentSuggestionController(AppointmentSuggestionRepositoryImpl())),
       ],
       child: const HealthApp(),
     ),

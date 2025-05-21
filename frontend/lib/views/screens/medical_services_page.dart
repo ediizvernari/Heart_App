@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../controllers/medical_service_controller.dart';
-import '../../constants/app_colors.dart';
-import '../../constants/app_text_styles.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_text_styles.dart';
 import '../../widgets/medical_service_form_dialog.dart';
 import '../../widgets/medical_service_item.dart';
 

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../../constants/app_colors.dart';
+import '../../core/constants/app_colors.dart';
 import '../../utils/validators/session_validator.dart';
 import '../../controllers/assigned_users_controller.dart';
 import '../../models/user.dart';
 import '../../widgets/user_medical_record_card.dart';
-import '../../widgets/appointment_medic_suggestion_form_dialog.dart';
+import '../../features/appointments/appointments_suggestions/presentation/widgets/appointment_medic_suggestion_form_dialog.dart';
 
 class MedicPatientsPage extends StatefulWidget {
   const MedicPatientsPage({Key? key}) : super(key: key);

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../models/medical_service_type.dart';
 import '../models/medical_service.dart';
-import '../constants/app_colors.dart';
-import '../constants/app_text_styles.dart';
+import '../core/constants/app_colors.dart';
+import '../core/constants/app_text_styles.dart';
 import 'medical_service_item.dart';
 
 class MedicalServiceTypeTile extends StatelessWidget {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/auth/data/auth_exception.dart';
-import 'package:frontend/features/auth/data/auth_repository.dart';
+import 'package:frontend/features/auth/data/repositories/auth_repository.dart';
 import 'package:frontend/features/auth/data/models/medic_signup_request.dart';
 import 'package:frontend/features/auth/data/models/user_signup_request.dart';
 import 'package:frontend/utils/auth_store.dart';

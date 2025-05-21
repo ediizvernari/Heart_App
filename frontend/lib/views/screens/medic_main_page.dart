@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../../constants/app_colors.dart';
+import '../../core/constants/app_colors.dart';
 import '../../utils/validators/session_validator.dart';
-import 'auth/home_screen.dart';
+import '../../features/auth/presentation/screens/home_screen.dart';
 import 'medic_patients_page.dart';
 
 class MedicMainPage extends StatefulWidget {

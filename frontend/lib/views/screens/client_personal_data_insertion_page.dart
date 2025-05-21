@@ -93,7 +93,7 @@ class ClientPersonalDataInsertionPageState
     if (response.statusCode == 200) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const ClientMainPage()),
+        MaterialPageRoute(builder: (context) => const UserMainPage()),
       );
     } else {
       _showErrorPopup('An error occurred. Please try again.');

@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/appointments/appointments_suggestions/data/repositories/appointment_suggestion_repository_impl.dart';
+import 'package:frontend/features/appointments/core_appointments/data/repositories/appointments_repository_impl.dart';
+import 'package:frontend/features/appointments/medic_availabilities/data/repositories/medic_availability_repository_impl.dart';
+import 'package:frontend/features/appointments/scheduling/data/repositories/schedule_repository_impl.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/user_controller.dart';
 import '../controllers/medical_service_controller.dart';
-import '../controllers/free_slot_controller.dart';
-import '../controllers/user_appointments_controller.dart';
-import '../controllers/medic_appointments_controller.dart';
-import '../controllers/user_appointment_suggestion_controller.dart';
-import '../controllers/medic_availability_controller.dart';
+import '../features/appointments/scheduling/presentation/medic_schedule_controller.dart';
+import '../features/appointments/core_appointments/presentation/controllers/user_appointments_controller.dart';
+import '../features/appointments/core_appointments/presentation/controllers/medic_appointments_controller.dart';
+import '../features/appointments/appointments_suggestions/presentation/controllers/user_appointment_suggestion_controller.dart';
+import '../features/appointments/medic_availabilities/presentation/controllers/medic_availability_controller.dart';
 
 import 'package:frontend/views/screens/user_main_page.dart';
 import 'package:frontend/views/screens/medic_main_page.dart';
 import '../views/screens/medical_services_page.dart';
-import '../views/screens/user_appointments_page.dart';
-import '../views/screens/medic_appointments_page.dart';
-import '../views/screens/user_appointment_suggestions_page.dart';
-import '../views/screens/medic_availability_page.dart';
+import '../features/appointments/core_appointments/presentation/screens/user_appointments_page.dart';
+import '../features/appointments/core_appointments/presentation/screens/medic_appointments_page.dart';
+import '../features/appointments/appointments_suggestions/presentation/screens/user_appointment_suggestions_page.dart';
+import '../features/appointments/medic_availabilities/presentation/screens/medic_availability_page.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
   '/medical-services': (context) => ChangeNotifierProvider<MedicalServiceController>(
@@ -38,14 +42,11 @@ final Map<String, WidgetBuilder> appRoutes = {
             },
           ),
           ChangeNotifierProvider<UserAppointmentsController>(
-            create: (_) {
-              final ctl = UserAppointmentsController();
-              ctl.loadMyAppointments();
-              return ctl;
-            },
+            create: (_) => UserAppointmentsController(AppointmentsRepositoryImpl()),
+            child: const UserAppointmentsPage(),
           ),
-          ChangeNotifierProvider<FreeSlotController>(
-            create: (_) => FreeSlotController(),
+          ChangeNotifierProvider<MedicScheduleController>(
+            create: (_) => MedicScheduleController(ScheduleRepositoryImpl()),
           ),
           ChangeNotifierProvider<MedicalServiceController>(
             create: (_) {
@@ -62,8 +63,8 @@ final Map<String, WidgetBuilder> appRoutes = {
         providers: [
           ChangeNotifierProvider<MedicAppointmentsController>(
             create: (_) {
-              final ctl = MedicAppointmentsController();
-              ctl.loadMedicAppointments();
+              final ctl = MedicAppointmentsController(AppointmentsRepositoryImpl());
+              ctl.getMedicAppointments();
               return ctl;
             },
           ),
@@ -78,19 +79,17 @@ final Map<String, WidgetBuilder> appRoutes = {
         child: const MedicAppointmentsPage(),
       ),
 
-  '/user-suggestions': (context) => ChangeNotifierProvider<UserAppointmentSuggestionController>(
-        create: (_) {
-          final ctl = UserAppointmentSuggestionController();
-          ctl.loadMySuggestions();
-          return ctl;
-        },
-        child: const UserSuggestionsPage(),
-      ),
+  '/user-suggestions': (ctx) => ChangeNotifierProvider(
+      create: (_) => UserAppointmentSuggestionController(
+        AppointmentSuggestionRepositoryImpl()
+      )..getMyAppointmentSuggestions(),
+      child: const UserSuggestionsPage(),
+    ),
 
   '/medic-availability': (context) => ChangeNotifierProvider<MedicAvailabilityController>(
         create: (_) {
-          final ctl = MedicAvailabilityController();
-          ctl.loadMyAvailabilities();
+          final ctl = MedicAvailabilityController(MedicAvailabilityRepositoryImpl());
+          ctl.getMyAvailabilities();
           return ctl;
         },
         child: const MedicAvailabilityPage(),

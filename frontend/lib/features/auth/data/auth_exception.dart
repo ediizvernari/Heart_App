@@ -1,3 +1,4 @@
+//TODO: See where this should be moved
 class AuthException implements Exception {
   final String message;
   const AuthException(this.message);

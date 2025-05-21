@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../constants/app_colors.dart';
-import '../../constants/app_text_styles.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_text_styles.dart';
 import '../../controllers/medic_filtering_controller.dart';
 import '../../handlers/medic_assignment_handler.dart';
 import '../../services/user_service.dart';

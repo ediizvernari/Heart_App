@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../utils/validators/session_validator.dart';
 import '../screens/client_personal_data_insertion_page.dart';
-import '../screens/auth/home_screen.dart';
+import '../../features/auth/presentation/screens/home_screen.dart';
 import 'package:frontend/handlers/client_cvd_prediction_button_handler.dart';
 import 'package:frontend/handlers/available_medics_button_handler.dart';
-import '../../constants/app_colors.dart';
-import '../../constants/app_text_styles.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_text_styles.dart';
 
-class ClientMainPage extends StatefulWidget {
-  const ClientMainPage({Key? key}) : super(key: key);
+class UserMainPage extends StatefulWidget {
+  const UserMainPage({Key? key}) : super(key: key);
 
   @override
-  State<ClientMainPage> createState() => _ClientMainPageState();
+  State<UserMainPage> createState() => _UserMainPageState();
 }
 
-class _ClientMainPageState extends State<ClientMainPage> {
+class _UserMainPageState extends State<UserMainPage> {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   String? _token;
 
