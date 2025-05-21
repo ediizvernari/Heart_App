@@ -17,7 +17,6 @@ class DialogUtils {
     );
   }
 
-  //TODO: Maybe this functions should be asynced
   static Future<void> showHealthDataConfirmationDialog({
     required BuildContext context,
     required Map<String, dynamic> healthData,

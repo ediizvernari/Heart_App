@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:frontend/views/screens/auth/home_screen.dart';
+import 'package:frontend/features/auth/presentation/screens/home_screen.dart';
 
 class SessionValidator {
   static Future<void> verifyToken(BuildContext context) async {

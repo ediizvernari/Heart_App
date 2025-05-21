@@ -1,5 +1,3 @@
-// lib/app_router.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,6 +9,8 @@ import '../controllers/medic_appointments_controller.dart';
 import '../controllers/user_appointment_suggestion_controller.dart';
 import '../controllers/medic_availability_controller.dart';
 
+import 'package:frontend/views/screens/user_main_page.dart';
+import 'package:frontend/views/screens/medic_main_page.dart';
 import '../views/screens/medical_services_page.dart';
 import '../views/screens/user_appointments_page.dart';
 import '../views/screens/medic_appointments_page.dart';
@@ -95,4 +95,7 @@ final Map<String, WidgetBuilder> appRoutes = {
         },
         child: const MedicAvailabilityPage(),
       ),
+
+    '/user_home': (ctx) => const UserMainPage(),
+    '/medic_home': (ctx) => const MedicMainPage(),
 };

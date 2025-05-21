@@ -1,16 +1,41 @@
+import 'dart:convert';
+
+import 'package:frontend/services/api_exception.dart';
+
 import 'auth_form_validator.dart';
 import '../../services/auth_service.dart';
 
 class AuthValidator {
   static Future<String?> validateEmail(String email, {required bool isMedic}) async {
-    final String? emailError = AuthFormValidator.validateEmailFormat(email);
-    if (emailError != null) return emailError;
+    final String? formatError = AuthFormValidator.validateEmailFormat(email);
+    if (formatError != null) return formatError;
 
     try {
-      final available = await AuthService.isEmailAvailableForSignup(email, isMedic: isMedic);
-      if (!available) return 'Email already registered';
-    } catch (e) {
-      return 'Error checking email: ${e.toString()}';
+      final available = await AuthService.isEmailAvailableForSignup(
+        email,
+        isMedic: isMedic,
+      );
+      if (!available) {
+        return 'Email already registered';
+      }
+    }
+    on ApiException catch (e) {
+      try {
+        final Map<String, dynamic> body = jsonDecode(e.responseBody);
+        final detail = body['detail'] as String?;
+        if (detail != null && detail.isNotEmpty) {
+          return detail;
+        }
+      } catch (_) { /* fall through */ }
+      return 'Email already registered';
+    }
+    on Exception catch (e) {
+      final msg = e.toString();
+      final detailMatch = RegExp(r'\{"detail"\s*:\s*"([^"]+)').firstMatch(msg);
+      if (detailMatch != null) {
+        return detailMatch.group(1);
+      }
+      return 'Email already registered';
     }
 
     return null;
