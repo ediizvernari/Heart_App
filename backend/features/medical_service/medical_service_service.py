@@ -94,6 +94,7 @@ class MedicalServiceService:
         if updates:
             encrypted = encrypt_fields(updates, list(updates.keys()))
             await self.medical_service_repo.update_medical_service(medical_service_id, encrypted)
+        return await self.get_medical_service_by_id(medical_service_id)
 
     async def delete_medical_service_for_medic(self, medic_id: int, medical_service_id: int):
         medical_service_object = await self.medical_service_repo.get_medical_service_by_id(medical_service_id)
