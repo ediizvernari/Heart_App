@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/user_appointment_suggestion_controller.dart';
-import '../../../../../controllers/medical_service_controller.dart';
+import '../../../../medical_service/presentation/controllers/medical_service_controller.dart';
 import '../widgets/appointment_suggestion_item.dart';
 import '../../../../../core/constants/app_colors.dart';
 
@@ -26,7 +26,7 @@ class _UserSuggestionsPageState extends State<UserSuggestionsPage> {
 
       final medics = appointmentSuggestionController.myAppointmentSuggestions.map((s) => s.medicId).toSet();
       for (final medicId in medics) {
-        await medicalServiceController.fetchServicesForAssignedMedic(medicId);
+        await medicalServiceController.getMedicalServicesForAssignedMedic(medicId);
       }
     });
   }
@@ -95,7 +95,7 @@ class _UserSuggestionsPageState extends State<UserSuggestionsPage> {
         itemBuilder: (_, i) {
           final s = pending[i];
           return SuggestionItem(
-            suggestion: s,
+            apppointmentSuggestion: s,
             onRespond: (id, status) async {
               await appointmentSuggestionController.respondToSuggestion(id, status);
               if (status == 'accepted') {

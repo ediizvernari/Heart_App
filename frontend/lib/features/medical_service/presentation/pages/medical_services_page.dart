@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../controllers/medical_service_controller.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_text_styles.dart';
-import '../../widgets/medical_service_form_dialog.dart';
-import '../../widgets/medical_service_item.dart';
+import '../controllers/medical_service_controller.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_text_styles.dart';
+import '../widgets/medical_service_form_dialog.dart';
+import '../widgets/medical_service_item.dart';
 
 //TODO: Put a header here
 class MedicalServicesPage extends StatefulWidget {
@@ -16,32 +16,32 @@ class MedicalServicesPage extends StatefulWidget {
 }
 
 class _MedicalServicesPageState extends State<MedicalServicesPage> {
-  int _selectedTypeId = 0;
+  int _selectedMedicalServiceTypeId = 0;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final ctl = context.read<MedicalServiceController>();
-      if (!ctl.loadingTypes && !ctl.loadingServices) {
-        ctl.loadAllMedicalServiceData();
+      final medicalServiceController = context.read<MedicalServiceController>();
+      if (!medicalServiceController.loadingTypes && !medicalServiceController.loadingServices) {
+        medicalServiceController.getAllMedicalServiceData();
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final ctl = context.watch<MedicalServiceController>();
+    final medicalServiceController = context.watch<MedicalServiceController>();
 
     final allTypes = [
       _FakeType(id: 0, name: 'All'),
-      ...ctl.types.map((t) => _FakeType(id: t.id, name: t.name)),
+      ...medicalServiceController.medicalServiceTypes.map((t) => _FakeType(id: t.id, name: t.name)),
     ];
 
-    final filtered = _selectedTypeId == 0
-        ? ctl.services
-        : ctl.services
-            .where((s) => s.medicalServiceTypeId == _selectedTypeId)
+    final filtered = _selectedMedicalServiceTypeId == 0
+        ? medicalServiceController.medicalServices
+        : medicalServiceController.medicalServices
+            .where((s) => s.medicalServiceTypeId == _selectedMedicalServiceTypeId)
             .toList();
 
     return Scaffold(
@@ -65,19 +65,19 @@ class _MedicalServicesPageState extends State<MedicalServicesPage> {
                 itemCount: allTypes.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 8),
                 itemBuilder: (ctx, i) {
-                  final type = allTypes[i];
-                  final selected = type.id == _selectedTypeId;
+                  final medicalServiceType = allTypes[i];
+                  final selectedMedicalserviceType = medicalServiceType.id == _selectedMedicalServiceTypeId;
                   return ChoiceChip(
-                    label: Text(type.name),
-                    selected: selected,
+                    label: Text(medicalServiceType.name),
+                    selected: selectedMedicalserviceType,
                     selectedColor: AppColors.primaryRed,
                     backgroundColor: Colors.grey.shade200,
                     labelStyle: TextStyle(
-                      color: selected ? Colors.white : Colors.black87,
+                      color: selectedMedicalserviceType ? Colors.white : Colors.black87,
                     ),
                     onSelected: (_) {
                       setState(() {
-                        _selectedTypeId = type.id;
+                        _selectedMedicalServiceTypeId = medicalServiceType.id;
                       });
                     },
                   );
@@ -87,10 +87,10 @@ class _MedicalServicesPageState extends State<MedicalServicesPage> {
 
             const SizedBox(height: 16),
 
-            if (ctl.loadingTypes || ctl.loadingServices)
+            if (medicalServiceController.loadingTypes || medicalServiceController.loadingServices)
               const Center(child: CircularProgressIndicator())
-            else if (ctl.error != null)
-              Center(child: Text('Error: ${ctl.error}'))
+            else if (medicalServiceController.error != null)
+              Center(child: Text('Error: ${medicalServiceController.error}'))
             else if (filtered.isEmpty)
               const Center(child: Text('No services found.'))
 
@@ -123,7 +123,7 @@ class _MedicalServicesPageState extends State<MedicalServicesPage> {
         onPressed: () => showDialog(
           context: context,
           builder: (_) => ChangeNotifierProvider.value(
-            value: ctl,
+            value: medicalServiceController,
             child: const MedicalServiceFormDialog(),
           ),
         ),

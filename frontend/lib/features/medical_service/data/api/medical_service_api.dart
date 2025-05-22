@@ -1,10 +1,13 @@
 import 'dart:convert';
-import '../core/api_constants.dart';
-import 'api_client.dart';
+import 'package:frontend/services/api_exception.dart';
+
+import '../../../../core/api_constants.dart';
+import '../../../../services/api_client.dart';
 import '../models/medical_service.dart';
 import '../models/medical_service_type.dart';
 
 class MedicalServiceApi{
+  //Used by the medics
   static Future<List<MedicalServiceType>> getAllMedicalServiceTypes() async {
     final response = await APIClient.get(APIConstants.getMedicalServicesTypesUrl);
 
@@ -18,7 +21,6 @@ class MedicalServiceApi{
     .toList();
   }
 
-  //Used by the medics
   static Future<List<MedicalService>> getMyMedicalServices(String? token) async {
     final headers = {'Authorization': 'Bearer $token'};
     final response = await APIClient.get(APIConstants.getMedicalServicesUrl, headers: headers);
@@ -34,13 +36,13 @@ class MedicalServiceApi{
 
   static Future<MedicalService> createMedicalService(String token, MedicalService medicalService) async {
     const url = APIConstants.createMedicalServiceUrl;
+    //TODO: Change this according to the appointments api variant
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
     };
 
     final payload = medicalService.toJsonForCreate();
-    print('createMedicalService payload: $payload');
     final response = await APIClient.post(url, payload, headers: headers);
 
    if (response.statusCode != 201) {
@@ -61,7 +63,7 @@ class MedicalServiceApi{
     final response = await APIClient.patch(url, medicalService.toJsonForCreate(), headers: headers);
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to update medical service');
+      throw throw ApiException(response.statusCode, response.body);
     }
 
     return MedicalService.fromJson(jsonDecode(response.body));
@@ -73,7 +75,7 @@ class MedicalServiceApi{
     final response = await APIClient.delete(url, null, headers: headers);
 
     if(response.statusCode != 200) {
-      throw Exception('Failed to delete medical service (status: ${response.statusCode})');
+      throw ApiException(response.statusCode, response.body);
     }
   }
 
@@ -88,15 +90,4 @@ class MedicalServiceApi{
     final List data = jsonDecode(response.body);
     return data.map((e) => MedicalService.fromJson(e)).toList();
   }
-}
-
-class ApiException implements Exception {
-  final int statusCode;
-  final String responseBody;
-
-  ApiException(this.statusCode, this.responseBody);
-
-  @override
-  String toString() =>
-      'ApiException($statusCode): ${responseBody.replaceAll('\n', ' ')}';
 }

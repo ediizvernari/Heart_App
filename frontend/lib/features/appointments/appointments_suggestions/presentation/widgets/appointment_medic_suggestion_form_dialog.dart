@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/medic_appointment_suggestion_controller.dart';
-import '../../../../../controllers/medical_service_controller.dart';
+import '../../../../medical_service/presentation/controllers/medical_service_controller.dart';
 import '../../data/models/appointment_suggestion_model.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_text_styles.dart';
@@ -28,8 +28,8 @@ class _SuggestionFormDialogState extends State<SuggestionFormDialog> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final svcCtl = context.read<MedicalServiceController>();
-      svcCtl.loadMedicalServices().then((_) {
+      final medicalServiceController = context.read<MedicalServiceController>();
+      medicalServiceController.getMyMedicalServices().then((_) {
         if (!mounted) return;
         setState(() {});
       });
@@ -38,9 +38,9 @@ class _SuggestionFormDialogState extends State<SuggestionFormDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final medCtl = context.read<MedicAppointmentSuggestionController>();
-    final svcCtl = context.watch<MedicalServiceController>();
-    final services = svcCtl.services;
+    final medicAppointmentSuggestionController = context.read<MedicAppointmentSuggestionController>();
+    final medicalServiceController = context.watch<MedicalServiceController>();
+    final medicalServices = medicalServiceController.medicalServices;
 
     final bool canSend = _serviceId != null;
 
@@ -56,7 +56,7 @@ class _SuggestionFormDialogState extends State<SuggestionFormDialog> {
             isExpanded: true,
             value: _serviceId,
             decoration: const InputDecoration(labelText: 'Service'),
-            items: services
+            items: medicalServices
                 .map((s) => DropdownMenuItem(
                       value: s.id,
                       child: Text(s.name),
@@ -85,7 +85,7 @@ class _SuggestionFormDialogState extends State<SuggestionFormDialog> {
                   if (!_formKey.currentState!.validate()) return;
                   _formKey.currentState!.save();
 
-                  final service = services.firstWhere((s) => s.id == _serviceId!);
+                  final service = medicalServices.firstWhere((s) => s.id == _serviceId!);
 
                   final suggestion = AppointmentSuggestion(
                     id: 0,
@@ -97,7 +97,7 @@ class _SuggestionFormDialogState extends State<SuggestionFormDialog> {
                     createdAt: DateTime.now(),
                   );
 
-                  medCtl.createSuggestion(suggestion).then((_) {
+                  medicAppointmentSuggestionController.createSuggestion(suggestion).then((_) {
                     Navigator.pop(context);
                   });
                 }

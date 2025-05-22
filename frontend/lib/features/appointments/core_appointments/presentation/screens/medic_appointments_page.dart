@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/controllers/medical_service_controller.dart';
+import 'package:frontend/features/medical_service/presentation/controllers/medical_service_controller.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/medic_appointments_controller.dart';
@@ -20,35 +20,35 @@ class _MedicAppointmentsPageState extends State<MedicAppointmentsPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<MedicAppointmentsController>().getMedicAppointments();
-      context.read<MedicalServiceController>().loadMedicalServices();
+      context.read<MedicalServiceController>().getMyMedicalServices();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final ctl = context.watch<MedicAppointmentsController>();
+    final medicAppointmentsController = context.watch<MedicAppointmentsController>();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Patient Appointments', style: AppTextStyles.welcomeHeader),
         backgroundColor: AppColors.primaryRed,
       ),
-      body: ctl.isLoading
+      body: medicAppointmentsController.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ctl.error != null
-              ? Center(child: Text('Error: ${ctl.error}'))
-              : ctl.medicAppointments.isEmpty
+          : medicAppointmentsController.error != null
+              ? Center(child: Text('Error: ${medicAppointmentsController.error}'))
+              : medicAppointmentsController.medicAppointments.isEmpty
                   ? const Center(child: Text('No patient appointments.'))
                   : ListView.separated(
                       padding: const EdgeInsets.all(16),
-                      itemCount: ctl.medicAppointments.length,
+                      itemCount: medicAppointmentsController.medicAppointments.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 8),
                       itemBuilder: (_, i) {
-                        final appt = ctl.medicAppointments[i];
+                        final appt = medicAppointmentsController.medicAppointments[i];
                         return AppointmentItem(
                           appointment: appt,
                           onUpdateStatus: (newStatus) {
-                            ctl.updateAppointmentStatus(appt.id, newStatus);
+                            medicAppointmentsController.updateAppointmentStatus(appt.id, newStatus);
                           },
                         );
                       },

@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/models/appointment_model.dart';
-import '../../../../../controllers/medical_service_controller.dart';
+import '../../../../medical_service/presentation/controllers/medical_service_controller.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_text_styles.dart';
 
@@ -30,7 +30,7 @@ class AppointmentItem extends StatelessWidget {
     final bodyStyle = AppTextStyles.welcomeHeader.copyWith(fontSize: 16);
     final captionStyle = AppTextStyles.buttonText.copyWith(fontSize: 12);
 
-    final services = context.read<MedicalServiceController>().services;
+    final services = context.read<MedicalServiceController>().medicalServices;
     final matching = services.where((s) => s.id == appointment.medicalServiceId).toList();
     final serviceName = matching.isNotEmpty ? matching.first.name : 'Unknown';
 

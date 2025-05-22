@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/medical_service.dart';
+import '../../data/models/medical_service.dart';
 import '../controllers/medical_service_controller.dart';
-import '../core/constants/app_colors.dart';
-import '../core/constants/app_text_styles.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_text_styles.dart';
 import 'medical_service_form_dialog.dart';
 
 class MedicalServiceItem extends StatelessWidget {

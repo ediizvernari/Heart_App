@@ -7,7 +7,7 @@ import '../../../../../models/medic.dart';
 import '../controllers/user_appointments_controller.dart';
 import '../../../scheduling/presentation/medic_schedule_controller.dart';
 import '../../../../../controllers/user_controller.dart';
-import '../../../../../controllers/medical_service_controller.dart';
+import '../../../../medical_service/presentation/controllers/medical_service_controller.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_text_styles.dart';
 
@@ -22,7 +22,7 @@ class _UserAppointmentFormDialogState extends State<UserAppointmentFormDialog> {
   DateTime _selectedDate = DateTime.now();
   int? _selectedServiceId;
   Medic? _assignedMedic;
-  bool _loading = true;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -31,19 +31,19 @@ class _UserAppointmentFormDialogState extends State<UserAppointmentFormDialog> {
   }
 
   Future<void> _initLoad() async {
-    final userCtl = context.read<UserController>();
-    final svcCtl = context.read<MedicalServiceController>();
-    final slotCtl = context.read<MedicScheduleController>();
+    final userController = context.read<UserController>();
+    final medicalServiceController = context.read<MedicalServiceController>();
+    final medicScheduleController = context.read<MedicScheduleController>();
 
-    await userCtl.fetchAssignedMedic();
-    final medic = userCtl.assignedMedic;
+    await userController.fetchAssignedMedic();
+    final medic = userController.assignedMedic;
     if (medic != null) {
-      await svcCtl.fetchServicesForAssignedMedic(medic.id);
+      await medicalServiceController.getMedicalServicesForAssignedMedic(medic.id);
     }
-    slotCtl.clear();
+    medicScheduleController.clear();
     setState(() {
       _assignedMedic = medic;
-      _loading = false;
+      _isLoading = false;
     });
   }
 
@@ -84,11 +84,11 @@ class _UserAppointmentFormDialogState extends State<UserAppointmentFormDialog> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_isLoading) return const Center(child: CircularProgressIndicator());
 
-    final svcCtl = context.watch<MedicalServiceController>();
-    final slotCtl = context.watch<MedicScheduleController>();
-    final services = svcCtl.services;
+    final medicalServiceController = context.watch<MedicalServiceController>();
+    final shceduleController = context.watch<MedicScheduleController>();
+    final services = medicalServiceController.medicalServices;
 
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
@@ -147,18 +147,18 @@ class _UserAppointmentFormDialogState extends State<UserAppointmentFormDialog> {
                       ),
                     const SizedBox(height: 16),
 
-                    if (slotCtl.isLoading)
+                    if (shceduleController.isLoading)
                       const Center(child: CircularProgressIndicator())
-                    else if (slotCtl.freeTimeSlots.isEmpty)
+                    else if (shceduleController.freeTimeSlots.isEmpty)
                       const Text('No available slots', style: TextStyle(color: Colors.grey))
                     else
                       SizedBox(
                         height: 200,
                         child: ListView.separated(
-                          itemCount: slotCtl.freeTimeSlots.length,
+                          itemCount: shceduleController.freeTimeSlots.length,
                           separatorBuilder: (_, __) => const Divider(),
                           itemBuilder: (_, i) {
-                            final slot = slotCtl.freeTimeSlots[i];
+                            final slot = shceduleController.freeTimeSlots[i];
                             final m = _assignedMedic!;
                             final start = DateTime(
                               _selectedDate.year,

@@ -3,18 +3,18 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../../data/models/appointment_suggestion_model.dart';
-import '../../../../../controllers/medical_service_controller.dart';
-import '../../../../../models/medical_service.dart';
+import '../../../../medical_service/presentation/controllers/medical_service_controller.dart';
+import '../../../../medical_service/data/models/medical_service.dart';
 import '../../../../../core/constants/app_text_styles.dart';
 
 typedef SuggestionResponseCallback = void Function(int suggestionId, String newStatus);
 
 class SuggestionItem extends StatelessWidget {
-  final AppointmentSuggestion suggestion;
+  final AppointmentSuggestion apppointmentSuggestion;
   final SuggestionResponseCallback? onRespond;
 
   const SuggestionItem({
-    required this.suggestion,
+    required this.apppointmentSuggestion,
     this.onRespond,
     Key? key,
   }) : super(key: key);
@@ -23,8 +23,8 @@ class SuggestionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final svcCtl = context.watch<MedicalServiceController>();
 
-    final service = svcCtl.services.firstWhere(
-      (s) => s.id == suggestion.medicalServiceId,
+    final service = svcCtl.medicalServices.firstWhere(
+      (s) => s.id == apppointmentSuggestion.medicalServiceId,
       orElse: () => MedicalService(
         id: 0,
         medicId: 0,
@@ -35,7 +35,7 @@ class SuggestionItem extends StatelessWidget {
       ),
     );
 
-    final fmtDate = DateFormat.yMMMd().add_jm().format(suggestion.createdAt);
+    final fmtDate = DateFormat.yMMMd().add_jm().format(apppointmentSuggestion.createdAt);
 
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -51,7 +51,7 @@ class SuggestionItem extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Reason: ${suggestion.reason}',
+              'Reason: ${apppointmentSuggestion.reason}',
               style: AppTextStyles.buttonText,
             ),
             const SizedBox(height: 4),
@@ -65,12 +65,12 @@ class SuggestionItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: () => onRespond!(suggestion.id, 'accepted'),
+                    onPressed: () => onRespond!(apppointmentSuggestion.id, 'accepted'),
                     child: const Text('Accept'),
                   ),
                   const SizedBox(width: 8),
                   TextButton(
-                    onPressed: () => onRespond!(suggestion.id, 'declined'),
+                    onPressed: () => onRespond!(apppointmentSuggestion.id, 'declined'),
                     child: const Text('Decline'),
                   ),
                 ],

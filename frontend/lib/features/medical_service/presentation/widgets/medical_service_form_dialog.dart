@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/medical_service.dart';
+import '../../data/models/medical_service.dart';
 import '../controllers/medical_service_controller.dart';
-import '../core/constants/app_colors.dart';
-import '../core/constants/app_text_styles.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_text_styles.dart';
 
 class MedicalServiceFormDialog extends StatefulWidget {
   final MedicalService? service;
@@ -17,25 +17,25 @@ class MedicalServiceFormDialog extends StatefulWidget {
 
 class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
   final _formKey = GlobalKey<FormState>();
-  late int _typeId;
-  late String _name;
-  late int _price;
-  late int _duration;
+  late int _medicalServiceTypeId;
+  late String _medicalServiceName;
+  late int _medicalServicePrice;
+  late int _medicalServiceDuration;
 
   @override
   void initState() {
     super.initState();
-    final svc = widget.service;
-    _typeId = svc?.medicalServiceTypeId ?? 0;
-    _name = svc?.name ?? '';
-    _price = svc?.price ?? 0;
-    _duration = svc?.durationMinutes ?? 0;
+    final medicalService = widget.service;
+    _medicalServiceTypeId = medicalService?.medicalServiceTypeId ?? 0;
+    _medicalServiceName = medicalService?.name ?? '';
+    _medicalServicePrice = medicalService?.price ?? 0;
+    _medicalServiceDuration = medicalService?.durationMinutes ?? 0;
   }
 
   @override
   Widget build(BuildContext context) {
-    final ctl = context.read<MedicalServiceController>();
-    final types = ctl.types;
+    final medicalServiceController = context.read<MedicalServiceController>();
+    final types = medicalServiceController.medicalServiceTypes;
 
     return AlertDialog(
       title: Text(
@@ -50,7 +50,7 @@ class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
             children: [
               DropdownButtonFormField<int>(
                 isExpanded: true,
-                value: _typeId > 0 ? _typeId : null,
+                value: _medicalServiceTypeId > 0 ? _medicalServiceTypeId : null,
                 items: types
                     .map((t) => DropdownMenuItem(
                           value: t.id,
@@ -62,7 +62,7 @@ class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
                     .toList(),
                 onChanged: types.isEmpty
                     ? null
-                    : (v) => setState(() => _typeId = v!),
+                    : (v) => setState(() => _medicalServiceTypeId = v!),
                 decoration: InputDecoration(
                   labelText: 'Service Type',
                   hintText: types.isEmpty ? 'Loading types…' : null,
@@ -70,22 +70,22 @@ class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
                 validator: (v) => v == null || v == 0 ? 'Required' : null,
               ),
               TextFormField(
-                initialValue: _name,
+                initialValue: _medicalServiceName,
                 decoration: const InputDecoration(labelText: 'Name'),
-                onSaved: (v) => _name = v!.trim(),
+                onSaved: (v) => _medicalServiceName = v!.trim(),
                 validator: (v) => v == null || v.isEmpty ? 'Required' : null,
               ),
               TextFormField(
-                initialValue: '$_price',
+                initialValue: '$_medicalServicePrice',
                 decoration: const InputDecoration(labelText: 'Price'),
                 keyboardType: TextInputType.number,
-                onSaved: (v) => _price = int.tryParse(v!) ?? 0,
+                onSaved: (v) => _medicalServicePrice = int.tryParse(v!) ?? 0,
               ),
               TextFormField(
-                initialValue: '$_duration',
+                initialValue: '$_medicalServiceDuration',
                 decoration: const InputDecoration(labelText: 'Duration (min)'),
                 keyboardType: TextInputType.number,
-                onSaved: (v) => _duration = int.tryParse(v!) ?? 0,
+                onSaved: (v) => _medicalServiceDuration = int.tryParse(v!) ?? 0,
               ),
             ],
           ),
@@ -111,16 +111,16 @@ class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
             final newService = MedicalService(
               id: widget.service?.id ?? 0,
               medicId: 0, // backend will overwrite if needed
-              medicalServiceTypeId: _typeId,
-              name: _name,
-              price: _price,
-              durationMinutes: _duration,
+              medicalServiceTypeId: _medicalServiceTypeId,
+              name: _medicalServiceName,
+              price: _medicalServicePrice,
+              durationMinutes: _medicalServiceDuration,
             );
 
             if (widget.service == null) {
-              ctl.createMedicalService(newService);
+              medicalServiceController.createMedicalService(newService);
             } else {
-              ctl.updateMedicalService(newService);
+              medicalServiceController.updateMedicalService(newService);
             }
 
             Navigator.pop(context);
