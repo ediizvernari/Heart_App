@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:frontend/features/auth/presentation/screens/home_screen.dart';
 
+//TODO: Delete this file after replacing its calls with the AuthStore
 class SessionValidator {
   static Future<void> verifyToken(BuildContext context) async {
     const storage = FlutterSecureStorage();

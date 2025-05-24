@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/user_health_data/data/models/user_health_data_model.dart';
+import 'package:intl/intl.dart';
 
 class DialogUtils {
   static void showAlertDialog(BuildContext context, String title, String message) {
@@ -19,10 +21,10 @@ class DialogUtils {
 
   static Future<void> showHealthDataConfirmationDialog({
     required BuildContext context,
-    required Map<String, dynamic> healthData,
+    required UserHealthData healthData,
     required VoidCallback onConfirm,
   }) {
-    return showDialog (
+    return showDialog<void>(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
@@ -30,12 +32,32 @@ class DialogUtils {
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: healthData.entries.map((entry) {
-                return Padding(
+              children: [
+                Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2.0),
-                  child: Text("${entry.key}: ${entry.value}"),
-                );
-              }).toList(),
+                  child: Text("Date of Birth: ${DateFormat('dd/MM/yyyy').format(healthData.dateOfBirth)}"),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2.0),
+                  child: Text("Height (cm): ${healthData.heightCm}"),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2.0),
+                  child: Text("Weight (kg): ${healthData.weightKg}"),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2.0),
+                  child: Text("Systolic BP: ${healthData.systolicBloodPressure}"),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2.0),
+                  child: Text("Diastolic BP: ${healthData.diastolicBloodPressure}"),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2.0),
+                  child: Text("Cholesterol Level: ${healthData.cholesterolLevel}"),
+                ),
+              ],
             ),
           ),
           actions: [
@@ -45,7 +67,7 @@ class DialogUtils {
             ),
             ElevatedButton(
               child: const Text("Confirm & View Prediction Results"),
-              onPressed: () async {
+              onPressed: () {
                 Navigator.of(dialogContext).pop();
                 onConfirm();
               },

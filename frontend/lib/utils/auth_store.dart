@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../features/auth/presentation/screens/home_screen.dart';
-import '../views/screens/user_main_page.dart';
-import '../views/screens/medic_main_page.dart';
+import '../features/users/presentation/pages/user_main_page.dart';
+import '../features/medics/presentation/pages/medic_main_page.dart';
 
 class AuthStore {
   static const _storage = FlutterSecureStorage();

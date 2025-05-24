@@ -29,4 +29,14 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
     color: AppColors.primaryRed,
   );
+
+  static const TextStyle header = TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.bold,
+  );
+
+  static const TextStyle subheader = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+  );
 }

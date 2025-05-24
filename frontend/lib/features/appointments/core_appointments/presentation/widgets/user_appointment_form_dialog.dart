@@ -3,10 +3,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/models/appointment_model.dart';
-import '../../../../../models/medic.dart';
+import '../../../../medics/data/models/medic.dart';
 import '../controllers/user_appointments_controller.dart';
 import '../../../scheduling/presentation/medic_schedule_controller.dart';
-import '../../../../../controllers/user_controller.dart';
+import '../../../../users/presentation/controllers/user_controller.dart';
 import '../../../../medical_service/presentation/controllers/medical_service_controller.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_text_styles.dart';
@@ -35,7 +35,7 @@ class _UserAppointmentFormDialogState extends State<UserAppointmentFormDialog> {
     final medicalServiceController = context.read<MedicalServiceController>();
     final medicScheduleController = context.read<MedicScheduleController>();
 
-    await userController.fetchAssignedMedic();
+    await userController.getMyAssignedMedic();
     final medic = userController.assignedMedic;
     if (medic != null) {
       await medicalServiceController.getMedicalServicesForAssignedMedic(medic.id);

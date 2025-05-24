@@ -25,6 +25,7 @@ class APIConstants {
   //User Health Data
   static const fetchUserHealthDataForUserUrl = '$baseUrl/user_health_data/get_user_health_data_for_user';
   static const checkUserHasHealthDataUrl = '$baseUrl/user_health_data/user_has_health_data';
+  static const upsertUserHealthDataUrl = '$baseUrl/user_health_data/create_or_update_user_health_data';
   
 
   //Location
@@ -36,13 +37,15 @@ class APIConstants {
   static const getFilteredMedicsUrl = '$baseUrl/medics/filtered_medics';
   static const getAssignedPatientsUrl = '$baseUrl/medics/patients';
   static String getPatientHealthDataUrl(int userID) =>'$baseUrl/medics/patients/$userID/data';
-  static String fetchAllPatientMedicalRecordsUrl(int userID) => '$baseUrl/medics/patients/$userID/medical_records';
-  static String fetchLatestPatientMedicalRecordUrl(int userID) => '$baseUrl/medics/patients/$userID/medical_records/latest';
+  static String getAssignedUserAllMedicalRecordsUrl(int userID) => '$baseUrl/medics/patients/$userID/medical_records';
+  static String getAssignedUserLatestMedicalRecordUrl(int userID) => '$baseUrl/medics/patients/$userID/medical_records/latest';
 
 
   //User Medical Record
   static const getAllMedicalRecordsForUserUrl = '$baseUrl/user_medical_records/all';
   static const getLatestMedicalRecordForUserUrl = '$baseUrl/user_medical_records/latest';
+  static String getAllMedicalRecordsByUserIdUrl(int userId) => '$baseUrl/user_medical_record/all/$userId';
+  static String getLatestMedicalRecordByUserIdUrl(int userId) => '$baseUrl/user_medical_record/latest/$userId';
 
   //Medical Services
   static const getMedicalServicesTypesUrl = '$baseUrl/medical_service/medical_service_types';

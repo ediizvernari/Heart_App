@@ -11,6 +11,7 @@ class AuthValidator {
     if (formatError != null) return formatError;
 
     try {
+      //TODO: Replace the authService with the right class that calls this
       final available = await AuthService.isEmailAvailableForSignup(
         email,
         isMedic: isMedic,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../../controllers/user_controller.dart';
+import '../../../../users/presentation/controllers/user_controller.dart';
 import '../controllers/user_appointments_controller.dart';
 import '../../../scheduling/presentation/medic_schedule_controller.dart';
 import '../../../../medical_service/presentation/controllers/medical_service_controller.dart';

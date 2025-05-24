@@ -2,6 +2,7 @@ import 'dart:convert';
 import '../core/api_constants.dart';
 import 'api_client.dart';
 
+//TODO: Delete this file
 class AuthService {
   static Future<String?> loginUser(String email, String password) async {
     final response = await APIClient.post(

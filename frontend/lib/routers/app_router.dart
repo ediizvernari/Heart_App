@@ -3,10 +3,20 @@ import 'package:frontend/features/appointments/appointments_suggestions/data/rep
 import 'package:frontend/features/appointments/core_appointments/data/repositories/appointments_repository_impl.dart';
 import 'package:frontend/features/appointments/medic_availabilities/data/repositories/medic_availability_repository_impl.dart';
 import 'package:frontend/features/appointments/scheduling/data/repositories/schedule_repository_impl.dart';
+import 'package:frontend/features/cvd_prediction/data/repositories/cvd_prediction_repository_impl.dart';
+import 'package:frontend/features/cvd_prediction/presentation/controllers/cvd_prediction_controller.dart';
+import 'package:frontend/features/cvd_prediction/presentation/pages/client_cvd_prediction_results_page.dart';
+import 'package:frontend/features/location/data/repositories/location_repository_impl.dart';
+import 'package:frontend/features/location/presentation/controller/location_controller.dart';
 import 'package:frontend/features/medical_service/data/repositories/medical_service_repository_impl.dart';
+import 'package:frontend/features/medics/data/repositories/medic_repository_impl.dart';
+import 'package:frontend/features/medics/presentation/controllers/medic_filtering_controller.dart';
+import 'package:frontend/features/user_health_data/data/repositories/user_health_data_repository_impl.dart';
+import 'package:frontend/features/users/data/repositories/user_repository_impl.dart';
+import 'package:frontend/features/location/presentation/pages/find_medic_page.dart';
 import 'package:provider/provider.dart';
 
-import '../controllers/user_controller.dart';
+import '../features/users/presentation/controllers/user_controller.dart';
 import '../features/medical_service/presentation/controllers/medical_service_controller.dart';
 import '../features/appointments/scheduling/presentation/medic_schedule_controller.dart';
 import '../features/appointments/core_appointments/presentation/controllers/user_appointments_controller.dart';
@@ -14,8 +24,8 @@ import '../features/appointments/core_appointments/presentation/controllers/medi
 import '../features/appointments/appointments_suggestions/presentation/controllers/user_appointment_suggestion_controller.dart';
 import '../features/appointments/medic_availabilities/presentation/controllers/medic_availability_controller.dart';
 
-import 'package:frontend/views/screens/user_main_page.dart';
-import 'package:frontend/views/screens/medic_main_page.dart';
+import 'package:frontend/features/users/presentation/pages/user_main_page.dart';
+import 'package:frontend/features/medics/presentation/pages/medic_main_page.dart';
 import '../features/medical_service/presentation/pages/medical_services_page.dart';
 import '../features/appointments/core_appointments/presentation/screens/user_appointments_page.dart';
 import '../features/appointments/core_appointments/presentation/screens/medic_appointments_page.dart';
@@ -35,13 +45,14 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/user-appointments': (context) => MultiProvider(
         providers: [
           ChangeNotifierProvider<UserController>(
-            create: (_) {
-              final ctl = UserController();
-              ctl.checkHasMedic();
-              ctl.fetchAssignedMedic();
-              return ctl;
-            },
+            create: (_) =>
+              UserController(UserRepositoryImpl())
+                ..checkUserHasMedic()
+                ..getMyAssignmentStatus()
+                ..getMyAssignedMedic(),
+            child: const UserMainPage(),
           ),
+
           ChangeNotifierProvider<UserAppointmentsController>(
             create: (_) => UserAppointmentsController(AppointmentsRepositoryImpl()),
             child: const UserAppointmentsPage(),
@@ -108,6 +119,31 @@ final Map<String, WidgetBuilder> appRoutes = {
           return ctl;
         },
         child: const MedicAvailabilityPage(),
+      ),
+    
+    '/find-medic': (ctx) => MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => LocationController(LocationRepositoryImpl())
+            ..getAllCountriesWithMedics(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => MedicFilteringController(MedicRepositoryImpl()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => UserController(UserRepositoryImpl()),
+        ),
+      ],
+      child: const FindMedicPage(),
+      ),
+
+    '/prediction': (ctx) => ChangeNotifierProvider<CvdPredictionController>(
+        create: (_) {
+          final ctrl  = CvdPredictionController(UserHealthDataRepositoryImpl(), CvdPredictionRepositoryImpl());
+          ctrl.predictCvdProbability();  
+          return ctrl;
+        },
+        child: const CvdPredictionResultsPage(),
       ),
 
     '/user_home': (ctx) => const UserMainPage(),

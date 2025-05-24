@@ -1,11 +1,11 @@
-import '../services/user_service.dart';
+import 'package:frontend/features/users/presentation/controllers/user_controller.dart';
 
 class MedicAssignmentHandler {
-  final UserService _userService;
+  final UserController _userController;
 
-  MedicAssignmentHandler(this._userService);
+  MedicAssignmentHandler(this._userController);
 
   Future<void> assignMedic(int medicId) async {
-    await _userService.assignMedic(medicId);
+    await _userController.assignMedic(medicId);
   }
 }
