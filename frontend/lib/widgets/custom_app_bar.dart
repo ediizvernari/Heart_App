@@ -7,6 +7,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? logo;
   final VoidCallback? onBack;
   final List<Widget>? actions;
+  final Color iconColor;
 
   const CustomAppBar({
     Key? key,
@@ -14,6 +15,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.logo,
     this.onBack,
     this.actions,
+    this.iconColor = Colors.white,
   }) : super(key: key);
 
   @override
@@ -23,6 +25,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: AppColors.primaryRed,
+      iconTheme: IconThemeData(color: iconColor),
       elevation: 0,
       leading: onBack != null
           ? IconButton(
