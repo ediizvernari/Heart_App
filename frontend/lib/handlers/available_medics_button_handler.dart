@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import '../features/location/presentation/pages/find_medic_page.dart'; // Make sure the path matches your folder structure
 
 class AvailableMedicsButtonHandler {
-  static void navigateToFindMedicPage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const FindMedicPage()),
-    );
+  static Future<T?> navigateToFindMedicPage<T>(BuildContext context) {
+  // Return the Future from pushNamed so callers can await.
+    return Navigator.pushNamed<T>(context, '/find-medic');
   }
 }

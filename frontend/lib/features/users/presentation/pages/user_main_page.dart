@@ -1,169 +1,198 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../../../../utils/validators/session_validator.dart';
+import 'package:provider/provider.dart';
+import 'package:frontend/widgets/custom_app_bar.dart';
+import 'package:frontend/widgets/rounded_button.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../user_health_data/presentation/pages/client_personal_data_insertion_page.dart';
-import '../../../auth/presentation/screens/home_screen.dart';
 import 'package:frontend/handlers/client_cvd_prediction_button_handler.dart';
 import 'package:frontend/handlers/available_medics_button_handler.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_text_styles.dart';
+import '../controllers/user_controller.dart';
 
-//TODO: Change this to include a controller for better state management
 class UserMainPage extends StatefulWidget {
   const UserMainPage({Key? key}) : super(key: key);
 
   @override
-  State<UserMainPage> createState() => _UserMainPageState();
+  _UserMainPageState createState() => _UserMainPageState();
 }
 
 class _UserMainPageState extends State<UserMainPage> {
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  String? _token;
-
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await SessionValidator.verifyToken(context);
-      final storedToken = await _storage.read(key: 'auth_token');
-      setState(() => _token = storedToken);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UserController>().getMyAssignmentStatus();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final isWide = MediaQuery.of(context).size.width > 600;
-    final crossAxisCount = isWide ? 3 : 2;
+    final userController = context.watch<UserController>();
 
-    final menu = [
-      {
-        'icon': Icons.calendar_today,
-        'label': 'Appointments',
-        'onTap': (BuildContext ctx) => Navigator.pushNamed(ctx, '/user-appointments'),
-      },
-      {
-        'icon': Icons.event_note,
-        'label': 'Suggestions',
-        'onTap': (BuildContext ctx) => Navigator.pushNamed(ctx, '/user-suggestions'),
-      },
-      {
-        'icon': Icons.health_and_safety,
-        'label': 'Predict Risk of CVD',
-        'onTap': (BuildContext ctx) {
-          if (_token == null) return;
-          handleCvdPredictionButtonTap(ctx);
-        },
-      },
-      {
-        'icon': Icons.insert_chart,
-        'label': 'Data Insertion',
-        'onTap': (BuildContext ctx) => Navigator.push(
-          ctx,
-          MaterialPageRoute(builder: (_) => const ClientPersonalDataInsertionPage()),
+    if (userController.assignmentStatus == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final bool hasMedic = userController.assignmentStatus!.isAssignedToMedic;
+
+    final _MenuItem predictionItem = _MenuItem(
+      icon: Icons.health_and_safety,
+      label: 'Predict CVD Risk',
+      onTap: () => handleCvdPredictionButtonTap(context),
+    );
+    final List<_MenuItem> smallMenuItems = [
+      _MenuItem(
+        icon: Icons.insert_chart,
+        label: 'Data Insertion',
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ClientPersonalDataInsertionPage(),
+          ),
         ),
-      },
-      {
-        'icon': Icons.medical_services,
-        'label': 'Find a Medic',
-        'onTap': (BuildContext ctx) => AvailableMedicsButtonHandler.navigateToFindMedicPage(ctx),
-      },
+      ),
+      hasMedic
+          ? _MenuItem(
+              icon: Icons.medical_services,
+              label: 'Medic Operations',
+              onTap: () => Navigator.pushNamed(context, '/medic-interactions'),
+            )
+          : _MenuItem(
+              icon: Icons.search,
+              label: 'Find a Medic',
+              onTap: () async {
+                await AvailableMedicsButtonHandler.navigateToFindMedicPage(context);
+                await context.read<UserController>().getMyAssignmentStatus();
+              },
+            ),
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text(
-          'Welcome, Client',
-          style: AppTextStyles.welcomeHeader,
-        ),
-        backgroundColor: AppColors.primaryRed,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: GridView.builder(
-          itemCount: menu.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 1.1,
-          ),
-          itemBuilder: (ctx, i) {
-            final item = menu[i];
-            return GestureDetector(
-              onTap: () => (item['onTap'] as void Function(BuildContext))(ctx),
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 4,
-                color: AppColors.cardBackground,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      item['icon'] as IconData,
-                      size: 48,
-                      color: AppColors.iconColor,
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      item['label'] as String,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.buttonText,
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
+      appBar: const PreferredSize(
+        preferredSize: Size.fromHeight(80),
+        child: CustomAppBar(
+          title: 'Welcome!',
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(12),
-        child: SizedBox(
-          height: 50,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryRed,
-              foregroundColor: AppColors.cardBackground,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+      backgroundColor: AppColors.primaryRed,
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: smallMenuItems
+                        .map((item) => Expanded(
+                              child: AspectRatio(
+                                aspectRatio: 1,
+                                child: _ActionCard(
+                                  icon: item.icon,
+                                  label: item.label,
+                                  onTap: item.onTap,
+                                ),
+                              ),
+                            ))
+                        .toList(),
+                  ),
+                  const SizedBox(height: 16),
+                  AspectRatio(
+                    aspectRatio: 2,
+                    child: _ActionCard(
+                      icon: predictionItem.icon,
+                      label: predictionItem.label,
+                      onTap: predictionItem.onTap,
+                      isBig: true,
+                    ),
+                  ),
+                ],
               ),
             ),
-            onPressed: () => _handleLogout(context),
-            child: const Text(
-              'Logout',
-              style: AppTextStyles.buttonText,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: RoundedButton(
+              text: 'Log Out',
+              onPressed: () {
+                context.read<AuthController>().logout(context);
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/',
+                  (route) => false,
+                );
+              },
             ),
           ),
-        ),
+        ],
       ),
     );
   }
+}
 
-  void _handleLogout(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Logout', style: AppTextStyles.dialogTitle),
-        content: const Text('Are you sure you want to logout?', style: AppTextStyles.dialogContent),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: AppTextStyles.dialogButton),
+class _MenuItem {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _MenuItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+}
+
+class _ActionCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool isBig;
+
+  const _ActionCard({
+    Key? key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.isBig = false,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final Color iconColor = isBig ? AppColors.primaryRed : Colors.grey[700]!;
+    final Color textColor = isBig ? AppColors.primaryRed : Colors.black;
+    final double iconSize = isBig ? 64.0 : 48.0;
+    final double fontSize = isBig ? 18.0 : 14.0;
+
+    return Card(
+      color: AppColors.cardBackground,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      elevation: 4,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: iconSize, color: iconColor),
+              const SizedBox(height: 12),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w500,
+                  color: textColor,
+                ),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () async {
-              await _storage.delete(key: 'auth_token');
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const HomeScreen()),
-              );
-            },
-            child: const Text('Logout', style: AppTextStyles.dialogButton),
-          ),
-        ],
+        ),
       ),
     );
   }

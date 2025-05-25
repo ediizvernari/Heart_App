@@ -50,6 +50,7 @@ class UserController extends ChangeNotifier {
 
   Future<void> assignMedic(int id) async => _wrap(() async {
     await _userRepository.assignMedic(id);
+    _hasMedic = true;
     await getMyAssignmentStatus();
     await getMyAssignedMedic();
   });

@@ -12,8 +12,10 @@ import 'package:frontend/features/medical_service/data/repositories/medical_serv
 import 'package:frontend/features/medics/data/repositories/medic_repository_impl.dart';
 import 'package:frontend/features/medics/presentation/controllers/medic_filtering_controller.dart';
 import 'package:frontend/features/user_health_data/data/repositories/user_health_data_repository_impl.dart';
+import 'package:frontend/features/user_health_data/presentation/pages/client_personal_data_insertion_page.dart';
 import 'package:frontend/features/users/data/repositories/user_repository_impl.dart';
 import 'package:frontend/features/location/presentation/pages/find_medic_page.dart';
+import 'package:frontend/features/users/presentation/pages/medic_interactions_page.dart';
 import 'package:provider/provider.dart';
 
 import '../features/users/presentation/controllers/user_controller.dart';
@@ -130,9 +132,6 @@ final Map<String, WidgetBuilder> appRoutes = {
         ChangeNotifierProvider(
           create: (_) => MedicFilteringController(MedicRepositoryImpl()),
         ),
-        ChangeNotifierProvider(
-          create: (_) => UserController(UserRepositoryImpl()),
-        ),
       ],
       child: const FindMedicPage(),
       ),
@@ -148,4 +147,6 @@ final Map<String, WidgetBuilder> appRoutes = {
 
     '/user_home': (ctx) => const UserMainPage(),
     '/medic_home': (ctx) => const MedicMainPage(),
+    '/medic-interactions': (ctx) => const MedicInteractionsPage(),
+    '/user-health-data-insertion': (ctx) => const ClientPersonalDataInsertionPage(),
 };

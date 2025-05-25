@@ -162,6 +162,15 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  Future<void> logout(BuildContext context) async {
+    await AuthStore.clearToken();
+
+    _user = null;
+    notifyListeners();
+
+    Navigator.of(context).pushNamedAndRemoveUntil('/', (r) => false);
+  }
+
   Future<bool> checkEmailAvailability({ required bool isMedic }) {
     return _repository.isEmailAvailableForSignup(_email, isMedic);
   }
