@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/utils/validators/auth_validator.dart';
-import 'package:frontend/widgets/curved_header.dart';
 import 'package:frontend/widgets/rounded_button.dart';
 import 'package:frontend/core/constants/app_colors.dart';
 import 'package:frontend/features/auth/presentation/controllers/auth_controller.dart';
@@ -16,37 +16,36 @@ class SignupMedicScreen extends StatefulWidget {
 class _SignupMedicScreenState extends State<SignupMedicScreen> {
   int _step = 0;
 
-  final _firstNameCtrl       = TextEditingController();
-  final _lastNameCtrl        = TextEditingController();
-  final _emailCtrl           = TextEditingController();
-  final _passwordCtrl        = TextEditingController();
-  final _confirmPasswordCtrl = TextEditingController();
-  final _streetCtrl          = TextEditingController();
-  final _cityCtrl            = TextEditingController();
-  final _countryCtrl         = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _streetController = TextEditingController();
+  final _cityController = TextEditingController();
+  final _countryController = TextEditingController();
 
   @override
   void dispose() {
-    _firstNameCtrl.dispose();
-    _lastNameCtrl.dispose();
-    _emailCtrl.dispose();
-    _passwordCtrl.dispose();
-    _confirmPasswordCtrl.dispose();
-    _streetCtrl.dispose();
-    _cityCtrl.dispose();
-    _countryCtrl.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _streetController.dispose();
+    _cityController.dispose();
+    _countryController.dispose();
     super.dispose();
   }
 
   Future<void> _handleNext() async {
-    // Run the common signup validators first:
     final err = await AuthValidator.validateAllFieldsForSignUp(
-      email:           _emailCtrl.text.trim(),
-      password:        _passwordCtrl.text,
-      confirmPassword: _confirmPasswordCtrl.text,
-      firstName:       _firstNameCtrl.text.trim(),
-      lastName:        _lastNameCtrl.text.trim(),
-      isMedic:         true,
+      firstName: _firstNameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      confirmPassword: _confirmPasswordController.text,
+      isMedic: true,
     );
     if (!mounted) return;
     if (err != null) {
@@ -69,20 +68,19 @@ class _SignupMedicScreenState extends State<SignupMedicScreen> {
   }
 
   Future<void> _handleSignup() async {
-    // Finally, call the controller with all fields:
     final authCtrl = context.read<AuthController>()
-      ..email    = _emailCtrl.text.trim()
-      ..password = _passwordCtrl.text;
+      ..email = _emailController.text.trim()
+      ..password = _passwordController.text;
 
     await authCtrl.signup(
-      context:        context,
-      isMedic:        true,
-      firstName:      _firstNameCtrl.text.trim(),
-      lastName:       _lastNameCtrl.text.trim(),
-      confirmPassword:_confirmPasswordCtrl.text,
-      streetAddress:  _streetCtrl.text.trim(),
-      city:           _cityCtrl.text.trim(),
-      country:        _countryCtrl.text.trim(),
+      context: context,
+      isMedic: true,
+      firstName: _firstNameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      confirmPassword:_confirmPasswordController.text,
+      streetAddress: _streetController.text.trim(),
+      city: _cityController.text.trim(),
+      country: _countryController.text.trim(),
     );
   }
 
@@ -90,7 +88,6 @@ class _SignupMedicScreenState extends State<SignupMedicScreen> {
   Widget build(BuildContext context) {
     final authCtrl = context.watch<AuthController>();
 
-    // same login‐style popup for any controller.error
     if (authCtrl.error != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showDialog<void>(
@@ -115,22 +112,27 @@ class _SignupMedicScreenState extends State<SignupMedicScreen> {
     return Scaffold(
       backgroundColor: AppColors.primaryRed,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Column(
-            children: [
-              const CurvedHeader(title: 'Register Medic', showBack: true),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: AppColors.whiteOverlay,
-                  borderRadius: BorderRadius.circular(24),
+        child: Column(
+          children: [
+            const CustomAppBar(title: 'Create a medic account'),
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: FractionallySizedBox(
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: AppColors.whiteOverlay,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: _step == 0 ? _buildStep0() : _buildStep1(authCtrl),
+                    ),
+                  ),
                 ),
-                child: _step == 0 ? _buildStep0() : _buildStep1(authCtrl),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -138,18 +140,18 @@ class _SignupMedicScreenState extends State<SignupMedicScreen> {
 
   Widget _buildStep0() => Column(
     children: [
-      _field(_firstNameCtrl,       'First Name'),
+      _field(_firstNameController, 'First Name'),
       const SizedBox(height: 16),
-      _field(_lastNameCtrl,        'Last Name'),
+      _field(_lastNameController, 'Last Name'),
       const SizedBox(height: 16),
       Directionality(
         textDirection: TextDirection.ltr,
-        child: _field(_emailCtrl,   'Email', keyboard: TextInputType.emailAddress),
+        child: _field(_emailController, 'Email', keyboard: TextInputType.emailAddress),
       ),
       const SizedBox(height: 16),
-      _field(_passwordCtrl,        'Password', obscure: true),
+      _field(_passwordController, 'Password', obscure: true),
       const SizedBox(height: 16),
-      _field(_confirmPasswordCtrl, 'Confirm Password', obscure: true),
+      _field(_confirmPasswordController, 'Confirm Password', obscure: true),
       const SizedBox(height: 24),
       RoundedButton(text: 'Next', onPressed: _handleNext),
     ],
@@ -157,22 +159,31 @@ class _SignupMedicScreenState extends State<SignupMedicScreen> {
 
   Widget _buildStep1(dynamic authCtrl) => Column(
     children: [
-      _field(_streetCtrl,  'Street Address'),
+      _field(_streetController, 'Street Address'),
       const SizedBox(height: 16),
-      _field(_cityCtrl,    'City'),
+      _field(_cityController, 'City'),
       const SizedBox(height: 16),
-      _field(_countryCtrl, 'Country'),
+      _field(_countryController, 'Country'),
       const SizedBox(height: 24),
       Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          ElevatedButton(
-            onPressed: () => setState(() => _step = 0),
-            child: const Text('Back'),
+          Expanded(
+            flex: 1,
+            child: SizedBox(
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () => setState(() => _step = 0),
+                child: const Text('Back'),
+              ),
+            ),
           ),
-          authCtrl.isLoading
-            ? const CircularProgressIndicator()
-            : RoundedButton(text: 'Sign Up', onPressed: _handleSignup),
+          const SizedBox(width: 16),
+          Expanded(
+            flex: 2,
+            child: authCtrl.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : RoundedButton(text: 'Sign Up', onPressed: _handleSignup),
+          ),
         ],
       ),
     ],

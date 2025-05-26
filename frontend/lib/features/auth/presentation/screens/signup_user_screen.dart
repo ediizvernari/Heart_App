@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/utils/validators/auth_validator.dart';
-import 'package:frontend/widgets/curved_header.dart';
 import 'package:frontend/widgets/rounded_button.dart';
 import 'package:frontend/core/constants/app_colors.dart';
 import 'package:frontend/features/auth/presentation/controllers/auth_controller.dart';
@@ -14,29 +14,29 @@ class SignupUserScreen extends StatefulWidget {
 }
 
 class _SignupUserScreenState extends State<SignupUserScreen> {
-  final _firstNameCtrl = TextEditingController();
-  final _lastNameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
-  final _confirmPasswordCtrl = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
-    _firstNameCtrl.dispose();
-    _lastNameCtrl.dispose();
-    _emailCtrl.dispose();
-    _passwordCtrl.dispose();
-    _confirmPasswordCtrl.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
   Future<void> _handleSignup() async {
     final err = await AuthValidator.validateAllFieldsForSignUp(
-      email: _emailCtrl.text.trim(),
-      password: _passwordCtrl.text,
-      confirmPassword: _confirmPasswordCtrl.text,
-      firstName: _firstNameCtrl.text.trim(),
-      lastName: _lastNameCtrl.text.trim(),
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      confirmPassword: _confirmPasswordController.text,
+      firstName: _firstNameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
       isMedic: false,
     );
 
@@ -59,16 +59,16 @@ class _SignupUserScreenState extends State<SignupUserScreen> {
     }
 
     final authCtrl = context.read<AuthController>()
-      ..email = _emailCtrl.text.trim()
-      ..password = _passwordCtrl.text;
+      ..email = _emailController.text.trim()
+      ..password = _passwordController.text;
 
     await authCtrl.signup(
       context: context,
       isMedic: false,
-      email: _emailCtrl.text.trim(),
-      firstName:_firstNameCtrl.text.trim(),
-      lastName: _lastNameCtrl.text.trim(),
-      confirmPassword:_confirmPasswordCtrl.text,
+      email: _emailController.text.trim(),
+      firstName: _firstNameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      confirmPassword: _confirmPasswordController.text,
     );
   }
 
@@ -100,93 +100,95 @@ class _SignupUserScreenState extends State<SignupUserScreen> {
     return Scaffold(
       backgroundColor: AppColors.primaryRed,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Column(
-            children: [
-              const CurvedHeader(title: 'Create Account', showBack: true),
-              const SizedBox(height: 16),
+        child: Column(
+          children: [
+            const CustomAppBar(title: 'Create a user account'),
 
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: AppColors.whiteOverlay,    // same overlay as login
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _firstNameCtrl,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        labelText: 'First Name',
-                        labelStyle: TextStyle(color: Colors.white),
-                        border: OutlineInputBorder(),
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: FractionallySizedBox(
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: AppColors.whiteOverlay,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextField(
+                            controller: _firstNameController,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(
+                              labelText: 'First Name',
+                              labelStyle: TextStyle(color: Colors.white),
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: _lastNameController,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(
+                              labelText: 'Last Name',
+                              labelStyle: TextStyle(color: Colors.white),
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Directionality(
+                            textDirection: TextDirection.ltr,
+                            child: TextField(
+                              controller: _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: const InputDecoration(
+                                labelText: 'Email',
+                                labelStyle: TextStyle(color: Colors.white),
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: _passwordController,
+                            obscureText: true,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(
+                              labelText: 'Password',
+                              labelStyle: TextStyle(color: Colors.white),
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: _confirmPasswordController,
+                            obscureText: true,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(
+                              labelText: 'Confirm Password',
+                              labelStyle: TextStyle(color: Colors.white),
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          authCtrl.isLoading
+                              ? const CircularProgressIndicator()
+                              : RoundedButton(
+                                  text: 'Sign Up',
+                                  onPressed: _handleSignup,
+                                ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-
-                    TextField(
-                      controller: _lastNameCtrl,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        labelText: 'Last Name',
-                        labelStyle: TextStyle(color: Colors.white),
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    Directionality(
-                      textDirection: TextDirection.ltr,
-                      child: TextField(
-                        controller: _emailCtrl,
-                        keyboardType: TextInputType.emailAddress,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          labelStyle: TextStyle(color: Colors.white),
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    TextField(
-                      controller: _passwordCtrl,
-                      obscureText: true,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        labelText: 'Password',
-                        labelStyle: TextStyle(color: Colors.white),
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    TextField(
-                      controller: _confirmPasswordCtrl,
-                      obscureText: true,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        labelText: 'Confirm Password',
-                        labelStyle: TextStyle(color: Colors.white),
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    authCtrl.isLoading
-                      ? const CircularProgressIndicator()
-                      : RoundedButton(
-                          text: 'Sign Up',
-                          onPressed: _handleSignup,
-                        ),
-                  ],
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

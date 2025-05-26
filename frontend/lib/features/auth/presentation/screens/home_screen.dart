@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/widgets/curved_header.dart';
+import 'package:frontend/widgets/custom_app_bar.dart';
 import 'package:frontend/widgets/rounded_button.dart';
 import 'package:frontend/core/constants/app_colors.dart';
 import 'login_screen.dart';
@@ -15,7 +15,7 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: AppColors.primaryRed,
       body: Column(
         children: [
-          const CurvedHeader(),
+          const CustomAppBar(title: 'Welcome to the Health App!'),
 
           Expanded(
             child: Center(

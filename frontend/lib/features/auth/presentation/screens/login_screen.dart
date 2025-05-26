@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:frontend/widgets/curved_header.dart';
 import 'package:frontend/widgets/rounded_button.dart';
 import 'package:frontend/core/constants/app_colors.dart';
 
@@ -40,11 +40,8 @@ class LoginScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Column(
             children: [
-              const CurvedHeader(
-                title: 'Login to Your Account',
-                showBack: true,
-              ),
-              const SizedBox(height: 16),
+              const CustomAppBar(title: 'Login to your account'),
+              const SizedBox(height: 200),
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
