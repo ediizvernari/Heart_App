@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
-import 'package:frontend/utils/validators/auth_validator.dart';
 import 'package:frontend/widgets/rounded_button.dart';
 import 'package:frontend/core/constants/app_colors.dart';
 import 'package:frontend/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:frontend/features/auth/data/models/user_signup_request.dart';
 
 class SignupUserScreen extends StatefulWidget {
   const SignupUserScreen({Key? key}) : super(key: key);
@@ -31,43 +31,20 @@ class _SignupUserScreenState extends State<SignupUserScreen> {
   }
 
   Future<void> _handleSignup() async {
-    final err = await AuthValidator.validateAllFieldsForSignUp(
+    final userSignupDto = UserSignupRequest(
       email: _emailController.text.trim(),
       password: _passwordController.text,
-      confirmPassword: _confirmPasswordController.text,
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
-      isMedic: false,
     );
 
-    if (!mounted) return;
-    if (err != null) {
-      await showDialog<void>(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Error'),
-          content: Text(err),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
+    final authController = context.read<AuthController>()
+      ..email = userSignupDto.email
+      ..password = userSignupDto.password;
 
-    final authCtrl = context.read<AuthController>()
-      ..email = _emailController.text.trim()
-      ..password = _passwordController.text;
-
-    await authCtrl.signup(
+    await authController.signupUser(
       context: context,
-      isMedic: false,
-      email: _emailController.text.trim(),
-      firstName: _firstNameController.text.trim(),
-      lastName: _lastNameController.text.trim(),
+      userSignupDto: userSignupDto,
       confirmPassword: _confirmPasswordController.text,
     );
   }
@@ -103,12 +80,10 @@ class _SignupUserScreenState extends State<SignupUserScreen> {
         child: Column(
           children: [
             const CustomAppBar(title: 'Create a user account'),
-
             Expanded(
               child: Center(
                 child: SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: FractionallySizedBox(
                     child: Container(
                       padding: const EdgeInsets.all(24),
@@ -139,17 +114,14 @@ class _SignupUserScreenState extends State<SignupUserScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          Directionality(
-                            textDirection: TextDirection.ltr,
-                            child: TextField(
-                              controller: _emailController,
-                              keyboardType: TextInputType.emailAddress,
-                              style: const TextStyle(color: Colors.white),
-                              decoration: const InputDecoration(
-                                labelText: 'Email',
-                                labelStyle: TextStyle(color: Colors.white),
-                                border: OutlineInputBorder(),
-                              ),
+                          TextField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(
+                              labelText: 'Email',
+                              labelStyle: TextStyle(color: Colors.white),
+                              border: OutlineInputBorder(),
                             ),
                           ),
                           const SizedBox(height: 16),

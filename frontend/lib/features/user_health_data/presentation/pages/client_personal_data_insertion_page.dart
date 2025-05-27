@@ -3,20 +3,21 @@ import 'package:frontend/utils/validators/user_health_data_validator.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/constants/app_colors.dart';
-import 'package:frontend/widgets/curved_header.dart';
+import 'package:frontend/widgets/custom_app_bar.dart';       // ← use same header
 import 'package:frontend/widgets/rounded_button.dart';
 import '../../data/models/user_health_data_model.dart';
 import '../../presentation/controllers/user_health_data_controller.dart';
 
-//TODO: Split some contents of this file into the widgets
 class ClientPersonalDataInsertionPage extends StatefulWidget {
   const ClientPersonalDataInsertionPage({super.key});
 
   @override
-  ClientPersonalDataInsertionPageState createState() => ClientPersonalDataInsertionPageState();
+  ClientPersonalDataInsertionPageState createState() =>
+      ClientPersonalDataInsertionPageState();
 }
 
-class ClientPersonalDataInsertionPageState extends State<ClientPersonalDataInsertionPage> {
+class ClientPersonalDataInsertionPageState
+    extends State<ClientPersonalDataInsertionPage> {
   final TextEditingController _birthDateController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
@@ -44,9 +45,7 @@ class ClientPersonalDataInsertionPageState extends State<ClientPersonalDataInser
           content: Text(message),
           actions: <Widget>[
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
               child: const Text('OK'),
             ),
           ],
@@ -79,9 +78,11 @@ class ClientPersonalDataInsertionPageState extends State<ClientPersonalDataInser
       cholesterolLevel: _cholesterolLevel!,
     );
 
-    final userHealthDataController = context.read<UserHealthDataController>();
+    final userHealthDataController =
+        context.read<UserHealthDataController>();
     await userHealthDataController.upsertUserHealthData(userHealthDataDto);
-    if(userHealthDataController.error != null) {
+
+    if (userHealthDataController.error != null) {
       _showErrorPopup(userHealthDataController.error!);
       return;
     }
@@ -103,12 +104,20 @@ class ClientPersonalDataInsertionPageState extends State<ClientPersonalDataInser
 
     return Scaffold(
       backgroundColor: AppColors.primaryRed,
+
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
+        child: CustomAppBar(
+          title: 'Enter Health Data',
+          onBack: () => Navigator.pop(context),
+        ),
+      ),
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Column(
             children: [
-              const CurvedHeader(title: 'Enter Health Data', showBack: true),
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(24),
@@ -121,9 +130,11 @@ class ClientPersonalDataInsertionPageState extends State<ClientPersonalDataInser
                     // Birth Date
                     TextField(
                       controller: _birthDateController,
+                      style: const TextStyle(color: Colors.white),
                       decoration: const InputDecoration(
                         labelText: 'Birth Date',
                         border: OutlineInputBorder(),
+                        labelStyle: TextStyle(color: Colors.white),
                       ),
                       readOnly: true,
                       onTap: () async {
@@ -135,7 +146,8 @@ class ClientPersonalDataInsertionPageState extends State<ClientPersonalDataInser
                         );
                         if (picked != null) {
                           _pickedDate = picked;
-                          _birthDateController.text = DateFormat('dd/MM/yyyy').format(picked);
+                          _birthDateController.text =
+                              DateFormat('dd/MM/yyyy').format(picked);
                         }
                       },
                     ),
@@ -145,9 +157,11 @@ class ClientPersonalDataInsertionPageState extends State<ClientPersonalDataInser
                     TextField(
                       controller: _heightController,
                       keyboardType: TextInputType.number,
+                      style: const TextStyle(color: Colors.white),
                       decoration: const InputDecoration(
                         labelText: 'Height (cm)',
-                        border: OutlineInputBorder(),
+                        labelStyle: TextStyle(color: Colors.white),
+                        border: OutlineInputBorder(),  
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -156,8 +170,10 @@ class ClientPersonalDataInsertionPageState extends State<ClientPersonalDataInser
                     TextField(
                       controller: _weightController,
                       keyboardType: TextInputType.number,
+                      style: const TextStyle(color: Colors.white),
                       decoration: const InputDecoration(
                         labelText: 'Weight (kg)',
+                        labelStyle: TextStyle(color: Colors.white),
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -167,8 +183,10 @@ class ClientPersonalDataInsertionPageState extends State<ClientPersonalDataInser
                     TextField(
                       controller: _systolicBPController,
                       keyboardType: TextInputType.number,
+                      style: const TextStyle(color: Colors.white),
                       decoration: const InputDecoration(
                         labelText: 'Systolic BP (mmHg)',
+                        labelStyle: TextStyle(color: Colors.white),
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -178,8 +196,10 @@ class ClientPersonalDataInsertionPageState extends State<ClientPersonalDataInser
                     TextField(
                       controller: _diastolicBPController,
                       keyboardType: TextInputType.number,
+                      style: const TextStyle(color: Colors.white),
                       decoration: const InputDecoration(
                         labelText: 'Diastolic BP (mmHg)',
+                        labelStyle: TextStyle(color: Colors.white),
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -188,14 +208,18 @@ class ClientPersonalDataInsertionPageState extends State<ClientPersonalDataInser
                     // Cholesterol
                     DropdownButtonFormField<int>(
                       value: _cholesterolLevel,
+                      dropdownColor: AppColors.primaryRed,
                       decoration: const InputDecoration(
                         labelText: 'Cholesterol Level',
                         border: OutlineInputBorder(),
+                        labelStyle: TextStyle(color: Colors.white),
                       ),
+                      style: const TextStyle(color: AppColors.primaryRed),
                       items: const [
-                        DropdownMenuItem(value: 1, child: Text('Normal')),
-                        DropdownMenuItem(value: 2, child: Text('Above Normal')),
-                        DropdownMenuItem(value: 3, child: Text('Way Above Normal')),
+                        DropdownMenuItem(value: 1, child: Text('Normal', style: TextStyle(color: Colors.white))),
+                        DropdownMenuItem(value: 2, child: Text('Above Normal', style: TextStyle(color: Colors.white))),
+                        DropdownMenuItem(
+                            value: 3, child: Text('Way Above Normal', style: TextStyle(color: Colors.white))),
                       ],
                       onChanged: (v) => setState(() => _cholesterolLevel = v),
                     ),
@@ -204,7 +228,7 @@ class ClientPersonalDataInsertionPageState extends State<ClientPersonalDataInser
                     healthCtrl.isLoading
                         ? const CircularProgressIndicator()
                         : RoundedButton(
-                            text: 'Submit Data',
+                            text: 'Submit Health Data',
                             onPressed: _submitUserHealthData,
                           ),
                   ],

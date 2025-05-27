@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-import '../../../../core/constants/app_colors.dart';
-import '../../../../utils/validators/session_validator.dart';
-import '../../../auth/presentation/screens/home_screen.dart';
+import 'package:frontend/features/auth/presentation/screens/home_screen.dart';
+import 'package:frontend/widgets/custom_app_bar.dart';
+import 'package:frontend/widgets/action_card.dart';
+import 'package:frontend/widgets/rounded_button.dart';
+import 'package:frontend/core/constants/app_colors.dart';
 import 'medic_patients_page.dart';
 
 class MedicMainPage extends StatefulWidget {
-  const MedicMainPage({super.key});
+  const MedicMainPage({Key? key}) : super(key: key);
 
   @override
   State<MedicMainPage> createState() => _MedicMainPageState();
@@ -15,14 +16,21 @@ class MedicMainPage extends StatefulWidget {
 
 class _MedicMainPageState extends State<MedicMainPage> {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  bool _loadingToken = true;
+  bool _checkingAuth = true;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await SessionValidator.verifyToken(context);
-      setState(() => _loadingToken = false);
+      final token = await _storage.read(key: 'auth_token');
+      if (token == null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+        return;
+      }
+      setState(() => _checkingAuth = false);
     });
   }
 
@@ -30,8 +38,8 @@ class _MedicMainPageState extends State<MedicMainPage> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        title: const Text('Log Out'),
+        content: const Text('Are you sure you want to log out?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           TextButton(
@@ -42,7 +50,7 @@ class _MedicMainPageState extends State<MedicMainPage> {
                 MaterialPageRoute(builder: (_) => const HomeScreen()),
               );
             },
-            child: const Text('Logout'),
+            child: const Text('Log Out'),
           ),
         ],
       ),
@@ -51,70 +59,95 @@ class _MedicMainPageState extends State<MedicMainPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loadingToken) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (_checkingAuth) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
     return Scaffold(
-      backgroundColor: AppColors.softGrey,
-      appBar: AppBar(
-        title: const Text('Medic Dashboard'),
-        backgroundColor: AppColors.primaryRed,
-        actions: [IconButton(icon: const Icon(Icons.logout), onPressed: _handleLogout)],
+      appBar: const PreferredSize(
+        preferredSize: Size.fromHeight(80),
+        child: CustomAppBar(title: 'Welcome!'),
       ),
-      drawer: Drawer(
-        child: ListView(padding: EdgeInsets.zero, children: [
-          DrawerHeader(
-            decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-            child: Text(
-              'Menu',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white),
+      backgroundColor: AppColors.primaryRed,
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // First row: My Patients & My Services
+                  Row(
+                    children: [
+                      Expanded(
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: ActionCard(
+                            icon: Icons.people,
+                            label: 'My Patients',
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const MedicPatientsPage()),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: ActionCard(
+                            icon: Icons.medical_services,
+                            label: 'My Services',
+                            onTap: () => Navigator.pushNamed(context, '/medical-services'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Second row: My Appointments & My Availability
+                  Row(
+                    children: [
+                      Expanded(
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: ActionCard(
+                            icon: Icons.calendar_today,
+                            label: 'My Appointments',
+                            onTap: () => Navigator.pushNamed(context, '/medic-appointments'),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: ActionCard(
+                            icon: Icons.access_time,
+                            label: 'My Availability',
+                            onTap: () => Navigator.pushNamed(context, '/medic-availability'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.dashboard),
-            title: const Text('Dashboard'),
-            onTap: () => Navigator.pop(context),
+
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: RoundedButton(
+              text: 'Log Out',
+              onPressed: _handleLogout,
+            ),
           ),
-          ListTile(
-            leading: const Icon(Icons.people),
-            title: const Text('My Patients'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const MedicPatientsPage()),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.medical_services),
-            title: const Text('My Services'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/medical-services');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.calendar_today),
-            title: const Text('My Appointments'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/medic-appointments');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.schedule),
-            title: const Text('My Availability'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/medic-availability');
-            },
-          ),
-        ]),
-      ),
-      body: const Center(
-        child: Text('Hello, Medic!', style: TextStyle(fontSize: 24)),
+        ],
       ),
     );
   }

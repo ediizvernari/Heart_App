@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/utils/validators/auth_validator.dart';
 import 'package:frontend/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
-import 'package:frontend/utils/validators/auth_validator.dart';
 import 'package:frontend/widgets/rounded_button.dart';
 import 'package:frontend/core/constants/app_colors.dart';
 import 'package:frontend/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:frontend/features/auth/data/models/medic_signup_request.dart';
 
 class SignupMedicScreen extends StatefulWidget {
   const SignupMedicScreen({Key? key}) : super(key: key);
@@ -39,7 +40,7 @@ class _SignupMedicScreenState extends State<SignupMedicScreen> {
   }
 
   Future<void> _handleNext() async {
-    final err = await AuthValidator.validateAllFieldsForSignUp(
+    final signUpValidationError = await AuthValidator.validateAllFieldsForSignUp(
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
       email: _emailController.text.trim(),
@@ -48,12 +49,12 @@ class _SignupMedicScreenState extends State<SignupMedicScreen> {
       isMedic: true,
     );
     if (!mounted) return;
-    if (err != null) {
+    if (signUpValidationError != null) {
       await showDialog<void>(
         context: context,
         builder: (_) => AlertDialog(
           title: const Text('Error'),
-          content: Text(err),
+          content: Text(signUpValidationError),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -68,19 +69,24 @@ class _SignupMedicScreenState extends State<SignupMedicScreen> {
   }
 
   Future<void> _handleSignup() async {
-    final authCtrl = context.read<AuthController>()
-      ..email = _emailController.text.trim()
-      ..password = _passwordController.text;
-
-    await authCtrl.signup(
-      context: context,
-      isMedic: true,
+    final medicDto = MedicSignupRequest(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
-      confirmPassword:_confirmPasswordController.text,
       streetAddress: _streetController.text.trim(),
       city: _cityController.text.trim(),
       country: _countryController.text.trim(),
+    );
+
+    final authController = context.read<AuthController>()
+      ..email = medicDto.email
+      ..password = medicDto.password;
+
+    await authController.signupMedic(
+      context: context,
+      medicSignupDto: medicDto,
+      confirmPassword: _confirmPasswordController.text,
     );
   }
 
@@ -157,7 +163,7 @@ class _SignupMedicScreenState extends State<SignupMedicScreen> {
     ],
   );
 
-  Widget _buildStep1(dynamic authCtrl) => Column(
+  Widget _buildStep1(AuthController authCtrl) => Column(
     children: [
       _field(_streetController, 'Street Address'),
       const SizedBox(height: 16),
