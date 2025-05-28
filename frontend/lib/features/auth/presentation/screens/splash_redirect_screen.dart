@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/utils/auth_store.dart';
+import 'package:frontend/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:provider/provider.dart';
 
 class AutoCheck extends StatefulWidget {
   const AutoCheck({Key? key}) : super(key: key);
@@ -9,15 +10,13 @@ class AutoCheck extends StatefulWidget {
 }
 
 class _AutoCheckState extends State<AutoCheck> {
-  bool _hasRun = false;
-
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_hasRun) {
-      _hasRun = true;
-      AuthStore.ensureSession(context);
-    }
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authController = context.read<AuthController>();
+      authController.ensureSession(context);
+    });
   }
 
   @override

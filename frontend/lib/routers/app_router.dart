@@ -3,6 +3,7 @@ import 'package:frontend/features/appointments/appointments_suggestions/data/rep
 import 'package:frontend/features/appointments/core_appointments/data/repositories/appointments_repository_impl.dart';
 import 'package:frontend/features/appointments/medic_availabilities/data/repositories/medic_availability_repository_impl.dart';
 import 'package:frontend/features/appointments/scheduling/data/repositories/schedule_repository_impl.dart';
+import 'package:frontend/features/auth/presentation/screens/login_screen.dart';
 import 'package:frontend/features/cvd_prediction/data/repositories/cvd_prediction_repository_impl.dart';
 import 'package:frontend/features/cvd_prediction/presentation/controllers/cvd_prediction_controller.dart';
 import 'package:frontend/features/cvd_prediction/presentation/pages/client_cvd_prediction_results_page.dart';
@@ -35,6 +36,12 @@ import '../features/appointments/appointments_suggestions/presentation/screens/u
 import '../features/appointments/medic_availabilities/presentation/screens/medic_availability_page.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
+  '/user_home': (context) => const UserMainPage(),
+  
+  '/medic_home': (context) => const MedicMainPage(),
+
+  '/login': (context) => const LoginScreen(),
+
   '/medical-services': (context) => ChangeNotifierProvider<MedicalServiceController>(
         create: (_) {
           final medicalServiceController = MedicalServiceController(MedicalServiceRepositoryImpl());
@@ -93,7 +100,7 @@ final Map<String, WidgetBuilder> appRoutes = {
         child: const MedicAppointmentsPage(),
       ),
 
-  '/user-suggestions': (ctx) => MultiProvider(
+  '/user-suggestions': (context) => MultiProvider(
       providers: [
         ChangeNotifierProvider<MedicalServiceController>(
           create: (_) {
@@ -123,7 +130,7 @@ final Map<String, WidgetBuilder> appRoutes = {
         child: const MedicAvailabilityPage(),
       ),
     
-    '/find-medic': (ctx) => MultiProvider(
+    '/find-medic': (context) => MultiProvider(
       providers: [
         ChangeNotifierProvider(
           create: (_) => LocationController(LocationRepositoryImpl())
@@ -136,7 +143,7 @@ final Map<String, WidgetBuilder> appRoutes = {
       child: const FindMedicPage(),
       ),
 
-    '/prediction': (ctx) => ChangeNotifierProvider<CvdPredictionController>(
+    '/prediction': (context) => ChangeNotifierProvider<CvdPredictionController>(
         create: (_) {
           final ctrl  = CvdPredictionController(UserHealthDataRepositoryImpl(), CvdPredictionRepositoryImpl());
           ctrl.predictCvdProbability();  
@@ -145,8 +152,6 @@ final Map<String, WidgetBuilder> appRoutes = {
         child: const CvdPredictionResultsPage(),
       ),
 
-    '/user_home': (ctx) => const UserMainPage(),
-    '/medic_home': (ctx) => const MedicMainPage(),
-    '/medic-interactions': (ctx) => const MedicInteractionsPage(),
-    '/user-health-data-insertion': (ctx) => const ClientPersonalDataInsertionPage(),
+    '/medic-interactions': (context) => const MedicInteractionsPage(),
+    '/user-health-data-insertion': (context) => const ClientPersonalDataInsertionPage(),
 };

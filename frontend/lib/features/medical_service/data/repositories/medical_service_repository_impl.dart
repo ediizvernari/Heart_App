@@ -3,7 +3,6 @@ import 'package:frontend/features/medical_service/data/models/medical_service.da
 import 'package:frontend/features/medical_service/data/models/medical_service_type.dart';
 import 'package:frontend/features/medical_service/data/repositories/medical_service_repository.dart';
 import 'package:frontend/services/api_exception.dart';
-import 'package:frontend/utils/auth_store.dart';
 
 class MedicalServiceRepositoryImpl implements MedicalServiceRepository {
   @override
@@ -17,11 +16,8 @@ class MedicalServiceRepositoryImpl implements MedicalServiceRepository {
 
   @override
   Future<List<MedicalService>> getMyMedicalServices() async {
-    final token = await AuthStore.getToken();
-    if(token == null) throw ApiException(401, 'Missing auth token');
-
     try {
-      return await MedicalServiceApi.getMyMedicalServices(token);
+      return await MedicalServiceApi.getMyMedicalServices();
     } on ApiException {
       rethrow;
     }
@@ -29,11 +25,8 @@ class MedicalServiceRepositoryImpl implements MedicalServiceRepository {
 
   @override
   Future<MedicalService> createMedicalService(MedicalService medicalService) async {
-    final token = await AuthStore.getToken();
-    if(token == null) throw ApiException(401, 'Missing auth token');
-
     try {
-      return await MedicalServiceApi.createMedicalService(token, medicalService);
+      return await MedicalServiceApi.createMedicalService(medicalService);
     } on ApiException {
       rethrow;
     }
@@ -41,11 +34,8 @@ class MedicalServiceRepositoryImpl implements MedicalServiceRepository {
 
   @override
   Future<MedicalService> updateMedicalService(MedicalService medicalService) async {
-    final token = await AuthStore.getToken();
-    if(token == null) throw ApiException(401, 'Missing auth token');
-
     try {
-      return await MedicalServiceApi.updateMedicalService(token, medicalService);
+      return await MedicalServiceApi.updateMedicalService(medicalService);
     } on ApiException {
       rethrow;
     }
@@ -53,11 +43,8 @@ class MedicalServiceRepositoryImpl implements MedicalServiceRepository {
 
   @override
   Future<void> deleteMedicalService(int medicalServiceId) async {
-    final token = await AuthStore.getToken();
-    if(token == null) throw ApiException(401, 'Missing auth token');
-
     try {
-      return await MedicalServiceApi.deleteMedicalService(token, medicalServiceId);
+      return await MedicalServiceApi.deleteMedicalService(medicalServiceId);
     } on ApiException {
       rethrow;
     }

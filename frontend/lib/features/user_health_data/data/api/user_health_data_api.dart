@@ -1,58 +1,57 @@
-import 'dart:convert';
-import 'package:frontend/features/user_health_data/data/models/user_health_data_model.dart';
+import 'package:dio/dio.dart';
 import 'package:frontend/services/api_exception.dart';
-
-import '../../../../services/api_client.dart';
-import '../../../../core/api_constants.dart';
+import 'package:frontend/core/api_constants.dart';
+import 'package:frontend/core/network/api_client.dart';
+import '../models/user_health_data_model.dart';
 
 class UserHealthDataApi {
-  static Future<bool> checkUserHasHealthData(String token) async {
-    final response = await APIClient.get(
-      APIConstants.checkUserHasHealthDataUrl,
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
-    );
+  static Future<bool> checkUserHasHealthData() async {
+    try {
+      final Response<dynamic> response = await ApiClient.get<dynamic>(APIConstants.checkUserHasHealthDataUrl);
 
-    if (response.statusCode == 200) {
-      return response.body == 'true';
-    } else {
-      throw ApiException(response.statusCode, response.body);
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data;
+        if (data is bool) return data;
+        if (data is String) return data.toLowerCase() == 'true';
+      }
+
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to check user health data existence.');
+    } on DioException catch (dioError) {
+      final statusCode = dioError.response?.statusCode ?? -1;
+      final message = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, message!);
     }
   }
 
-  static Future<UserHealthData> upsertUserHealthData(String token, UserHealthData dto) async {
-    final response = await APIClient.post(
-      APIConstants.upsertUserHealthDataUrl,
-      dto.toJsonForCreate(),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
+  static Future<UserHealthData> upsertUserHealthData(UserHealthData dto) async {
+    try {
+      final Response<Map<String, dynamic>> response = await ApiClient.post<Map<String, dynamic>>(APIConstants.upsertUserHealthDataUrl, dto.toJsonForCreate());
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonData = jsonDecode(response.body) as Map<String, dynamic>;
-      return UserHealthData.fromJson(jsonData);
-    } else {
-      throw ApiException(response.statusCode, response.body);
+      if (response.statusCode == 200 && response.data != null) {
+        return UserHealthData.fromJson(response.data!);
+      }
+
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to upsert user health data.');
+    } on DioException catch (dioError) {
+      final statusCode = dioError.response?.statusCode ?? -1;
+      final message = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, message!);
     }
   }
 
-  static Future<UserHealthData> getUserHealthDataForPrediction(String token) async {
-    final response = await APIClient.get(
-      APIConstants.fetchUserHealthDataForUserUrl,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
+  static Future<UserHealthData> getUserHealthDataForPrediction() async {
+    try {
+      final Response<Map<String, dynamic>> response = await ApiClient.get<Map<String, dynamic>>(APIConstants.fetchUserHealthDataForUserUrl);
 
-    if (response.statusCode == 200) {
-      final jsonData = jsonDecode(response.body);
-      return UserHealthData.fromJson(jsonData);
-    } else {
-      throw ApiException(response.statusCode, response.body);
+      if (response.statusCode == 200 && response.data != null) {
+        return UserHealthData.fromJson(response.data!);
+      }
+
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to fetch user health data for prediction.');
+    } on DioException catch (dioError) {
+      final statusCode = dioError.response?.statusCode ?? -1;
+      final message = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, message!);
     }
   }
 }

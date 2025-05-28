@@ -1,69 +1,77 @@
-import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:frontend/services/api_exception.dart';
-import '../../../../../core/api_constants.dart';
+import 'package:frontend/core/api_constants.dart';
 import '../models/appointment_suggestion_model.dart';
-import '../../../../../services/api_client.dart';
+import 'package:frontend/core/network/api_client.dart';
 
 class AppointmentSuggestionApi {
-  static Future<List<AppointmentSuggestion>> getMyAppointmentSuggestions(String token) async {
-    final resp = await APIClient.get(
-      APIConstants.getAllUsersSuggestionsUrl,
-      headers: _authHeaders(token),
-    );
-    if (resp.statusCode != 200) throw ApiException(resp.statusCode, resp.body);
-    return (jsonDecode(resp.body) as List)
-        .map((e) => AppointmentSuggestion.fromJson(e))
-        .toList();
-  }
+  static Future<List<AppointmentSuggestion>> getMyAppointmentSuggestions() async {
+    try {
+      final Response<List<dynamic>> response = await ApiClient.get<List<dynamic>>(APIConstants.getAllUsersSuggestionsUrl);
 
-  static Future<List<AppointmentSuggestion>> getMedicAppointmentSuggestions(String token) async {
-    final resp = await APIClient.get(
-      APIConstants.getAllMedicSuggestionsUrl,
-      headers: _authHeaders(token),
-    );
-    if (resp.statusCode != 200) throw ApiException(resp.statusCode, resp.body);
-    return (jsonDecode(resp.body) as List)
-        .map((e) => AppointmentSuggestion.fromJson(e))
-        .toList();
-  }
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data!
+            .map((e) => AppointmentSuggestion.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
 
-  static Future<AppointmentSuggestion> createAppointmentSuggestion(
-    String token,
-    AppointmentSuggestion appointmentSuggestion,
-  ) async {
-    final resp = await APIClient.post(
-      APIConstants.appointmentSuggestionForUser(appointmentSuggestion.userId),
-      appointmentSuggestion.toJsonForCreate(),
-      headers: _authHeaders(token),
-    );
-    if (resp.statusCode != 200 && resp.statusCode != 201) {
-      throw ApiException(resp.statusCode, resp.body);
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to load appointment suggestions.');
+    } on DioException catch (dioError) {
+      final int statusCode = dioError.response?.statusCode ?? -1;
+      final String? errorMessage = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, errorMessage!);
     }
-    return AppointmentSuggestion.fromJson(jsonDecode(resp.body));
   }
 
-  static Future<AppointmentSuggestion> updateAppointmentSuggestionStatus(
-    String token,
-    int id,
-    String newStatus,
-  ) async {
-    final url = APIConstants.changeAppointmentSuggestionStatusUrl(id, newStatus);
+  static Future<List<AppointmentSuggestion>> getMedicAppointmentSuggestions() async {
+    try {
+      final Response<List<dynamic>> response = await ApiClient.get<List<dynamic>>(APIConstants.getAllMedicSuggestionsUrl);
 
-    final resp = await APIClient.patch(
-      url,
-      {},
-      headers: _authHeaders(token),
-    );
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data!
+            .map((e) => AppointmentSuggestion.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
 
-    if (resp.statusCode != 200) {
-      throw ApiException(resp.statusCode, resp.body);
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to load medic appointment suggestions.');
+    } on DioException catch (dioError) {
+      final int statusCode = dioError.response?.statusCode ?? -1;
+      final String? errorMessage = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, errorMessage!);
     }
-    return AppointmentSuggestion.fromJson(jsonDecode(resp.body));
   }
 
-  //TODO: Use this as an example for the rest of the api's
-  static Map<String, String> _authHeaders(String token) => {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      };
+  static Future<AppointmentSuggestion> createAppointmentSuggestion(AppointmentSuggestion suggestion) async {
+    try {
+      final Response<Map<String, dynamic>> response = await ApiClient.post<Map<String, dynamic>>(APIConstants.appointmentSuggestionForUser(suggestion.userId), suggestion.toJsonForCreate());
+
+      if ((response.statusCode == 200 || response.statusCode == 201) && response.data != null) {
+        return AppointmentSuggestion.fromJson(response.data!);
+      }
+
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to create appointment suggestion.');
+    } on DioException catch (dioError) {
+      final int statusCode = dioError.response?.statusCode ?? -1;
+      final String? errorMessage = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, errorMessage!);
+    }
+  }
+
+  static Future<AppointmentSuggestion> updateAppointmentSuggestionStatus(int suggestionId, String newStatus) async {
+    final String url = APIConstants.changeAppointmentSuggestionStatusUrl(suggestionId, newStatus);
+
+    try {
+      final Response<Map<String, dynamic>> response = await ApiClient.patch<Map<String, dynamic>>(url, {});
+
+      if (response.statusCode == 200 && response.data != null) {
+        return AppointmentSuggestion.fromJson(response.data!);
+      }
+
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to update appointment suggestion status.');
+    } on DioException catch (dioError) {
+      final int statusCode = dioError.response?.statusCode ?? -1;
+      final String? errorMessage = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, errorMessage!);
+    }
+  }
 }

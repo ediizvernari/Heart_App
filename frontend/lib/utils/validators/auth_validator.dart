@@ -1,9 +1,8 @@
 import 'dart:convert';
 
+import 'package:frontend/features/auth/data/api/auth_api.dart';
 import 'package:frontend/services/api_exception.dart';
-
 import 'auth_form_validator.dart';
-import '../../services/auth_service.dart';
 
 class AuthValidator {
   static Future<String?> validateEmail(String email, {required bool isMedic}) async {
@@ -11,10 +10,9 @@ class AuthValidator {
     if (formatError != null) return formatError;
 
     try {
-      //TODO: Replace the authService with the right class that calls this
-      final available = await AuthService.isEmailAvailableForSignup(
+      final available = await AuthApi.isEmailAvailableForSignup(
         email,
-        isMedic: isMedic,
+        isMedic,
       );
       if (!available) {
         return 'Email already registered';

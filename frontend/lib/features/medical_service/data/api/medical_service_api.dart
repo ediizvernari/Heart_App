@@ -1,93 +1,110 @@
-import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:frontend/services/api_exception.dart';
-
-import '../../../../core/api_constants.dart';
-import '../../../../services/api_client.dart';
+import 'package:frontend/core/api_constants.dart';
+import 'package:frontend/core/network/api_client.dart';
 import '../models/medical_service.dart';
 import '../models/medical_service_type.dart';
 
-class MedicalServiceApi{
-  //Used by the medics
+class MedicalServiceApi {
   static Future<List<MedicalServiceType>> getAllMedicalServiceTypes() async {
-    final response = await APIClient.get(APIConstants.getMedicalServicesTypesUrl);
+    try {
+      final Response<List<dynamic>> response = await ApiClient.get<List<dynamic>>(APIConstants.getMedicalServicesTypesUrl, options: Options(extra: {'noAuth': true}));
 
-    if (response.statusCode != 200) {
-      throw Exception('Failed to load medical service types');
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data!
+            .map((e) => MedicalServiceType.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to load medical service types.');
+    } on DioException catch (dioError) {
+      final int statusCode = dioError.response?.statusCode ?? -1;
+      final String? errorMsg = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, errorMsg!);
     }
-
-    final List data = jsonDecode(response.body);
-    return data
-    .map((e) => MedicalServiceType.fromJson(e))
-    .toList();
   }
 
-  static Future<List<MedicalService>> getMyMedicalServices(String? token) async {
-    final headers = {'Authorization': 'Bearer $token'};
-    final response = await APIClient.get(APIConstants.getMedicalServicesUrl, headers: headers);
+  static Future<List<MedicalService>> getMyMedicalServices() async {
+    try {
+      final Response<List<dynamic>> response = await ApiClient.get<List<dynamic>>(APIConstants.getMedicalServicesUrl);
 
-    if (response.statusCode != 200){
-      throw Exception('Failed to load medical services');
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data!
+            .map((e) => MedicalService.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to load your medical services.');
+    } on DioException catch (dioError) {
+      final int statusCode = dioError.response?.statusCode ?? -1;
+      final String? errorMsg = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, errorMsg!);
     }
-    final List data = jsonDecode(response.body);
-    return data
-    .map((e) => MedicalService.fromJson(e))
-    .toList();
   }
 
-  static Future<MedicalService> createMedicalService(String token, MedicalService medicalService) async {
-    const url = APIConstants.createMedicalServiceUrl;
-    //TODO: Change this according to the appointments api variant
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
+  static Future<MedicalService> createMedicalService(MedicalService service) async {
+    try {
+      final Response<Map<String, dynamic>> response = await ApiClient.post<Map<String, dynamic>>(APIConstants.createMedicalServiceUrl, service.toJsonForCreate());
 
-    final payload = medicalService.toJsonForCreate();
-    final response = await APIClient.post(url, payload, headers: headers);
+      if (response.statusCode == 201 && response.data != null) {
+        return MedicalService.fromJson(response.data!);
+      }
 
-   if (response.statusCode != 201) {
-      throw ApiException(response.statusCode, response.body);  
-    } 
-
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
-    return MedicalService.fromJson(json);
-  }
-
-  static Future<MedicalService> updateMedicalService(String? token, MedicalService medicalService) async {
-    final headers = {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json'
-    };
-
-    final url = APIConstants.updateMedicalServiceUrl(medicalService.id);
-    final response = await APIClient.patch(url, medicalService.toJsonForCreate(), headers: headers);
-
-    if (response.statusCode != 200) {
-      throw throw ApiException(response.statusCode, response.body);
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to create medical service.');
+    } on DioException catch (dioError) {
+      final int statusCode = dioError.response?.statusCode ?? -1;
+      final String? errorMsg = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, errorMsg!);
     }
-
-    return MedicalService.fromJson(jsonDecode(response.body));
   }
 
-  static Future<void> deleteMedicalService(String? token, int medicalServiceId) async {
-    final headers = {'Authorization': 'Bearer $token'};
-    final url = APIConstants.deleteMedicalServiceUrl(medicalServiceId);
-    final response = await APIClient.delete(url, null, headers: headers);
+  static Future<MedicalService> updateMedicalService(MedicalService service) async {
+    final url = APIConstants.updateMedicalServiceUrl(service.id);
+    try {
+      final Response<Map<String, dynamic>> response = await ApiClient.patch<Map<String, dynamic>>(url, service.toJsonForCreate());
 
-    if(response.statusCode != 200) {
-      throw ApiException(response.statusCode, response.body);
+      if (response.statusCode == 200 && response.data != null) {
+        return MedicalService.fromJson(response.data!);
+      }
+
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to update medical service.');
+    } on DioException catch (dioError) {
+      final int statusCode = dioError.response?.statusCode ?? -1;
+      final String? errorMsg = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, errorMsg!);
+    }
+  }
+
+  static Future<void> deleteMedicalService(int serviceId) async {
+    final url = APIConstants.deleteMedicalServiceUrl(serviceId);
+    try {
+      final Response<void> response = await ApiClient.delete<void>(url);
+
+      if (response.statusCode == 200) return;
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to delete medical service.');
+    } on DioException catch (dioError) {
+      final int statusCode = dioError.response?.statusCode ?? -1;
+      final String? errorMsg = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, errorMsg!);
     }
   }
 
   static Future<List<MedicalService>> getMedicalServicesByMedicId(int medicId) async {
     final url = APIConstants.getMedicalServicesByMedicIdUrl(medicId);
-    final response = await APIClient.get(url);
+    try {
+      final Response<List<dynamic>> response = await ApiClient.get<List<dynamic>>(url, options: Options(extra: {'noAuth': true}));
 
-    if (response.statusCode != 200) {
-      throw Exception('Failed to load services for medic $medicId');
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data!
+            .map((e) => MedicalService.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to load services for medic $medicId.');
+    } on DioException catch (dioError) {
+      final int statusCode = dioError.response?.statusCode ?? -1;
+      final String? errorMsg = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, errorMsg!);
     }
-
-    final List data = jsonDecode(response.body);
-    return data.map((e) => MedicalService.fromJson(e)).toList();
   }
 }

@@ -1,64 +1,77 @@
-import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:frontend/services/api_exception.dart';
-import '../../../../core/api_constants.dart';
-import '../../../../services/api_client.dart';
+import 'package:frontend/core/api_constants.dart';
+import 'package:frontend/core/network/api_client.dart';
 import '../models/user_medical_record.dart';
 
 class UserMedicalRecordApi {
-  static Map<String, String> _authHeaders(String token) => {
-    'Authorization': 'Bearer $token',
-    'Content-Type': 'application/json',
-  };
+  static Future<List<UserMedicalRecord>> getAllMedicalRecordsForUser() async {
+    try {
+      final Response<List<dynamic>> response = await ApiClient.get<List<dynamic>>(APIConstants.getAllMedicalRecordsForUserUrl);
 
-  // Used by the medic
-  static Future<List<UserMedicalRecord>> getAllMedicalRecordsForUser(String token) async {
-    final response = await APIClient.get(
-      APIConstants.getAllMedicalRecordsForUserUrl,
-      headers: _authHeaders(token),
-    );
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data!
+            .map((e) => UserMedicalRecord.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
 
-    if (response.statusCode != 200) {
-      throw ApiException(response.statusCode, response.body);
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to load your medical records.');
+    } on DioException catch (dioError) {
+      final statusCode = dioError.response?.statusCode ?? -1;
+      final message = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, message!);
     }
-
-    final list = jsonDecode(response.body) as List;
-    return list.map((e) => UserMedicalRecord.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  static Future<UserMedicalRecord> getLatestUserMedicalRecord(String token) async {
-    final response = await APIClient.get(
-      APIConstants.getLatestMedicalRecordForUserUrl,
-      headers: _authHeaders(token),
-    );
+  static Future<UserMedicalRecord> getLatestUserMedicalRecord() async {
+    try {
+      final Response<Map<String, dynamic>> response = await ApiClient.get<Map<String, dynamic>>(APIConstants.getLatestMedicalRecordForUserUrl);
 
-    if (response.statusCode != 200) {
-      throw throw ApiException(response.statusCode, response.body);
+      if (response.statusCode == 200 && response.data != null) {
+        return UserMedicalRecord.fromJson(response.data!);
+      }
+
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to load latest medical record.');
+    } on DioException catch (dioError) {
+      final statusCode = dioError.response?.statusCode ?? -1;
+      final message = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, message!);
     }
-    return UserMedicalRecord.fromJson(jsonDecode(response.body));
   }
 
-  // Used by the user
-  static Future<List<UserMedicalRecord>> getAllMedicalRecordsByUserId(String token, int userId) async {
-    final response = await APIClient.get(
-      APIConstants.getAllMedicalRecordsByUserIdUrl(userId),
-      headers: _authHeaders(token),
-    );
+  static Future<List<UserMedicalRecord>> getAllMedicalRecordsByUserId(int userId) async {
+    try {
+      final String url = APIConstants.getAllMedicalRecordsByUserIdUrl(userId);
+      final Response<List<dynamic>> response = await ApiClient.get<List<dynamic>>(url);
 
-    if (response.statusCode != 200) throw ApiException(response.statusCode, response.body);
-    return (jsonDecode(response.body) as List)
-        .map((e) => UserMedicalRecord.fromJson(e))
-        .toList();
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data!
+            .map((e) => UserMedicalRecord.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to load medical records for user $userId.');
+    } on DioException catch (dioError) {
+      final statusCode = dioError.response?.statusCode ?? -1;
+      final message = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, message!);
+    }
   }
 
-  static Future<UserMedicalRecord> getLatestMedicalRecordByUserId(String token, int userId) async {
-    final response = await APIClient.get(
-      APIConstants.getLatestMedicalRecordByUserIdUrl(userId),
-      headers: _authHeaders(token),
-    );
+  static Future<UserMedicalRecord> getLatestMedicalRecordByUserId(int userId) async {
+    try {
+      final String url = APIConstants.getLatestMedicalRecordByUserIdUrl(userId);
+      final Response<Map<String, dynamic>> response = await ApiClient.get<Map<String, dynamic>>(url);
 
-    if (response.statusCode != 200) {
-      throw ApiException(response.statusCode, response.body);
+      if (response.statusCode == 200 && response.data != null) {
+        return UserMedicalRecord.fromJson(response.data!);
+      }
+
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to load latest medical record for user $userId.');
+    } on DioException catch (dioError) {
+      final statusCode = dioError.response?.statusCode ?? -1;
+      final message = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, message!);
     }
-    return UserMedicalRecord.fromJson(jsonDecode(response.body));
   }
 }

@@ -33,6 +33,9 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
+final navigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
 void main() {
   HttpOverrides.global = MyHttpOverrides();
   runApp(
@@ -100,6 +103,8 @@ class HealthApp extends StatelessWidget {
         child: child!,
       ),
       routes: appRoutes,
+      navigatorKey: navigatorKey,
+      scaffoldMessengerKey: scaffoldMessengerKey,
       home: const AutoCheck(),
     );
   }

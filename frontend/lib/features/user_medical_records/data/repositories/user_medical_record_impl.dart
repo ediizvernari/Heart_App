@@ -1,4 +1,3 @@
-import 'package:frontend/utils/auth_store.dart';
 import 'package:frontend/services/api_exception.dart';
 import '../api/user_medical_record_api.dart';
 import '../models/user_medical_record.dart';
@@ -7,11 +6,8 @@ import 'user_medical_record_repository.dart';
 class UserMedicalRecordImpl implements UserMedicalRecordRepository {
   @override
   Future<List<UserMedicalRecord>> getAllMedicalRecordsForUser() async {
-    final String? token = await AuthStore.getToken();
-    if (token == null) throw ApiException(401, 'Missing auth token');
-
     try {
-      return await UserMedicalRecordApi.getAllMedicalRecordsForUser(token);
+      return await UserMedicalRecordApi.getAllMedicalRecordsForUser();
     } on ApiException {
       rethrow;
     }
@@ -19,11 +15,8 @@ class UserMedicalRecordImpl implements UserMedicalRecordRepository {
 
   @override
   Future<UserMedicalRecord> getLatestUserMedicalRecord() async {
-    final String? token = await AuthStore.getToken();
-    if (token == null) throw ApiException(401, 'Missing auth token');
-
     try {
-      return await UserMedicalRecordApi.getLatestUserMedicalRecord(token);
+      return await UserMedicalRecordApi.getLatestUserMedicalRecord();
     } on ApiException {
       rethrow;
     }
@@ -31,11 +24,8 @@ class UserMedicalRecordImpl implements UserMedicalRecordRepository {
 
   @override
   Future<List<UserMedicalRecord>> getAllMedicalRecordsByUserId(int userId) async {
-    final String? token = await AuthStore.getToken();
-    if (token == null) throw ApiException(401, 'Missing auth token');
-
     try {
-      return await UserMedicalRecordApi.getAllMedicalRecordsByUserId(token, userId);
+      return await UserMedicalRecordApi.getAllMedicalRecordsByUserId(userId);
     } on ApiException {
       rethrow;
     }
@@ -43,11 +33,8 @@ class UserMedicalRecordImpl implements UserMedicalRecordRepository {
 
   @override
   Future<UserMedicalRecord> getLatestMedicalRecordByUserId(int userId) async {
-    final String? token = await AuthStore.getToken();
-    if (token == null) throw ApiException(401, 'Missing auth token');
-
     try {
-      return await UserMedicalRecordApi.getLatestMedicalRecordByUserId(token, userId);
+      return await UserMedicalRecordApi.getLatestMedicalRecordByUserId(userId);
     } on ApiException {
       rethrow;
     }

@@ -1,67 +1,77 @@
-import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:frontend/services/api_exception.dart';
-
-import '../../../../../services/api_client.dart';
-import '../../../../../core/api_constants.dart';
+import 'package:frontend/core/api_constants.dart';
+import 'package:frontend/core/network/api_client.dart';
 import '../models/appointment_model.dart';
 
-class AppointmentAPI {
-  static Future<List<Appointment>> getMyAppointments(String token) async {
-    const url = APIConstants.getAllUserAppointmentsUrl;
-    final response = await APIClient.get(url, headers: {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json',
-    });
-    if (response.statusCode != 200) {
-      throw ApiException(response.statusCode, response.body);
+class AppointmentApi {
+  static Future<List<Appointment>> getMyAppointments() async {
+    try {
+      final Response<List<dynamic>> response = await ApiClient.get<List<dynamic>>(APIConstants.getAllUserAppointmentsUrl);
+
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data!
+            .map((e) => Appointment.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to load user appointments.');
+    } on DioException catch (dioError) {
+      final int statusCode = dioError.response?.statusCode ?? -1;
+      final String? errorMessage = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, errorMessage!);
     }
-    final List list = jsonDecode(response.body);
-    return list.map((e) => Appointment.fromJson(e)).toList();
   }
 
-  static Future<List<Appointment>> getMedicAppointments(String token) async {
-    const url = APIConstants.getAllMedicAppointmentsUrl;
-    final response = await APIClient.get(url, headers: {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json',
-    });
-    if (response.statusCode != 200) {
-      throw ApiException(response.statusCode, response.body);
+  static Future<List<Appointment>> getMedicAppointments() async {
+    try {
+      final Response<List<dynamic>> response = await ApiClient.get<List<dynamic>>(APIConstants.getAllMedicAppointmentsUrl);
+
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data!
+            .map((e) => Appointment.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to load medic appointments.');
+    } on DioException catch (dioError) {
+      final int statusCode = dioError.response?.statusCode ?? -1;
+      final String? errorMessage = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, errorMessage!);
     }
-    final List list = jsonDecode(response.body);
-    return list.map((e) => Appointment.fromJson(e)).toList();
   }
 
-  static Future<Appointment> createAppointment(String token, Appointment appointment) async {
-    const url = APIConstants.bookAppointmentUrl;
-    final response = await APIClient.post(
-    url,               
-    appointment.toJsonForCreate(),
-    headers: {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json',
-    },
-  );
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return Appointment.fromJson(jsonDecode(response.body));
+  static Future<Appointment> createAppointment(Appointment appointment) async {
+    try {
+      final Response<Map<String, dynamic>> response = await ApiClient.post<Map<String, dynamic>>(APIConstants.bookAppointmentUrl, appointment.toJsonForCreate());
+
+      if ((response.statusCode == 200 || response.statusCode == 201) && response.data != null) {
+        return Appointment.fromJson(response.data!);
+      }
+
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to create appointment.');
+    } on DioException catch (dioError) {
+      final int statusCode = dioError.response?.statusCode ?? -1;
+      final String? errorMessage = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, errorMessage!);
     }
-    throw ApiException(response.statusCode, response.body);
   }
 
-  static Future<Appointment> updateAppointmentStatus(String token, int appointmentId, String newStatus) async {
-    final url = APIConstants.changeAppointmentStatusUrl(appointmentId, newStatus);
-    final response = await APIClient.patch(
-      url,
-      {},
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
+  static Future<Appointment> updateAppointmentStatus(int appointmentId, String newStatus) async {
+    final String url = APIConstants.changeAppointmentStatusUrl(appointmentId, newStatus);
 
-    if (response.statusCode != 200) {
-      throw ApiException(response.statusCode, response.body);
+    try {
+      final Response<Map<String, dynamic>> response = await ApiClient.patch<Map<String, dynamic>>(url, {});
+
+      if (response.statusCode == 200 && response.data != null) {
+        return Appointment.fromJson(response.data!);
+      }
+
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to update appointment status.');
+    } on DioException catch (dioError) {
+      final int statusCode = dioError.response?.statusCode ?? -1;
+      final String? errorMessage = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, errorMessage!);
     }
-    return Appointment.fromJson(jsonDecode(response.body));
   }
 }

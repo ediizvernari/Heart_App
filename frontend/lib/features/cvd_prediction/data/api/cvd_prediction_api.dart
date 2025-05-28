@@ -1,25 +1,27 @@
+import 'package:dio/dio.dart';
 import 'dart:convert';
-import 'package:frontend/features/cvd_prediction/data/models/prediction_result.dart';
 import 'package:frontend/services/api_exception.dart';
-
-import '../../../../services/api_client.dart';
-import '../../../../core/api_constants.dart';
+import 'package:frontend/core/api_constants.dart';
+import 'package:frontend/core/network/api_client.dart';
+import '../models/prediction_result.dart';
 
 class CvdPredictionApi {
-  static Future<PredictionResult> getCVDPredictionPercentage(String? token) async {
-    final response = await APIClient.get(
-      APIConstants.checkCvdPredictionUrl,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
+  static Future<PredictionResult> getCvdPredictionPercentage() async {
+    try {
+      final Response<dynamic> response = await ApiClient.get<dynamic>(APIConstants.checkCvdPredictionUrl);
 
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body) as Map<String, dynamic>;
-      return PredictionResult.fromJson(jsonData);
-    } else {
-      throw ApiException(response.statusCode, response.body);
+      if (response.statusCode == 200 && response.data != null) {
+        final Map<String, dynamic> jsonData = response.data is String
+            ? json.decode(response.data as String)
+            : response.data as Map<String, dynamic>;
+        return PredictionResult.fromJson(jsonData);
+      }
+
+      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Unknown error fetching CVD prediction.');
+    } on DioException catch (dioError) {
+      final int statusCode = dioError.response?.statusCode ?? -1;
+      final String? errorMessage = dioError.response?.statusMessage ?? dioError.message;
+      throw ApiException(statusCode, errorMessage!);
     }
   }
 }
