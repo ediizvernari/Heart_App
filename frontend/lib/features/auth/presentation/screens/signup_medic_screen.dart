@@ -1,94 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/utils/validators/auth_validator.dart';
 import 'package:frontend/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
-import 'package:frontend/widgets/rounded_button.dart';
 import 'package:frontend/core/constants/app_colors.dart';
 import 'package:frontend/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:frontend/features/auth/data/models/medic_signup_request.dart';
+import 'package:frontend/features/auth/presentation/widgets/signup_medic_form.dart';
 
-class SignupMedicScreen extends StatefulWidget {
-  const SignupMedicScreen({Key? key}) : super(key: key);
-
-  @override
-  State<SignupMedicScreen> createState() => _SignupMedicScreenState();
-}
-
-class _SignupMedicScreenState extends State<SignupMedicScreen> {
-  int _step = 0;
-
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-  final _streetController = TextEditingController();
-  final _cityController = TextEditingController();
-  final _countryController = TextEditingController();
-
-  @override
-  void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    _streetController.dispose();
-    _cityController.dispose();
-    _countryController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _handleNext() async {
-    final signUpValidationError = await AuthValidator.validateAllFieldsForSignUp(
-      firstName: _firstNameController.text.trim(),
-      lastName: _lastNameController.text.trim(),
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-      confirmPassword: _confirmPasswordController.text,
-      isMedic: true,
-    );
-    if (!mounted) return;
-    if (signUpValidationError != null) {
-      await showDialog<void>(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Error'),
-          content: Text(signUpValidationError),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-    setState(() => _step = 1);
-  }
-
-  Future<void> _handleSignup() async {
-    final medicDto = MedicSignupRequest(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-      firstName: _firstNameController.text.trim(),
-      lastName: _lastNameController.text.trim(),
-      streetAddress: _streetController.text.trim(),
-      city: _cityController.text.trim(),
-      country: _countryController.text.trim(),
-    );
-
-    final authController = context.read<AuthController>()
-      ..email = medicDto.email
-      ..password = medicDto.password;
-
-    await authController.signupMedic(
-      context: context,
-      medicSignupDto: medicDto,
-      confirmPassword: _confirmPasswordController.text,
-    );
-  }
+class SignupMedicScreen extends StatelessWidget {
+  const SignupMedicScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -116,100 +34,30 @@ class _SignupMedicScreenState extends State<SignupMedicScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.primaryRed,
-      body: SafeArea(
-        child: Column(
-          children: [
-            const CustomAppBar(title: 'Create a medic account'),
-            Expanded(
-              child: Center(
+      resizeToAvoidBottomInset: true,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.primaryGradient,
+        ),
+        child: const SafeArea(
+          child: Column(
+            children: [
+              CustomAppBar(title: 'Create a medic account'),
+              Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: FractionallySizedBox(
-                    child: Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: AppColors.whiteOverlay,
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: _step == 0 ? _buildStep0() : _buildStep1(authCtrl),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 48),
+                  child: Center(
+                    child: FractionallySizedBox(
+                      widthFactor: 0.9,
+                      child: SignupMedicForm(),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildStep0() => Column(
-    children: [
-      _field(_firstNameController, 'First Name'),
-      const SizedBox(height: 16),
-      _field(_lastNameController, 'Last Name'),
-      const SizedBox(height: 16),
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: _field(_emailController, 'Email', keyboard: TextInputType.emailAddress),
-      ),
-      const SizedBox(height: 16),
-      _field(_passwordController, 'Password', obscure: true),
-      const SizedBox(height: 16),
-      _field(_confirmPasswordController, 'Confirm Password', obscure: true),
-      const SizedBox(height: 24),
-      RoundedButton(text: 'Next', onPressed: _handleNext),
-    ],
-  );
-
-  Widget _buildStep1(AuthController authCtrl) => Column(
-    children: [
-      _field(_streetController, 'Street Address'),
-      const SizedBox(height: 16),
-      _field(_cityController, 'City'),
-      const SizedBox(height: 16),
-      _field(_countryController, 'Country'),
-      const SizedBox(height: 24),
-      Row(
-        children: [
-          Expanded(
-            flex: 1,
-            child: SizedBox(
-              height: 48,
-              child: ElevatedButton(
-                onPressed: () => setState(() => _step = 0),
-                child: const Text('Back'),
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            flex: 2,
-            child: authCtrl.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : RoundedButton(text: 'Sign Up', onPressed: _handleSignup),
-          ),
-        ],
-      ),
-    ],
-  );
-
-  Widget _field(
-    TextEditingController ctl,
-    String label, {
-    bool obscure = false,
-    TextInputType keyboard = TextInputType.text,
-  }) {
-    return TextField(
-      controller: ctl,
-      obscureText: obscure,
-      keyboardType: keyboard,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.white),
-        border: const OutlineInputBorder(),
       ),
     );
   }

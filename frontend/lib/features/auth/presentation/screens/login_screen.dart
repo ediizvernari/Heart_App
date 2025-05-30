@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/auth/presentation/widgets/login_form.dart';
 import 'package:frontend/widgets/custom_app_bar.dart';
+import 'package:frontend/core/constants/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:frontend/widgets/rounded_button.dart';
-import 'package:frontend/core/constants/app_colors.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -34,61 +34,17 @@ class LoginScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.primaryRed,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.primaryGradient,
+        ),
+        child: const SafeArea(
           child: Column(
             children: [
-              const CustomAppBar(title: 'Login to your account'),
-              const SizedBox(height: 200),
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: AppColors.whiteOverlay,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Column(
-                  children: [
-                    Directionality(
-                      textDirection: TextDirection.ltr,
-                      child: TextField(
-                        keyboardType: TextInputType.emailAddress,
-                        textAlign: TextAlign.start,
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          labelStyle: TextStyle(color: Colors.white),
-                          border: OutlineInputBorder(),
-                        ),
-                        style: const TextStyle(color: Colors.white),
-                        onChanged: (v) => authController.email = v,
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    TextField(
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Password',
-                        labelStyle: TextStyle(color: Colors.white),
-                        border: OutlineInputBorder(),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                      onChanged: (v) => authController.password = v,
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    authController.isLoading
-                        ? const CircularProgressIndicator()
-                        : RoundedButton(
-                            text: 'Login',
-                            onPressed: () {
-                              authController.login(context: context);
-                            },
-                          ),
-                  ],
+              CustomAppBar(title: 'Login to your account'),
+              Expanded(
+                child: Center(
+                  child: LoginForm(),
                 ),
               ),
             ],
