@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/features/user_health_data/data/models/user_health_data_model.dart';
 import 'package:intl/intl.dart';
@@ -15,14 +17,14 @@ class DialogUtils {
             child: const Text("OK"),
           ),
         ],
-      )
+      ),
     );
   }
 
   static Future<void> showHealthDataConfirmationDialog({
     required BuildContext context,
     required UserHealthData healthData,
-    required VoidCallback onConfirm,
+    required FutureOr<void> Function(BuildContext dialogContext) onConfirm,
   }) {
     return showDialog<void>(
       context: context,
@@ -68,10 +70,12 @@ class DialogUtils {
             ElevatedButton(
               child: const Text("Confirm & View Prediction Results"),
               onPressed: () {
+                // dismiss only the dialog
                 Navigator.of(dialogContext).pop();
-                onConfirm();
+                // then invoke your async confirm handler
+                onConfirm(dialogContext);
               },
-            )
+            ),
           ],
         );
       },
@@ -79,7 +83,7 @@ class DialogUtils {
   }
 
   static Future<void> showMissingDataDialog(BuildContext context, VoidCallback onProceed) {
-    return showDialog(
+    return showDialog<void>(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
