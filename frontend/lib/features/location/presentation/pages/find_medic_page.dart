@@ -1,14 +1,15 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:frontend/features/medics/data/repositories/medic_repository_impl.dart';
-import 'package:frontend/features/users/presentation/controllers/user_controller.dart';
+import 'package:frontend/features/location/presentation/widgets/medic_filter_panel.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_text_styles.dart';
-import '../../../medics/presentation/controllers/medic_filtering_controller.dart';
-import '../../../../handlers/medic_assignment_handler.dart';
-import '../widgets/medic_filter_panel.dart';
-import '../../../medics/presentation/widgets/medic_list_view.dart';
+import 'package:frontend/core/constants/app_colors.dart';
+import 'package:frontend/widgets/custom_app_bar.dart';
+import 'package:frontend/features/medics/presentation/controllers/medic_filtering_controller.dart';
+import 'package:frontend/features/medics/data/repositories/medic_repository_impl.dart';
+import 'package:frontend/features/medics/presentation/widgets/medic_list_view.dart';
+import 'package:frontend/handlers/medic_assignment_handler.dart';
+import 'package:frontend/features/users/presentation/controllers/user_controller.dart';
 
 class FindMedicPage extends StatefulWidget {
   const FindMedicPage({Key? key}) : super(key: key);
@@ -31,16 +32,17 @@ class _FindMedicPageState extends State<FindMedicPage> {
   }
 
   @override
-void didChangeDependencies() {
-  super.didChangeDependencies();
-  final userController = context.read<UserController>();
-  _assignHandler = MedicAssignmentHandler(userController);
-}
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final userController = context.read<UserController>();
+    _assignHandler = MedicAssignmentHandler(userController);
+  }
 
   @override
   void dispose() {
     _cityCtrl.dispose();
     _countryCtrl.dispose();
+    _filterCtrl.dispose();
     super.dispose();
   }
 
@@ -61,79 +63,104 @@ void didChangeDependencies() {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.softGrey,
-      body: Column(
-        children: [
-          // Header
-          Container(
-            width: double.infinity,
-            height: 120,
-            color: AppColors.primaryRed,
-            alignment: Alignment.center,
-            child: Text(
-              'Find a Medic',
-              style: AppTextStyles.welcomeHeader.copyWith(
-                color: Colors.white,
-              ),
-            ),
-          ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.primaryGradient,
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              const CustomAppBar(title: 'Find a Medic'),
 
-          Expanded(
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: ChangeNotifierProvider.value(
-                value: _filterCtrl,
-                child: Consumer<MedicFilteringController>(
-                  builder: (_, ctrl, __) => Column(
-                    children: [
-                      Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 4,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: MedicFilterPanel(
-                            cityController: _cityCtrl,
-                            countryController: _countryCtrl,
-                            onFilterChanged: (_) {
-                              _filterCtrl.getFilteredMedics(
-                                city: _cityCtrl.text.isEmpty
-                                    ? null
-                                    : _cityCtrl.text,
-                                country: _countryCtrl.text.isEmpty
-                                    ? null
-                                    : _countryCtrl.text,
-                              );
-                            },
-                          ),
-                        ),
-                      ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: ChangeNotifierProvider<MedicFilteringController>.value(
+                    value: _filterCtrl,
+                    child: Consumer<MedicFilteringController>(
+                      builder: (context, ctrl, _) {
+                        return Column(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFFFFFF).withValues(alpha: 38),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: const Color(0xFFFFFFFF).withValues(alpha: 76),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: MedicFilterPanel(
+                                    cityController: _cityCtrl,
+                                    countryController: _countryCtrl,
+                                    onFilterChanged: (_) {
+                                      ctrl.getFilteredMedics(
+                                        city: _cityCtrl.text.isEmpty ? null : _cityCtrl.text,
+                                        country: _countryCtrl.text.isEmpty ? null : _countryCtrl.text,
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
 
-                      const SizedBox(height: 12),
+                            const SizedBox(height: 12),
 
-                      if (ctrl.isLoading)
-                        const Center(child: CircularProgressIndicator())
-                      else if (ctrl.errorMessage != null)
-                        Center(
-                          child: Text(
-                            ctrl.errorMessage!,
-                            style: const TextStyle(color: Colors.red),
-                          ),
-                        )
-                      else
-                        MedicListView(
-                          medics: ctrl.filteredMedics,
-                          onAssign: _assign,
-                        ),
-                    ],
+                            Expanded(
+                              child: ctrl.isLoading
+                                  ? const Center(
+                                      child: CircularProgressIndicator(),
+                                    )
+                                  : ctrl.errorMessage != null
+                                      ? Center(
+                                          child: Text(
+                                            ctrl.errorMessage!,
+                                            style: const TextStyle(
+                                              color: Colors.red,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        )
+                                      : ClipRRect(
+                                          borderRadius: BorderRadius.circular(16),
+                                          child: BackdropFilter(
+                                            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFFFFFFF).withValues(alpha: 38),
+                                                borderRadius: BorderRadius.circular(16),
+                                                border: Border.all(
+                                                  color: const Color(0xFFFFFFFF).withValues(alpha: 76),
+                                                  width: 1.5,
+                                                ),
+                                              ),
+                                              padding: const EdgeInsets.all(16),
+                                              child: MedicListView(
+                                                medics: ctrl.filteredMedics,
+                                                onAssign: _assign,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

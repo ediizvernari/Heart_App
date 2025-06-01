@@ -17,17 +17,17 @@ class MedicListView extends StatelessWidget {
     if (medics.isEmpty) {
       return const Center(child: Text('No medics found.'));
     }
-    return Expanded(
-      child: ListView.builder(
-        itemCount: medics.length,
-        itemBuilder: (context, i) {
-          final m = medics[i];
-          return MedicCard(
-            medic: m,
-            onAssign: () => onAssign(m.id),
-          );
-        },
-      ),
+
+    return ListView.builder(
+      itemCount: medics.length,
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      itemBuilder: (context, i) {
+        final m = medics[i];
+        return MedicCard(
+          medic: m,
+          onAssign: () => onAssign(m.id),
+        );
+      },
     );
   }
 }

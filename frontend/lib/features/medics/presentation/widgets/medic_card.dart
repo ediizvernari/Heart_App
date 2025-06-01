@@ -25,6 +25,7 @@ class MedicCard extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
+            Text('Address: ${medic.streetAddress}'),
             Text('City: ${medic.city}'),
             Text('Country: ${medic.country}'),
             const SizedBox(height: 8),
