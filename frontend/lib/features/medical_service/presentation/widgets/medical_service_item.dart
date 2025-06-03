@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../data/models/medical_service.dart';
-import '../controllers/medical_service_controller.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../controllers/medical_service_controller.dart';
+import '../../data/models/medical_service.dart';
 import 'medical_service_form_dialog.dart';
 
 class MedicalServiceItem extends StatelessWidget {
@@ -14,39 +14,63 @@ class MedicalServiceItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ctl = context.read<MedicalServiceController>();
+    final medicalServiceController = context.read<MedicalServiceController>();
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ListTile(
-        title: Text(service.name, style: AppTextStyles.buttonText),
-        subtitle: Text(
-          '\$${service.price} • ${service.durationMinutes} min',
-          style: Theme.of(context)
-              .textTheme
-              .bodySmall
-              ?.copyWith(color: AppColors.softGrey),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            IconButton(
-              icon: const Icon(Icons.edit, size: 20),
-              color: AppColors.primaryRed,
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (dialogCtx) => ChangeNotifierProvider.value(
-                    value: ctl,
-                    child: MedicalServiceFormDialog(service: service),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    service.name,
+                    style: AppTextStyles.header.copyWith(
+                      color: Colors.black87,
+                    ),
                   ),
-                );
-              },
+                  const SizedBox(height: 4),
+                  Text(
+                    '\$${service.price.toStringAsFixed(2)} • ${service.durationMinutes} min',
+                    style: AppTextStyles.subheader.copyWith(
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            IconButton(
-              icon: const Icon(Icons.delete, size: 20),
-              color: AppColors.primaryRed,
-              onPressed: () => ctl.deleteMedicalService(service.id),
+
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit, size: 20),
+                  color: AppColors.primaryRed,
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (dialogCtx) => ChangeNotifierProvider.value(
+                        value: medicalServiceController,
+                        child: MedicalServiceFormDialog(service: service),
+                      ),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, size: 20),
+                  color: AppColors.primaryRed,
+                  onPressed: () {
+                    medicalServiceController.deleteMedicalService(service.id);
+                  },
+                ),
+              ],
             ),
           ],
         ),

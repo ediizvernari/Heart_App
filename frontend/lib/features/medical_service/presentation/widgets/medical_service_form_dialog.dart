@@ -17,120 +17,229 @@ class MedicalServiceFormDialog extends StatefulWidget {
 
 class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
   final _formKey = GlobalKey<FormState>();
-  late int _medicalServiceTypeId;
-  late String _medicalServiceName;
-  late int _medicalServicePrice;
-  late int _medicalServiceDuration;
+  int? _selectedTypeId;
+  late TextEditingController _medicalServiceNameController;
+  late TextEditingController _medicalServicePriceController;
+  late TextEditingController _medicalServiceDurationController;
 
   @override
   void initState() {
     super.initState();
-    final medicalService = widget.service;
-    _medicalServiceTypeId = medicalService?.medicalServiceTypeId ?? 0;
-    _medicalServiceName = medicalService?.name ?? '';
-    _medicalServicePrice = medicalService?.price ?? 0;
-    _medicalServiceDuration = medicalService?.durationMinutes ?? 0;
+    final svc = widget.service;
+    _selectedTypeId = svc?.medicalServiceTypeId;
+    _medicalServiceNameController = TextEditingController(text: svc?.name ?? '');
+    _medicalServicePriceController = TextEditingController(text: svc != null ? svc.price.toString() : '');
+    _medicalServiceDurationController = TextEditingController(text: svc != null ? svc.durationMinutes.toString() : '');
+
+    // Ensure types are loaded if needed
+    final controller = context.read<MedicalServiceController>();
+    if (controller.medicalServiceTypes.isEmpty) {
+      controller.getAllMedicalServiceData();
+    }
+  }
+
+  @override
+  void dispose() {
+    _medicalServiceNameController.dispose();
+    _medicalServicePriceController.dispose();
+    _medicalServiceDurationController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final medicalServiceController = context.read<MedicalServiceController>();
-    final types = medicalServiceController.medicalServiceTypes;
+    final controller = context.watch<MedicalServiceController>();
+    final types = controller.medicalServiceTypes;
 
-    return AlertDialog(
-      title: Text(
-        widget.service == null ? 'New Service' : 'Edit Service',
-        style: AppTextStyles.welcomeHeader,
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
       ),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButtonFormField<int>(
-                isExpanded: true,
-                value: _medicalServiceTypeId > 0 ? _medicalServiceTypeId : null,
-                items: types
-                    .map((t) => DropdownMenuItem(
-                          value: t.id,
-                          child: Text(
-                            t.name,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ))
-                    .toList(),
-                onChanged: types.isEmpty
-                    ? null
-                    : (v) => setState(() => _medicalServiceTypeId = v!),
-                decoration: InputDecoration(
-                  labelText: 'Service Type',
-                  hintText: types.isEmpty ? 'Loading types…' : null,
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 400),
+        padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 1) Title
+                Text(
+                  widget.service == null ? 'New Service' : 'Edit Service',
+                  style: AppTextStyles.dialogTitle.copyWith(
+                    color: AppColors.primaryRed,
+                  ),
                 ),
-                validator: (v) => v == null || v == 0 ? 'Required' : null,
-              ),
-              TextFormField(
-                initialValue: _medicalServiceName,
-                decoration: const InputDecoration(labelText: 'Name'),
-                onSaved: (v) => _medicalServiceName = v!.trim(),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-              TextFormField(
-                initialValue: '$_medicalServicePrice',
-                decoration: const InputDecoration(labelText: 'Price'),
-                keyboardType: TextInputType.number,
-                onSaved: (v) => _medicalServicePrice = int.tryParse(v!) ?? 0,
-              ),
-              TextFormField(
-                initialValue: '$_medicalServiceDuration',
-                decoration: const InputDecoration(labelText: 'Duration (min)'),
-                keyboardType: TextInputType.number,
-                onSaved: (v) => _medicalServiceDuration = int.tryParse(v!) ?? 0,
-              ),
-            ],
+                const SizedBox(height: 12),
+
+                // 2) Type dropdown
+                DropdownButtonFormField<int>(
+                  isExpanded: true,
+                  value: _selectedTypeId,
+                  decoration: InputDecoration(
+                    labelText: 'Service Type',
+                    labelStyle: AppTextStyles.subheader.copyWith(
+                      color: Colors.black54,
+                    ),
+                    border: const OutlineInputBorder(),
+                    hintText: types.isEmpty ? 'Loading types…' : null,
+                    hintStyle: AppTextStyles.dialogContent.copyWith(
+                      color: Colors.black38,
+                    ),
+                  ),
+                  items: types
+                      .map((t) => DropdownMenuItem<int>(
+                            value: t.id,
+                            child: Text(
+                              t.name,
+                              style: AppTextStyles.dialogContent.copyWith(
+                                color: Colors.black87,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ))
+                      .toList(),
+                  onChanged:
+                      types.isEmpty ? null : (v) => setState(() => _selectedTypeId = v),
+                  validator: (v) =>
+                      v == null ? 'Please select a type' : null,
+                ),
+                const SizedBox(height: 12),
+
+                // 3) Name field
+                TextFormField(
+                  controller: _medicalServiceNameController,
+                  style: AppTextStyles.dialogContent.copyWith(
+                    color: Colors.black87,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Name',
+                    labelStyle: AppTextStyles.subheader.copyWith(
+                      color: Colors.black54,
+                    ),
+                    border: const OutlineInputBorder(),
+                  ),
+                  validator: (v) =>
+                      v == null || v.trim().isEmpty ? 'Required' : null,
+                ),
+                const SizedBox(height: 12),
+
+                // 4) Price field
+                TextFormField(
+                  controller: _medicalServicePriceController,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  style: AppTextStyles.dialogContent.copyWith(
+                    color: Colors.black87,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Price',
+                    labelStyle: AppTextStyles.subheader.copyWith(
+                      color: Colors.black54,
+                    ),
+                    border: const OutlineInputBorder(),
+                    prefixText: '\$ ',
+                    prefixStyle: AppTextStyles.dialogContent.copyWith(
+                      color: Colors.black54,
+                    ),
+                  ),
+                  validator: (v) {
+                    if (v == null || double.tryParse(v.trim()) == null) {
+                      return 'Enter a valid number';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+
+                // 5) Duration field
+                TextFormField(
+                  controller: _medicalServiceDurationController,
+                  keyboardType: TextInputType.number,
+                  style: AppTextStyles.dialogContent.copyWith(
+                    color: Colors.black87,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Duration (min)',
+                    labelStyle: AppTextStyles.subheader.copyWith(
+                      color: Colors.black54,
+                    ),
+                    border: const OutlineInputBorder(),
+                  ),
+                  validator: (v) {
+                    if (v == null || int.tryParse(v.trim()) == null) {
+                      return 'Enter a valid duration';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                // 6) Actions: Cancel & Create/Save
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(
+                        'Cancel',
+                        style: AppTextStyles.dialogButton.copyWith(
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryRed,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                      ),
+                      onPressed: () {
+                        if (!_formKey.currentState!.validate()) return;
+                        _formKey.currentState!.save();
+
+                        final name = _medicalServiceNameController.text.trim();
+                        final price = double.parse(_medicalServicePriceController.text.trim());
+                        final duration = int.parse(_medicalServiceDurationController.text.trim());
+                        final typeId = _selectedTypeId!;
+
+                        final newService = MedicalService(
+                          id: widget.service?.id ?? 0,
+                          medicId: widget.service?.medicId ?? 0,
+                          medicalServiceTypeId: typeId,
+                          name: name,
+                          price: price.toInt(),
+                          durationMinutes: duration,
+                        );
+
+                        if (widget.service == null) {
+                          controller.createMedicalService(newService);
+                        } else {
+                          controller.updateMedicalService(newService);
+                        }
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(
+                        widget.service == null ? 'Create' : 'Save',
+                        style: AppTextStyles.buttonText.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(
-            'Cancel',
-            style: AppTextStyles.buttonText.copyWith(color: AppColors.primaryRed),
-          ),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primaryRed,
-            foregroundColor: Colors.white,
-          ),
-          onPressed: () {
-            if (!_formKey.currentState!.validate()) return;
-            _formKey.currentState!.save();
-
-            final newService = MedicalService(
-              id: widget.service?.id ?? 0,
-              medicId: 0, // backend will overwrite if needed
-              medicalServiceTypeId: _medicalServiceTypeId,
-              name: _medicalServiceName,
-              price: _medicalServicePrice,
-              durationMinutes: _medicalServiceDuration,
-            );
-
-            if (widget.service == null) {
-              medicalServiceController.createMedicalService(newService);
-            } else {
-              medicalServiceController.updateMedicalService(newService);
-            }
-
-            Navigator.pop(context);
-          },
-          child: Text(
-            widget.service == null ? 'Create' : 'Save',
-            style: AppTextStyles.buttonText.copyWith(color: Colors.white),
-          ),
-        ),
-      ],
     );
   }
 }

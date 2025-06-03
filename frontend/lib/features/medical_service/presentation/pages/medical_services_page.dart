@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/medical_service/presentation/widgets/medical_service_form_dialog.dart';
 import 'package:provider/provider.dart';
 
-import '../controllers/medical_service_controller.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
-import '../widgets/medical_service_form_dialog.dart';
+import '../../../../widgets/custom_app_bar.dart';
+import '../controllers/medical_service_controller.dart';
 import '../widgets/medical_service_item.dart';
 
-//TODO: Put a header here
 class MedicalServicesPage extends StatefulWidget {
   const MedicalServicesPage({Key? key}) : super(key: key);
 
@@ -38,95 +38,114 @@ class _MedicalServicesPageState extends State<MedicalServicesPage> {
       ...medicalServiceController.medicalServiceTypes.map((t) => _FakeType(id: t.id, name: t.name)),
     ];
 
-    final filtered = _selectedMedicalServiceTypeId == 0
+    final filteredServices = _selectedMedicalServiceTypeId == 0
         ? medicalServiceController.medicalServices
         : medicalServiceController.medicalServices
             .where((s) => s.medicalServiceTypeId == _selectedMedicalServiceTypeId)
             .toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'My Medical Services',
-          style: AppTextStyles.welcomeHeader,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.primaryGradient,
         ),
-        backgroundColor: AppColors.primaryRed,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1) Filter chips
-            SizedBox(
-              height: 40,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: allTypes.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (ctx, i) {
-                  final medicalServiceType = allTypes[i];
-                  final selectedMedicalserviceType = medicalServiceType.id == _selectedMedicalServiceTypeId;
-                  return ChoiceChip(
-                    label: Text(medicalServiceType.name),
-                    selected: selectedMedicalserviceType,
-                    selectedColor: AppColors.primaryRed,
-                    backgroundColor: Colors.grey.shade200,
-                    labelStyle: TextStyle(
-                      color: selectedMedicalserviceType ? Colors.white : Colors.black87,
-                    ),
-                    onSelected: (_) {
-                      setState(() {
-                        _selectedMedicalServiceTypeId = medicalServiceType.id;
-                      });
-                    },
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            if (medicalServiceController.loadingTypes || medicalServiceController.loadingServices)
-              const Center(child: CircularProgressIndicator())
-            else if (medicalServiceController.error != null)
-              Center(child: Text('Error: ${medicalServiceController.error}'))
-            else if (filtered.isEmpty)
-              const Center(child: Text('No services found.'))
-
-            else
+        child: SafeArea(
+          child: Column(
+            children: [
+              const CustomAppBar(title: 'My Medical Services'),
               Expanded(
-                child: ListView.separated(
-                  itemCount: filtered.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (ctx, i) {
-                    final svc = filtered[i];
-                    return Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: 40,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: allTypes.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 8),
+                          itemBuilder: (ctx, i) {
+                            final type = allTypes[i];
+                            final isSelected =
+                                type.id == _selectedMedicalServiceTypeId;
+                            return ChoiceChip(
+                              label: Text(
+                                type.name,
+                                style: AppTextStyles.subheader.copyWith(
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.black87,
+                                ),
+                              ),
+                              selected: isSelected,
+                              selectedColor: AppColors.primaryRed,
+                              backgroundColor: Colors.grey.shade200,
+                              onSelected: (_) {
+                                setState(() {
+                                  _selectedMedicalServiceTypeId = type.id;
+                                });
+                              },
+                            );
+                          },
+                        ),
                       ),
-                      elevation: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: MedicalServiceItem(service: svc),
-                      ),
-                    );
-                  },
+                      const SizedBox(height: 16),
+                      if (medicalServiceController.loadingTypes ||
+                          medicalServiceController.loadingServices) ...[
+                        const Center(child: CircularProgressIndicator())
+                      ] else if (medicalServiceController.error != null) ...[
+                        Center(
+                          child: Text(
+                            'Error: ${medicalServiceController.error}',
+                            style: AppTextStyles.dialogContent.copyWith(
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                        )
+                      ] else if (filteredServices.isEmpty) ...[
+                        Center(
+                          child: Text(
+                            'No services found.',
+                            style: AppTextStyles.dialogContent.copyWith(
+                              color: Colors.black54,
+                            ),
+                          ),
+                        )
+                      ] else ...[
+                        Expanded(
+                          child: ListView.separated(
+                            itemCount: filteredServices.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (ctx, index) {
+                              final svc = filteredServices[index];
+                              return MedicalServiceItem(service: svc);
+                            },
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ),
-          ],
-        ),
-      ),
-
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primaryRed,
-        onPressed: () => showDialog(
-          context: context,
-          builder: (_) => ChangeNotifierProvider.value(
-            value: medicalServiceController,
-            child: const MedicalServiceFormDialog(),
+            ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryRed,
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (_) => ChangeNotifierProvider.value(
+              value: medicalServiceController,
+              child: const MedicalServiceFormDialog(),
+            ),
+          );
+        },
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
