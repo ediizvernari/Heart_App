@@ -2,7 +2,7 @@ from typing import List
 from fastapi import HTTPException
 
 
-from backend.utils.encryption_utils import encrypt_fields, decrypt_fields, decrypt_data
+from backend.utils.encryption_utils import encrypt_data, encrypt_fields, decrypt_fields, decrypt_data
 from .medical_service_repository import MedicalServiceRepository
 from .medical_service_schemas import (
     MedicalServiceTypeOutSchema,
@@ -26,7 +26,10 @@ class MedicalServiceService:
             for encrypted_medical_service_type in encrypted_medical_service_types
         ]
     
-    #TODO: See if this function is needed
+    async def create_medical_service_type(self, medical_service_type_name) -> MedicalServiceTypeOutSchema:
+        created_medical_service_type = await self.medical_service_repo.create_medical_service_type(medical_service_type_name=encrypt_data(medical_service_type_name))
+        return await self.get_medical_service_type_by_id(created_medical_service_type.id)
+
     async def get_medical_service_type_by_id(self, medical_service_type_id) -> MedicalServiceTypeOutSchema:
         medical_service_type_obj = await self.medical_service_repo.get_medical_service_type_by_id(medical_service_type_id)
         if not medical_service_type_obj:
