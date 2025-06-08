@@ -15,6 +15,9 @@ class AppointmentOutSchema(BaseModel):
     medic_id: int
     medical_service_id: int
     address: str
+    medical_service_name: str
+    medical_service_price: int
+    medical_service_duration_minutes: int
     appointment_start: datetime
     appointment_end: datetime
     appointment_status: str

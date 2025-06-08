@@ -1,8 +1,9 @@
 from typing import List
 from fastapi import HTTPException
 from datetime import datetime
+import asyncio
 
-from backend.database.sql_models import Medic, User
+from backend.database.sql_models import Appointment, Medic, User
 from backend.utils.encryption_utils import encrypt_data, encrypt_fields, decrypt_fields
 from .appointment_repository import AppointmentRepository
 from .appointment_schemas import AppointmentCreateSchema, AppointmentOutSchema
@@ -31,13 +32,18 @@ class AppointmentService:
 
     async def _get_appointment_by_id(self, appointment_id: int) -> AppointmentOutSchema:
         encrypted_appointment = await self._appointment_repo.get_appointment_by_id(appointment_id)
-        decrypted_fields = decrypt_fields(encrypted_appointment, ["address", "appointment_start", "appointment_end", "appointment_status"])
+        decrypted_fields = decrypt_fields(encrypted_appointment, ["address", "medical_service_name", "medical_service_price", "medical_service_duration_minutes", "appointment_start", "appointment_end", "appointment_status"])
 
         return AppointmentOutSchema(
             id=appointment_id,
             user_id=encrypted_appointment.user_id,
             medic_id=encrypted_appointment.medic_id,
             medical_service_id=encrypted_appointment.medical_service_id,
+
+            medical_service_name=decrypted_fields["medical_service_name"],
+            medical_service_price=int(decrypted_fields["medical_service_price"]),
+            medical_service_duration_minutes = int(decrypted_fields["medical_service_duration_minutes"]),
+            
             address=decrypted_fields["address"],
             appointment_start=decrypted_fields["appointment_start"],
             appointment_end=decrypted_fields["appointment_end"],
@@ -48,45 +54,15 @@ class AppointmentService:
 
     async def get_user_appointments(self, user_id: int) -> List[AppointmentOutSchema]:
         encrypted_user_appointments = await self._appointment_repo.get_user_appointments(user_id)
-
-        decrypted_user_appointments: List[AppointmentOutSchema] = []
-        for user_appointment in encrypted_user_appointments:
-            decrypted_fields = decrypt_fields(user_appointment, ["address", "appointment_start", "appointment_end", "appointment_status"])
-            decrypted_user_appointments.append(AppointmentOutSchema(
-                id=user_appointment.id,
-                user_id=user_appointment.user_id,
-                medic_id=user_appointment.medic_id,
-                medical_service_id=user_appointment.medical_service_id,
-                address=decrypted_fields["address"],
-                appointment_start=datetime.fromisoformat(decrypted_fields["appointment_start"]),
-                appointment_end=datetime.fromisoformat(decrypted_fields["appointment_end"]),
-                appointment_status=decrypted_fields["appointment_status"],
-                created_at=user_appointment.created_at,
-                updated_at=user_appointment.updated_at,
-            ))
-        
-        return decrypted_user_appointments
+        return await asyncio.gather(
+            *[self._get_appointment_by_id(appointment.id) for appointment in encrypted_user_appointments]
+        )
 
     async def get_medic_appointments(self, medic_id: int) -> List[AppointmentOutSchema]:
         encrypted_medic_appointments = await self._appointment_repo.get_medic_appointments(medic_id)
-
-        decrypted_medic_appointments: List[AppointmentOutSchema] = []
-        for user_appointment in encrypted_medic_appointments:
-            decrypted_fields = decrypt_fields(user_appointment, ["address", "appointment_start", "appointment_end", "appointment_status"])
-            decrypted_medic_appointments.append(AppointmentOutSchema(
-                id=user_appointment.id,
-                user_id=user_appointment.user_id,
-                medic_id=user_appointment.medic_id,
-                medical_service_id=user_appointment.medical_service_id,
-                address=decrypted_fields["address"],
-                appointment_start= datetime.fromisoformat(decrypted_fields["appointment_start"]),
-                appointment_end=datetime.fromisoformat(decrypted_fields["appointment_end"]),
-                appointment_status=decrypted_fields["appointment_status"],
-                created_at=user_appointment.created_at,
-                updated_at=user_appointment.updated_at,
-            ))
-        
-        return decrypted_medic_appointments
+        return await asyncio.gather(
+            *[self._get_appointment_by_id(appointment.id) for appointment in encrypted_medic_appointments]
+        )
 
     async def create_appointment(self, user_id: int, appointment_payload: AppointmentCreateSchema) -> AppointmentOutSchema:
         medical_service = await self._medical_service_service.get_medical_service_by_id(appointment_payload.medical_service_id)
@@ -116,21 +92,24 @@ class AppointmentService:
         if requested_slot not in free_slots:
             raise HTTPException(status_code=409, detail="Unavailable time slot")
         
-        encrypted_fields = encrypt_fields({
+        encrypted_appointment_fields = encrypt_fields({
             "address":           appointment_payload.address,
             "appointment_start": appointment_payload.appointment_start.isoformat(),
             "appointment_end":   appointment_payload.appointment_end.isoformat(),
             "appointment_status": "pending"
         }, ["address", "appointment_start", "appointment_end", "appointment_status"])
 
-        appointment = await self._appointment_repo.create_user_appointment(
+        appointment: Appointment = await self._appointment_repo.create_user_appointment(
             user_id = user_id,
-            medic_id=appointment_payload.medic_id,
-            medical_service_id=appointment_payload.medical_service_id,
-            address=encrypted_fields["address"],
-            appointment_start=encrypted_fields["appointment_start"],
-            appointment_end=encrypted_fields["appointment_end"],
-            appointment_status=encrypted_fields["appointment_status"],
+            medic_id = appointment_payload.medic_id,
+            medical_service_id = appointment_payload.medical_service_id,
+            address = encrypted_appointment_fields["address"],
+            appointment_start = encrypted_appointment_fields["appointment_start"],
+            appointment_end = encrypted_appointment_fields["appointment_end"],
+            appointment_status = encrypted_appointment_fields["appointment_status"],
+            medical_service_name = encrypt_data(medical_service.name),
+            medical_service_price = encrypt_data(str(medical_service.price)),
+            medical_service_duration_minutes = encrypt_data(str(medical_service.duration_minutes)),
         )
 
         return await self._get_appointment_by_id(appointment.id)

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
 import '../../data/models/appointment_model.dart';
-import '../../../../medical_service/presentation/controllers/medical_service_controller.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_text_styles.dart';
 
@@ -27,12 +25,15 @@ class AppointmentItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMedicView = onUpdateStatus != null;
-    final bodyStyle = AppTextStyles.welcomeHeader.copyWith(fontSize: 16);
-    final captionStyle = AppTextStyles.buttonText.copyWith(fontSize: 12);
 
-    final services = context.read<MedicalServiceController>().medicalServices;
-    final matching = services.where((s) => s.id == appointment.medicalServiceId).toList();
-    final serviceName = matching.isNotEmpty ? matching.first.name : 'Unknown';
+    final primaryTextStyle = AppTextStyles.header.copyWith(color: Colors.black87);
+    final captionStyle = AppTextStyles.subheader.copyWith(color: Colors.black54);
+    final statusLabelStyle = AppTextStyles.buttonText.copyWith(
+      color: AppColors.primaryRed,
+      fontSize: 12,
+    );
+
+    final serviceName = appointment.medicalServiceName;
 
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -45,34 +46,46 @@ class AppointmentItem extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(_formattedDate, style: bodyStyle),
+                Text(_formattedDate, style: primaryTextStyle),
                 Chip(
                   backgroundColor: AppColors.primaryRed.withAlpha(30),
                   label: Text(
                     appointment.appointmentStatus.toUpperCase(),
-                    style: captionStyle.copyWith(color: AppColors.primaryRed),
+                    style: statusLabelStyle,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            Text('Service: $serviceName', style: bodyStyle),
+
+            Text('Service: $serviceName', style: primaryTextStyle),
             const SizedBox(height: 4),
+
             Text('Address: ${appointment.address}', style: captionStyle),
             const SizedBox(height: 12),
-            if (isMedicView)
+
+            if (isMedicView) ...[
               const Divider(),
-            if (isMedicView)
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  _StatusButton(label: 'Confirm', onPressed: () => onUpdateStatus!('confirmed')),
+                  _StatusButton(
+                    label: 'Confirm',
+                    onPressed: () => onUpdateStatus!('confirmed'),
+                  ),
                   const SizedBox(width: 8),
-                  _StatusButton(label: 'Complete', onPressed: () => onUpdateStatus!('completed')),
+                  _StatusButton(
+                    label: 'Complete',
+                    onPressed: () => onUpdateStatus!('completed'),
+                  ),
                   const SizedBox(width: 8),
-                  _StatusButton(label: 'Cancel', onPressed: () => onUpdateStatus!('cancelled')),
+                  _StatusButton(
+                    label: 'Cancel',
+                    onPressed: () => onUpdateStatus!('cancelled'),
+                  ),
                 ],
               ),
+            ],
           ],
         ),
       ),

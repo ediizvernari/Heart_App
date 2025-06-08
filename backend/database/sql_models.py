@@ -136,13 +136,12 @@ class MedicalService(Base):
 
     medic = relationship("Medic", back_populates="medical_services")
     type = relationship("MedicalServiceType", back_populates="definition")
-    appointments = relationship("Appointment", back_populates="medical_service", cascade="all, delete-orphan")
+    appointments = relationship("Appointment", back_populates="medical_service", cascade="save-update, merge")
     appointments_suggestions = relationship("AppointmentSuggestion", back_populates="medical_service", cascade="all, delete-orphan")
 
     class Config:
         from_attributes = True
 
-#TODO: Create backend logic for this entity
 class Appointment(Base):
     __tablename__ = 'appointments'
 
@@ -150,6 +149,10 @@ class Appointment(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     medic_id = Column(Integer, ForeignKey("medics.id"))
     medical_service_id = Column(Integer, ForeignKey("medical_services.id"))
+
+    medical_service_name = Column(String, nullable=False)
+    medical_service_price = Column(String, nullable=False)
+    medical_service_duration_minutes = Column(String, nullable=False)
     
     address = Column(String)
     appointment_start = Column(String)
@@ -166,7 +169,6 @@ class Appointment(Base):
     class Config:
         from_attributes = True
 
-#TODO: Create backend logic for this entity
 class AppointmentSuggestion(Base):
     __tablename__ = "appointment_suggestions"
 
@@ -186,7 +188,6 @@ class AppointmentSuggestion(Base):
     class Config:
         from_attributes = True
 
-#TODO: Create backend logic for this entity
 class MedicAvailability(Base):
     __tablename__ = 'medic_availabilities'
 

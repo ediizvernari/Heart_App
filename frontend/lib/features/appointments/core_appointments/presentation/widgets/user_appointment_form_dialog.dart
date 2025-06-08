@@ -121,12 +121,20 @@ class _UserAppointmentFormDialogState
       slot.endDateTime.minute,
     );
 
+    final medicalService = context
+        .read<MedicalServiceController>()
+        .medicalServices
+        .firstWhere((s) => s.id == _selectedMedicalServiceId);
+
     final appt = Appointment(
       id: 0,
       userId: 0,
       medicId: _assignedMedic.id,
       medicalServiceId: _selectedMedicalServiceId!,
       address: _assignedMedic.streetAddress,
+      medicalServiceName: medicalService.name,
+      medicalServicePrice: medicalService.price,
+      medicalServiceDurationMinutes: medicalService.durationMinutes,
       appointmentStart: start,
       appointmentEnd: end,
       appointmentStatus: 'pending',
