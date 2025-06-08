@@ -24,22 +24,30 @@ class _MedicAvailabilityPageState extends State<MedicAvailabilityPage> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = context.watch<MedicAvailabilityController>();
+    final medicAvailabilityController = context.watch<MedicAvailabilityController>();
 
     return Scaffold(
-      appBar: const PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
-        child: CustomAppBar(title: 'Availability Management'),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.primaryGradient,
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              const CustomAppBar(title: 'Availability Management'),
+              Expanded(child: AvailabilityBody(controller: medicAvailabilityController)),
+            ],
+          ),
+        ),
       ),
-      body: AvailabilityBody(controller: controller),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primaryRed,
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add, color: Colors.white),
         onPressed: () {
           showDialog(
             context: context,
             builder: (_) => ChangeNotifierProvider.value(
-              value: controller,
+              value: medicAvailabilityController,
               child: const NewSlotDialog(),
             ),
           );

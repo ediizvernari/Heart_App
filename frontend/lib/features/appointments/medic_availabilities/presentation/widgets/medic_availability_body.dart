@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_colors.dart';
+import 'package:frontend/core/constants/app_text_styles.dart';
 import '../controllers/medic_availability_controller.dart';
-import 'medic_availability_item.dart';
+import '../widgets/medic_availability_item.dart';
 
 class AvailabilityBody extends StatelessWidget {
   final MedicAvailabilityController controller;
@@ -17,12 +18,21 @@ class AvailabilityBody extends StatelessWidget {
       return Center(
         child: Text(
           'Error: ${controller.error}',
-          style: const TextStyle(color: AppColors.primaryRed)
+          style: AppTextStyles.dialogContent.copyWith(
+            color: AppColors.primaryRed,
+          ),
         ),
       );
     }
     if (controller.medicAvailabilities.isEmpty) {
-      return const Center(child: Text('No availability slots yet.'));
+      return Center(
+        child: Text(
+          'No availability slots yet.',
+          style: AppTextStyles.dialogContent.copyWith(
+            color: Colors.black54,
+          ),
+        ),
+      );
     }
 
     return ListView.builder(
@@ -45,20 +55,35 @@ class AvailabilityBody extends StatelessWidget {
     showDialog(
       context: ctx,
       builder: (_) => AlertDialog(
-        title: const Text('Delete this slot?'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        title: Text(
+          'Delete this slot?',
+          style: AppTextStyles.dialogTitle.copyWith(
+            color: AppColors.primaryRed,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: AppTextStyles.dialogButton.copyWith(
+                color: Colors.black54,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
               ctl.removeAvailability(slotId);
             },
-            child: const Text(
+            child: Text(
               'Delete',
-              style: TextStyle(color: AppColors.primaryRed),
+              style: AppTextStyles.dialogButton.copyWith(
+                color: AppColors.primaryRed,
+              ),
             ),
           ),
         ],

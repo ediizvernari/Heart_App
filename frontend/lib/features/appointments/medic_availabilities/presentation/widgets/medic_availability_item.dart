@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_colors.dart';
+import 'package:frontend/core/constants/app_text_styles.dart';
 import '../../data/models/medic_availability_model.dart';
 
 class AvailabilityItem extends StatelessWidget {
@@ -17,12 +18,29 @@ class AvailabilityItem extends StatelessWidget {
     final dayName = _weekdayName(slot.weekday);
 
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      child: ListTile(
-        title: Text('$dayName • ${slot.startTime}–${slot.endTime}'),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete, color: AppColors.primaryRed),
-          onPressed: onDelete,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Text(
+                '$dayName • ${slot.startTime}–${slot.endTime}',
+                style: AppTextStyles.header.copyWith(
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete, size: 20),
+              color: AppColors.primaryRed,
+              onPressed: onDelete,
+            ),
+          ],
         ),
       ),
     );
