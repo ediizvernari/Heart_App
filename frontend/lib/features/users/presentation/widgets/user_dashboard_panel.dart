@@ -3,7 +3,6 @@ import 'package:frontend/features/users/presentation/controllers/user_controller
 import 'package:frontend/handlers/client_cvd_prediction_button_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/widgets/action_card.dart';
-import 'package:frontend/handlers/available_medics_button_handler.dart';
 import 'package:frontend/features/user_health_data/presentation/pages/user_health_data_insertion_page.dart';
 
 class UserDashboardPanel extends StatelessWidget {
@@ -36,7 +35,7 @@ class UserDashboardPanel extends StatelessWidget {
             icon: Icons.search,
             label: 'Find a Medic',
             onTap: () async {
-              await AvailableMedicsButtonHandler.navigateToFindMedicPage(context);
+              await Navigator.of(context).pushNamed('/find-medic');
               await context.read<UserController>().getMyAssignmentStatus();
             },
           );

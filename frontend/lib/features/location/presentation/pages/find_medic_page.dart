@@ -8,7 +8,6 @@ import 'package:frontend/widgets/custom_app_bar.dart';
 import 'package:frontend/features/medics/presentation/controllers/medic_filtering_controller.dart';
 import 'package:frontend/features/medics/data/repositories/medic_repository_impl.dart';
 import 'package:frontend/features/medics/presentation/widgets/medic_list_view.dart';
-import 'package:frontend/handlers/medic_assignment_handler.dart';
 import 'package:frontend/features/users/presentation/controllers/user_controller.dart';
 
 class FindMedicPage extends StatefulWidget {
@@ -19,11 +18,10 @@ class FindMedicPage extends StatefulWidget {
 }
 
 class _FindMedicPageState extends State<FindMedicPage> {
-  final TextEditingController _cityCtrl    = TextEditingController();
-  final TextEditingController _countryCtrl = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _countryController = TextEditingController();
 
   late final MedicFilteringController _filterCtrl;
-  late final MedicAssignmentHandler  _assignHandler;
 
   @override
   void initState() {
@@ -34,21 +32,20 @@ class _FindMedicPageState extends State<FindMedicPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final userController = context.read<UserController>();
-    _assignHandler = MedicAssignmentHandler(userController);
   }
 
   @override
   void dispose() {
-    _cityCtrl.dispose();
-    _countryCtrl.dispose();
+    _cityController.dispose();
+    _countryController.dispose();
     _filterCtrl.dispose();
     super.dispose();
   }
 
   void _assign(int id) async {
+    final userCtrl = context.read<UserController>();
     try {
-      await _assignHandler.assignMedic(id);
+      await userCtrl.assignMedic(id);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Medic assigned successfully!')),
       );
@@ -99,12 +96,12 @@ class _FindMedicPageState extends State<FindMedicPage> {
                                     ),
                                   ),
                                   child: MedicFilterPanel(
-                                    cityController: _cityCtrl,
-                                    countryController: _countryCtrl,
+                                    cityController: _cityController,
+                                    countryController: _countryController,
                                     onFilterChanged: (_) {
                                       ctrl.getFilteredMedics(
-                                        city: _cityCtrl.text.isEmpty ? null : _cityCtrl.text,
-                                        country: _countryCtrl.text.isEmpty ? null : _countryCtrl.text,
+                                        city: _cityController.text.isEmpty ? null : _cityController.text,
+                                        country: _countryController.text.isEmpty ? null : _countryController.text,
                                       );
                                     },
                                   ),
