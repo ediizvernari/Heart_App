@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/appointments/appointments_suggestions/presentation/widgets/appointment_suggestion_item.dart';
+import 'package:frontend/core/constants/app_colors.dart';
+import 'package:frontend/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
+import 'package:frontend/features/medical_service/presentation/controllers/medical_service_controller.dart';
+import 'package:frontend/features/appointments/appointments_suggestions/presentation/controllers/user_appointment_suggestion_controller.dart';
 
-import '../controllers/user_appointment_suggestion_controller.dart';
-import '../../../../medical_service/presentation/controllers/medical_service_controller.dart';
-import '../widgets/appointment_suggestion_item.dart';
-import '../../../../../core/constants/app_colors.dart';
+class UserAppointmentSuggestionsPage extends StatefulWidget {
+  const UserAppointmentSuggestionsPage({Key? key}) : super(key: key);
 
-
-//TODO: ADD an are you sure button
-class UserSuggestionsPage extends StatefulWidget {
-  const UserSuggestionsPage({super.key});
   @override
-  _UserSuggestionsPageState createState() => _UserSuggestionsPageState();
+  _UserAppointmentSuggestionsPageState createState() => _UserAppointmentSuggestionsPageState();
 }
 
-class _UserSuggestionsPageState extends State<UserSuggestionsPage> {
+class _UserAppointmentSuggestionsPageState extends State<UserAppointmentSuggestionsPage> {
   @override
   void initState() {
     super.initState();
@@ -23,8 +22,9 @@ class _UserSuggestionsPageState extends State<UserSuggestionsPage> {
       final medicalServiceController  = context.read<MedicalServiceController>();
 
       await appointmentSuggestionController.getMyAppointmentSuggestions();
-
-      final medics = appointmentSuggestionController.myAppointmentSuggestions.map((s) => s.medicId).toSet();
+      final medics = appointmentSuggestionController.myAppointmentSuggestions
+          .map((s) => s.medicId)
+          .toSet();
       for (final medicId in medics) {
         await medicalServiceController.getMedicalServicesForAssignedMedic(medicId);
       }
@@ -33,81 +33,85 @@ class _UserSuggestionsPageState extends State<UserSuggestionsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final appointmentSuggestionController = context.watch<UserAppointmentSuggestionController>();
-    final medicalServiceController  = context.watch<MedicalServiceController>();
+    final suggestionCtrl = context.watch<UserAppointmentSuggestionController>();
+    final serviceCtrl    = context.watch<MedicalServiceController>();
 
-    if (appointmentSuggestionController.isLoading) {
+    if (suggestionCtrl.isLoading || serviceCtrl.loadingServices) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
-    if (medicalServiceController.loadingServices) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (appointmentSuggestionController.error != null) {
+    if (suggestionCtrl.error != null) {
       return Scaffold(
-        body: Center(child: Text('Error loading suggestions: ${appointmentSuggestionController.error}')),
-      );
-    }
-
-    if (medicalServiceController.error != null) {
-      return Scaffold(
-        body: Center(child: Text('Error loading services: ${medicalServiceController.error}')),
-      );
-    }
-
-    final pending = appointmentSuggestionController.myAppointmentSuggestions
-        .where((s) => s.status == 'pending')
-        .toList();
-
-    if (pending.isEmpty) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Appointment Suggestions'),
-          backgroundColor: AppColors.primaryRed,
-        ),
-        body: const Center(
+        body: Center(
           child: Text(
-            'No pending suggestions.',
-            style: TextStyle(fontSize: 16, color: Colors.black54),
+            'Error loading suggestions: ${suggestionCtrl.error}',
+            style: const TextStyle(color: Colors.red),
+          ),
+        ),
+      );
+    }
+    if (serviceCtrl.error != null) {
+      return Scaffold(
+        body: Center(
+          child: Text(
+            'Error loading services: ${serviceCtrl.error}',
+            style: const TextStyle(color: Colors.red),
           ),
         ),
       );
     }
 
+    final pending = suggestionCtrl.myAppointmentSuggestions
+        .where((s) => s.status == 'pending')
+        .toList();
+
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.primaryGradient,
         ),
-        title: const Text('Appointment Suggestions'),
-        backgroundColor: AppColors.primaryRed,
-      ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: pending.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 8),
-        itemBuilder: (_, i) {
-          final s = pending[i];
-          return SuggestionItem(
-            apppointmentSuggestion: s,
-            onRespond: (id, status) async {
-              await appointmentSuggestionController.respondToSuggestion(id, status);
-              if (status == 'accepted') {
-                Navigator.pushNamed(
-                  context,
-                  '/user-appointments',
-                  arguments: {'fromSuggestion': s},
-                );
-              }
-            },
-          );
-        },
+        child: SafeArea(
+          child: Column(
+            children: [
+              const CustomAppBar(title: 'Appointment Suggestions'),
+              Expanded(
+                child: pending.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'No pending suggestions.',
+                          style: TextStyle(color: Colors.white70, fontSize: 16),
+                        ),
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: pending.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemBuilder: (_, i) {
+                          final s = pending[i];
+                          return AppointmentSuggestionItem(
+                            apppointmentSuggestion: s,
+                            onRespond: (id, newStatus) async {
+                              await suggestionCtrl.respondToSuggestion(
+                                id,
+                                newStatus,
+                              );
+                              if (newStatus == 'accepted') {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/user-appointments',
+                                  arguments: {'fromSuggestion': s},
+                                );
+                              }
+                            },
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/appointments/appointments_suggestions/data/models/appointment_suggestion_model.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-
-import '../../data/models/appointment_suggestion_model.dart';
-import '../../../../medical_service/presentation/controllers/medical_service_controller.dart';
-import '../../../../medical_service/data/models/medical_service.dart';
-import '../../../../../core/constants/app_text_styles.dart';
+import 'package:frontend/features/medical_service/presentation/controllers/medical_service_controller.dart';
+import 'package:frontend/features/medical_service/data/models/medical_service.dart';
+import 'package:frontend/core/constants/app_text_styles.dart';
 
 typedef SuggestionResponseCallback = void Function(int suggestionId, String newStatus);
 
-class SuggestionItem extends StatelessWidget {
+class AppointmentSuggestionItem extends StatelessWidget {
   final AppointmentSuggestion apppointmentSuggestion;
   final SuggestionResponseCallback? onRespond;
 
-  const SuggestionItem({
+  const AppointmentSuggestionItem({
+    Key? key,
     required this.apppointmentSuggestion,
     this.onRespond,
-    Key? key,
   }) : super(key: key);
 
   @override
@@ -40,6 +39,7 @@ class SuggestionItem extends StatelessWidget {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(

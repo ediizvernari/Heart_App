@@ -45,6 +45,8 @@ class _SuggestionFormDialogState extends State<SuggestionFormDialog> {
     final bool canSend = _serviceId != null;
 
     return AlertDialog(
+      scrollable: true,
+      backgroundColor: Colors.white,
       title: const Text(
         'Suggest Appointment',
         style: AppTextStyles.welcomeHeader,
@@ -55,14 +57,14 @@ class _SuggestionFormDialogState extends State<SuggestionFormDialog> {
           DropdownButtonFormField<int>(
             isExpanded: true,
             value: _serviceId,
-            decoration: const InputDecoration(labelText: 'Service'),
+            decoration: const InputDecoration(labelText: 'Medical Service'),
             items: medicalServices
                 .map((s) => DropdownMenuItem(
                       value: s.id,
                       child: Text(s.name),
                     ))
                 .toList(),
-            hint: const Text('Select Service'),
+            hint: const Text('Select Medical Service'),
             validator: (v) => v == null ? 'Required' : null,
             onChanged: (v) => setState(() => _serviceId = v),
           ),
