@@ -17,7 +17,6 @@ class APIConstants {
   static const userHasMedicUrl = '$baseUrl/users/has_medic';
   static const assignmentStatusUrl = '$baseUrl/users/assignment_status';
   static const assignMedicUrl = '$baseUrl/users/assign_medic';
-  static const changeSharingPreferenceStatusUrl = '$baseUrl/users/share_data';
   static const getAssignedMedicUrl = '$baseUrl/users/assigned_medic';
   static const unassignMedicUrl = '$baseUrl/users/unassign_medic';
   

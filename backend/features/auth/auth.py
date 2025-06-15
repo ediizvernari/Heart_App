@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends
 
-from backend.features.auth.auth_schemas import TokenSchema, LoginSchema, MessageSchema
-from backend.features.auth.deps         import get_auth_service, get_current_account
+from backend.features.auth.auth_schemas import TokenSchema, LoginSchema
+from backend.features.auth.deps         import get_auth_service
 from backend.features.users.deps        import get_user_service
-from backend.features.users.user_schemas import UserCreateSchema, UserOutSchema
+from backend.features.users.user_schemas import UserCreateSchema
 from backend.features.medics.deps       import get_medic_service
 from backend.features.medics.medic_schemas import MedicCreateSchema
 from backend.features.auth.auth_service import AuthService
