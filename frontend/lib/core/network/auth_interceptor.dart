@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/main.dart';
-import 'package:frontend/utils/auth_store.dart';
+import 'package:frontend/core/utils/auth_store.dart';
 
 class AuthInterceptor extends Interceptor {
   @override

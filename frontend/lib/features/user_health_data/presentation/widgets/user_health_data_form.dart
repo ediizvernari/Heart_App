@@ -4,9 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/widgets/rounded_button.dart';
 import 'package:frontend/core/constants/app_colors.dart';
-import 'package:frontend/utils/validators/user_health_data_validator.dart';
+import 'package:frontend/core/utils/validators/user_health_data_validator.dart';
 import 'package:frontend/features/user_health_data/presentation/controllers/user_health_data_controller.dart';
 import 'package:frontend/features/user_health_data/data/models/user_health_data_model.dart';
+
+enum _NextPage { main, prediction }
 
 class UserHealthDataForm extends StatefulWidget {
   const UserHealthDataForm({super.key});
@@ -89,7 +91,33 @@ class _UserHealthDataFormState extends State<UserHealthDataForm> {
       return _showError(userHealthDataController.error!);
     }
     if (!mounted) return;
-    Navigator.pushReplacementNamed(context, '/prediction');
+    final choice = await showDialog<_NextPage>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Data Saved'),
+        content: const Text('Where would you like to go now?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, _NextPage.main),
+            child: const Text('Main Page'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, _NextPage.prediction),
+            child: const Text('View My Prediction Results'),
+          ),
+        ],
+      ),
+    );
+
+    // Navigate based on their choice
+    switch (choice) {
+      case _NextPage.prediction:
+        Navigator.pushReplacementNamed(context, '/prediction');
+        break;
+      case _NextPage.main:
+      default:
+        Navigator.pushReplacementNamed(context, '/user_home');
+    }
   }
 
   @override
