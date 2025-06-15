@@ -7,7 +7,6 @@ class UserCreateSchema(BaseModel):
     password: str
 
 class UserOutSchema(BaseModel):
-    #TODO: Maybe add the shares data with medic field
     first_name: str
     last_name: str
     email: str
@@ -20,6 +19,5 @@ class MedicAssignmentRequest(BaseModel):
 
 class UserAssignmentStatus(BaseModel):
     has_assigned_medic: bool
-    shares_data_with_medic: bool
 
     model_config = {"from_attributes": True}

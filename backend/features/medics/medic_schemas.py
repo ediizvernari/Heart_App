@@ -25,6 +25,5 @@ class AssignedUserOutSchema(BaseModel):
     id: int
     first_name: str
     last_name: str
-    shares_data_with_medic: bool
 
     model_config = {"from_attributes": True}

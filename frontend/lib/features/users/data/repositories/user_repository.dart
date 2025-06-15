@@ -6,6 +6,5 @@ abstract class UserRepository {
   Future<AssignmentStatus> getMyAssignmentStatus();
   Future<void> assignMedic(int medicId);
   Future<void> unassignMedic();
-  Future<void> changeSharingPreferenceStatus(bool newSharingPreferenceStatus);
   Future<Medic> getMyAssignedMedic();
 }

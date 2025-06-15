@@ -1,5 +1,7 @@
 from argon2 import PasswordHasher
-from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
+from fastapi import HTTPException, status
+
 
 from backend.features.medics.medic_schemas import MedicOutSchema
 from backend.features.medics.medic_service import MedicService
@@ -50,18 +52,16 @@ class UserService:
         return await self._get_user_by_id(user.id)
 
     async def signup_user(self, user_payload: UserCreateSchema) -> str:
+        if not self.check_user_email(user_payload.email):
+            raise HTTPException(409, "Email already registered")
         user = await self.create_user(user_payload)
-        return create_access_token({"sub": user.id, "role": "user"})
+        token = create_access_token({"sub": user.id, "role": "user"})
+        return token
 
     async def check_user_email(self, email: str) -> dict:
         if await self._user_repo.get_by_email(email):
-            raise HTTPException(400, "Email already registered")
+            raise HTTPException(409, "Email already registered")
         return {"available": True}
-    
-    #TODO: Check if this function is needed
-    async def update_user_sharing_preferences(self, user_id: int, sharing_preferences: bool) -> UserOutSchema:
-        await self._user_repo.update_sharing_preferences(user_id, sharing_preferences)
-        return await self._get_user_by_id(user_id)
 
     async def assign_user_to_medic(self, user_id: int, medic_id: int) -> UserOutSchema:
         user = await self._user_repo.get_user_by_id(user_id)
@@ -81,7 +81,6 @@ class UserService:
         if not user:
             raise HTTPException(404, "User not found")
         user.medic_id = None
-        user.share_data_with_medic = False
         await self._user_repo.db.commit()
         await self._user_repo.db.refresh(user)
 
@@ -93,7 +92,6 @@ class UserService:
             raise HTTPException(404, "User not found")
         return UserAssignmentStatus(
             has_assigned_medic=user.medic_id is not None,
-            shares_data_with_medic=user.share_data_with_medic,
         )
 
     async def get_assigned_medic(self, user_id: int) -> MedicOutSchema:
@@ -105,5 +103,3 @@ class UserService:
             raise HTTPException(404, "No medic assigned")
         
         return await self._medic_service.get_medic_by_id(user_object.medic_id)
-
-

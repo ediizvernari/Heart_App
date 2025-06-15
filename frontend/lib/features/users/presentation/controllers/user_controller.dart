@@ -61,11 +61,6 @@ class UserController extends ChangeNotifier {
     _assignedMedic = null;
   });
 
-  Future<void> changeSharing(bool newSharingPreference) async => _wrap(() async {
-    await _userRepository.changeSharingPreferenceStatus(newSharingPreference);
-    await getMyAssignmentStatus();
-  });
-
   void clearError() {
     _error = null;
     notifyListeners();

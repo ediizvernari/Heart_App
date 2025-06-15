@@ -66,20 +66,6 @@ class UserApi {
     }
   }
 
-  static Future<void> changeSharingPreferenceStatus(bool share) async {
-    try {
-      final Response<void> response = await ApiClient.patch<void>(APIConstants.changeSharingPreferenceStatusUrl, null, queryParameters: {'share_data_with_medic': share});
-
-      if (response.statusCode == 200) return;
-      
-      throw ApiException(response.statusCode ?? 0, response.statusMessage ?? 'Failed to change sharing preference.');
-    } on DioException catch (dioError) {
-      final statusCode = dioError.response?.statusCode ?? -1;
-      final message = dioError.response?.statusMessage ?? dioError.message;
-      throw ApiException(statusCode, message!);
-    }
-  }
-
   static Future<Medic> getAssignedMedic() async {
     try {
       final Response<Map<String, dynamic>> response = await ApiClient.get<Map<String, dynamic>>(APIConstants.getAssignedMedicUrl);

@@ -64,7 +64,7 @@ class UserHealthDataService:
         decrypted_user_health_data_dict = decrypt_health_data_fields_for_user(encrypted_user_health_data_dict)
 
         user_data_for_input_feature_build = UserHealthDataSchema(**decrypted_user_health_data_dict)
-
+ 
         return {
             "birth_date": user_data_for_input_feature_build.birth_date,
             "height": user_data_for_input_feature_build.height,

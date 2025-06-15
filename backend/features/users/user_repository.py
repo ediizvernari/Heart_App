@@ -20,10 +20,6 @@ class UserRepository:
         await update_entity_by_id(self.db, User, user_id, {"medic_id": medic_id})
     
     async def unassign_medic(self, user_id: int) -> None:
-        await update_entity_by_id(self.db, User, user_id, {"medic_id": None, "share_data_with_medic": False})
-
-    #TODO: Check if this function is needed
-    async def update_sharing_preferences(self, user_id: int, sharing_preference: bool) -> None:
-        await update_entity_by_id(self.db, User, user_id, {"share_data_with_medic": sharing_preference})
+        await update_entity_by_id(self.db, User, user_id, {"medic_id": None})
 
 #TODO: Maybe add some password change and also a delete for accound deletion

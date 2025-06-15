@@ -26,13 +26,6 @@ class AssignedUsersController extends ChangeNotifier {
     assignedUsersLatestRecordMap.clear();
 
     for (final u in assignedUsers) {
-      if (u.sharesDataWithMedic) {
-        try {
-          assignedUsersHealthDataMap[u.id] =
-            await _medicRepository.getAssignedUserHealthData(u.id);
-        } catch (_) { /* ignore */ }
-      }
-
       try {
         assignedUsersLatestRecordMap[u.id] =
           await _medicRepository.getAssignedUserLastMedicalRecord(u.id);

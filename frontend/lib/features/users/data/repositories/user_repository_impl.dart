@@ -21,10 +21,6 @@ class UserRepositoryImpl implements UserRepository {
     UserApi.unassignMedic();
 
   @override
-  Future<void> changeSharingPreferenceStatus(bool newSharingPreferenceStatus) async =>
-    UserApi.changeSharingPreferenceStatus(newSharingPreferenceStatus);
-
-  @override
   Future<Medic> getMyAssignedMedic() async =>
     UserApi.getAssignedMedic();
 }
