@@ -17,7 +17,6 @@ class MedicalServiceFormDialog extends StatefulWidget {
 
 class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
   final _formKey = GlobalKey<FormState>();
-  int? _selectedTypeId;
   late TextEditingController _medicalServiceNameController;
   late TextEditingController _medicalServicePriceController;
   late TextEditingController _medicalServiceDurationController;
@@ -26,12 +25,10 @@ class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
   void initState() {
     super.initState();
     final svc = widget.service;
-    _selectedTypeId = svc?.medicalServiceTypeId;
     _medicalServiceNameController = TextEditingController(text: svc?.name ?? '');
     _medicalServicePriceController = TextEditingController(text: svc != null ? svc.price.toString() : '');
     _medicalServiceDurationController = TextEditingController(text: svc != null ? svc.durationMinutes.toString() : '');
 
-    // Ensure types are loaded if needed
     final controller = context.read<MedicalServiceController>();
     if (controller.medicalServiceTypes.isEmpty) {
       controller.getAllMedicalServiceData();
@@ -49,7 +46,6 @@ class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<MedicalServiceController>();
-    final types = controller.medicalServiceTypes;
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -64,7 +60,7 @@ class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 1) Title
+
                 Text(
                   widget.service == null ? 'New Service' : 'Edit Service',
                   style: AppTextStyles.dialogTitle.copyWith(
@@ -73,41 +69,6 @@ class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
                 ),
                 const SizedBox(height: 12),
 
-                // 2) Type dropdown
-                DropdownButtonFormField<int>(
-                  isExpanded: true,
-                  value: _selectedTypeId,
-                  decoration: InputDecoration(
-                    labelText: 'Service Type',
-                    labelStyle: AppTextStyles.subheader.copyWith(
-                      color: Colors.black54,
-                    ),
-                    border: const OutlineInputBorder(),
-                    hintText: types.isEmpty ? 'Loading types…' : null,
-                    hintStyle: AppTextStyles.dialogContent.copyWith(
-                      color: Colors.black38,
-                    ),
-                  ),
-                  items: types
-                      .map((t) => DropdownMenuItem<int>(
-                            value: t.id,
-                            child: Text(
-                              t.name,
-                              style: AppTextStyles.dialogContent.copyWith(
-                                color: Colors.black87,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ))
-                      .toList(),
-                  onChanged:
-                      types.isEmpty ? null : (v) => setState(() => _selectedTypeId = v),
-                  validator: (v) =>
-                      v == null ? 'Please select a type' : null,
-                ),
-                const SizedBox(height: 12),
-
-                // 3) Name field
                 TextFormField(
                   controller: _medicalServiceNameController,
                   style: AppTextStyles.dialogContent.copyWith(
@@ -208,12 +169,11 @@ class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
                         final name = _medicalServiceNameController.text.trim();
                         final price = double.parse(_medicalServicePriceController.text.trim());
                         final duration = int.parse(_medicalServiceDurationController.text.trim());
-                        final typeId = _selectedTypeId!;
 
                         final newService = MedicalService(
                           id: widget.service?.id ?? 0,
                           medicId: widget.service?.medicId ?? 0,
-                          medicalServiceTypeId: typeId,
+                          medicalServiceTypeId: widget.service?.medicalServiceTypeId ?? 0,
                           name: name,
                           price: price.toInt(),
                           durationMinutes: duration,
