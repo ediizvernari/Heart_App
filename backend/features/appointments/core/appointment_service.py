@@ -32,7 +32,7 @@ class AppointmentService:
 
     async def _get_appointment_by_id(self, appointment_id: int) -> AppointmentOutSchema:
         encrypted_appointment = await self._appointment_repo.get_appointment_by_id(appointment_id)
-        decrypted_fields = decrypt_fields(encrypted_appointment, ["address", "medical_service_name", "medical_service_price", "medical_service_duration_minutes", "appointment_start", "appointment_end", "appointment_status"])
+        decrypted_fields = decrypt_fields(encrypted_appointment, ["address", "medical_service_name", "medical_service_price", "appointment_start", "appointment_end", "appointment_status"])
 
         return AppointmentOutSchema(
             id=appointment_id,
@@ -42,7 +42,6 @@ class AppointmentService:
 
             medical_service_name=decrypted_fields["medical_service_name"],
             medical_service_price=int(decrypted_fields["medical_service_price"]),
-            medical_service_duration_minutes = int(decrypted_fields["medical_service_duration_minutes"]),
             
             address=decrypted_fields["address"],
             appointment_start=decrypted_fields["appointment_start"],
@@ -109,7 +108,6 @@ class AppointmentService:
             appointment_status = encrypted_appointment_fields["appointment_status"],
             medical_service_name = encrypt_data(medical_service.name),
             medical_service_price = encrypt_data(str(medical_service.price)),
-            medical_service_duration_minutes = encrypt_data(str(medical_service.duration_minutes)),
         )
 
         return await self._get_appointment_by_id(appointment.id)

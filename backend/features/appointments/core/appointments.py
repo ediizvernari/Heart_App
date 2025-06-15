@@ -1,6 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, Query, status
-from fastapi import HTTPException
+from fastapi import APIRouter, Depends, Query
 from backend.database.sql_models import User, Medic
 from backend.features.auth.deps import get_current_account
 from backend.features.appointments.deps import get_appointment_service

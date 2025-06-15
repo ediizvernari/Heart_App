@@ -6,7 +6,6 @@ class Appointment {
   final String address;
   final String medicalServiceName;
   final int medicalServicePrice;
-  final int medicalServiceDurationMinutes;
   final DateTime appointmentStart;
   final DateTime appointmentEnd;
   final String appointmentStatus;
@@ -21,7 +20,6 @@ class Appointment {
     required this.address,
     required this.medicalServiceName,
     required this.medicalServicePrice,
-    required this.medicalServiceDurationMinutes,
     required this.appointmentStart,
     required this.appointmentEnd,
     required this.appointmentStatus,
@@ -37,7 +35,6 @@ class Appointment {
         address: json['address'] as String,
         medicalServiceName: json['medical_service_name'] as String,
         medicalServicePrice: json['medical_service_price'] as int,
-        medicalServiceDurationMinutes: json['medical_service_duration_minutes'] as int,
         appointmentStart: DateTime.parse(json['appointment_start'] as String),
         appointmentEnd: DateTime.parse(json['appointment_end'] as String),
         appointmentStatus: json['appointment_status'] as String,

@@ -134,7 +134,6 @@ class _UserAppointmentFormDialogState
       address: _assignedMedic.streetAddress,
       medicalServiceName: medicalService.name,
       medicalServicePrice: medicalService.price,
-      medicalServiceDurationMinutes: medicalService.durationMinutes,
       appointmentStart: start,
       appointmentEnd: end,
       appointmentStatus: 'pending',
