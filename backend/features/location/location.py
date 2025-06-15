@@ -14,4 +14,4 @@ async def get_autocompleted_cities(query: str = Query(..., min_length=1), locati
 
 @router.get("/countries", response_model=List[CountrySchema])
 async def get_all_decrypted_countries(location_service: LocationService = Depends(get_location_service)):
-    return await location_service.list_countries()
+    return await location_service.get_all_countries()

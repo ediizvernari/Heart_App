@@ -1,5 +1,8 @@
 import base64
 from datetime import date
+import hashlib
+import hmac
+import unicodedata
 import os
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
@@ -24,7 +27,30 @@ ENCRYPTED_MEDIC_FIELDS = {
 }
 
 AES_KEY = os.getenv("AES_KEY")
-aes_key = base64.b64decode(AES_KEY)
+if not AES_KEY:
+    raise RuntimeError("Missing AES_KEY_BASE environment variable")
+try:
+    aes_key = base64.b64decode(AES_KEY)
+except Exception:
+    raise RuntimeError("AES_KEY_BASE is not valid Base64")
+
+LOOKUP_KEY_B64 = os.getenv("LOOKUP_KEY_BASE64")
+if not LOOKUP_KEY_B64:
+    raise RuntimeError("Missing LOOKUP_KEY_BASE64 environment variable")
+try:
+    lookup_key = base64.b64decode(LOOKUP_KEY_B64)
+except Exception:
+    raise RuntimeError("LOOKUP_KEY_BASE64 is not valid Base64")
+if len(lookup_key) != 32:
+    raise RuntimeError("LOOKUP_KEY_BASE64 must decode to 32 bytes (256 bits)")
+
+def normalize_text(text: str) -> str:
+    normalized_text = unicodedata.normalize("NFKC", text)
+    return normalized_text.strip().casefold()
+
+def make_lookup_hash(plaintext: str) -> str:
+    canon = normalize_text(plaintext)
+    return hmac.new(lookup_key, canon.encode("utf-8"), hashlib.sha256).hexdigest()
 
 def encrypt_data(data: str) -> str:
     iv = os.urandom(12)

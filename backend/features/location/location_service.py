@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import HTTPException
 
-from backend.utils.encryption_utils import encrypt_data, decrypt_data
+from backend.utils.encryption_utils import encrypt_data, decrypt_data, make_lookup_hash
 from .location_repository import LocationRepository
 from .location_schemas import (
     CountrySchema,
@@ -17,14 +17,19 @@ class LocationService:
     # ─── Countries ──────────────────────────────────────────────────────────
 
     async def create_country(self, payload: CountrySchema) -> CountryOutSchema:
-        encrypted = encrypt_data(payload.name)
-        country = await self.repo.create_country(encrypted)
+        encrypted_country_name = encrypt_data(payload.name)
+        country_lookup_hash = make_lookup_hash(payload.name)
+
+        is_country = await self.repo.get_country_by_lookup_hash(country_lookup_hash)
+        if is_country is None:
+            country = await self.repo.create_country(encrypted_country_name, country_lookup_hash)
+
         return CountryOutSchema.model_validate({
             "id": country.id,
             "name": decrypt_data(country.name),
         })
 
-    async def list_countries(self) -> List[CountryOutSchema]:
+    async def get_all_countries(self) -> List[CountryOutSchema]:
         rows = await self.repo.get_all_countries()
         return [
             CountryOutSchema.model_validate({
@@ -33,28 +38,27 @@ class LocationService:
             })
             for c in rows
         ]
-
-    async def get_country_name_by_id(self, country_id: int) -> str:
-        country = await self.repo.get_country_by_id(country_id)
-        if not country:
-            raise HTTPException(404, "Country not found")
-        return decrypt_data(country.name)
-
     # ─── Cities ─────────────────────────────────────────────────────────────
 
     async def create_city(self, payload: CityWithCountrySchema) -> CityWithCountryOutSchema:
-        encrypted_country = encrypt_data(payload.country)
-        country = await self.repo.get_country_by_name(encrypted_country)
-        if not country:
-            country = await self.repo.create_country(encrypted_country)
+        country_hash = make_lookup_hash(payload.country)
+        encrypted_country_name = encrypt_data(payload.country)
 
-        encrypted_city = encrypt_data(payload.city)
-        city = await self.repo.create_city(encrypted_city, country.id)
+        country_obj = await self.repo.get_country_by_lookup_hash(country_hash)
+        if country_obj is None:
+            country_obj = await self.repo.create_country(encrypted_country_name, country_hash)
+        
+        city_hash = make_lookup_hash(payload.city)
+        encrypted_city_name = encrypt_data(payload.city)
+
+        city_obj = await self.repo.get_city_by_lookup_hash_and_country_id(city_hash, country_obj.id)
+        if city_obj is None:
+            city_obj = await self.repo.create_city(encrypted_city_name, city_hash, country_obj.id)
 
         return CityWithCountryOutSchema.model_validate({
-            "id": city.id,
-            "city": decrypt_data(city.name),
-            "country": await self.get_country_name_by_city_id(city.id),
+            "id": city_obj.id,
+            "city": decrypt_data(city_obj.name),
+            "country": await self.get_country_name_by_city_id(city_obj.id),
         })
 
     async def get_city_name_by_id(self, city_id: int) -> str:

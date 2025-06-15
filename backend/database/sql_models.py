@@ -11,9 +11,6 @@ class User(Base):
     last_name = Column(String)
     email = Column(String, unique=True, index=True)
     password = Column(String)
-
-    #TODO: Maybe delete this column
-    share_data_with_medic = Column(Boolean, default=False)
     
     medic = relationship("Medic", back_populates="patients")
     health_data = relationship("UserHealthData", back_populates="user", uselist=False, cascade="all, delete-orphan")
@@ -54,7 +51,8 @@ class Country(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, unique=True, index=True)
-
+    lookup_hash = Column(String, unique=True, index=True)
+ 
     cities = relationship("City", back_populates="country", cascade="all, delete-orphan")
 
     class Config:
@@ -66,6 +64,7 @@ class City(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, index=True)
+    lookup_hash = Column(String, unique=True, index=True)
     country_id = Column(Integer, ForeignKey("countries.id"))
 
     country = relationship("Country", back_populates="cities")
@@ -152,7 +151,6 @@ class Appointment(Base):
 
     medical_service_name = Column(String, nullable=False)
     medical_service_price = Column(String, nullable=False)
-    medical_service_duration_minutes = Column(String, nullable=False)
     
     address = Column(String)
     appointment_start = Column(String)

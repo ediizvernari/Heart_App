@@ -4,7 +4,7 @@ from argon2 import PasswordHasher
 
 from backend.features.user_health_data.user_health_data_schemas import UserHealthDataOutSchema
 from backend.features.user_health_data.user_health_data_service import UserHealthDataService
-from backend.utils.encryption_utils import encrypt_data, encrypt_fields, decrypt_data
+from backend.utils.encryption_utils import encrypt_data, encrypt_fields, decrypt_data, make_lookup_hash
 from backend.core.auth import create_access_token
 from backend.features.location.location_service import LocationService
 from .medic_repository import MedicRepository
@@ -20,32 +20,42 @@ class MedicService:
 
     async def signup_medic(self, medic_payload: MedicCreateSchema) -> str:
         if await self._medic_repo.get_medic_by_email(medic_payload.email):
-            raise HTTPException(400, "Email already registered")
+            raise HTTPException(status_code=409, detail="Email already registered")
 
+        country_hash = make_lookup_hash(medic_payload.country)
         encrypted_country = encrypt_data(medic_payload.country)
-        encrypted_city    = encrypt_data(medic_payload.city)
 
-        country = await self._location_service.repo.get_country_by_name(encrypted_country)
-        if not country:
-            country = await self._location_service.repo.create_country(encrypted_country)
+        country = await self._location_service.repo.get_country_by_lookup_hash(country_hash)
+        if country is None:
+            country = await self._location_service.repo.create_country(
+                name=encrypted_country,
+                lookup_hash=country_hash
+            )
         country_id = country.id
 
-        city = await self._location_service.repo.get_city_by_name_and_country(
-            city_name=encrypted_city,
-            country_id=country_id
-        )
-        if not city:
-            city = await self._location_service.repo.create_city(encrypted_city, country_id)
+        city_hash      = make_lookup_hash(medic_payload.city)
+        encrypted_city = encrypt_data(medic_payload.city)
+
+        city = await self._location_service.repo.get_city_by_lookup_hash_and_country_id(lookup_hash=city_hash, country_id=country_id)
+        if city is None:
+            city = await self._location_service.repo.create_city(
+                encrypted_city_name=encrypted_city,
+                lookup_hash=city_hash,
+                country_id=country_id
+            )
         city_id = city.id
 
-        hashed = ph.hash(medic_payload.password)
-        encrypted = encrypt_fields(medic_payload, ["first_name", "last_name", "street_address"])
+        hashed_password = ph.hash(medic_payload.password)
+        encrypted_personal = encrypt_fields(
+            medic_payload,
+            fields=["first_name", "last_name", "street_address"]
+        )
 
         medic = await self._medic_repo.create_medic(
-            **encrypted,
             email=medic_payload.email,
-            password=hashed,
+            password=hashed_password,
             city_id=city_id,
+            **encrypted_personal
         )
 
         return create_access_token({"sub": medic.id, "role": "medic"})
@@ -53,7 +63,7 @@ class MedicService:
     async def check_medic_email_availability(self, email: str) -> dict:
         existing = await self._medic_repo.get_medic_by_email(email)
         if existing:
-            raise HTTPException(status_code=400, detail="Email already registered")
+            raise HTTPException(status_code=409, detail="Email already registered")
         return {"available": True}
     
     async def get_medic_by_id(self, medic_id: int) -> MedicOutSchema:
@@ -106,7 +116,6 @@ class MedicService:
                 "id": user.id,
                 "first_name": decrypt_data(user.first_name),
                 "last_name": decrypt_data(user.last_name),
-                "shares_data_with_medic": user.share_data_with_medic,
             })
             for user in assigned_users
         ]
