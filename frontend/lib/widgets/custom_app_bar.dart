@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_text_styles.dart';
+import 'package:frontend/core/constants/app_colors.dart';
+import 'package:frontend/core/constants/app_text_styles.dart';
+import 'package:frontend/core/theme/app_theme.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -8,6 +9,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onBack;
   final List<Widget>? actions;
   final Color iconColor;
+  final bool showBackButton;
 
   const CustomAppBar({
     Key? key,
@@ -16,6 +18,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onBack,
     this.actions,
     this.iconColor = Colors.white,
+    this.showBackButton = true,
   }) : super(key: key);
 
   @override
@@ -23,13 +26,23 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final gradient = Theme.of(context)
+            .extension<AppThemeExtension>()
+            ?.appBarGradient ??
+        AppColors.primaryGradient;
+
+    final canDefaultBack = showBackButton &&
+        onBack == null &&
+        Navigator.of(context).canPop();
+
     return AppBar(
-      backgroundColor: AppColors.primaryRed,
-      iconTheme: IconThemeData(color: iconColor),
+      backgroundColor: Colors.transparent,
       elevation: 0,
-      leading: onBack != null
+      iconTheme: IconThemeData(color: iconColor),
+      automaticallyImplyLeading: canDefaultBack,
+      leading: showBackButton && onBack != null
           ? IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              icon: Icon(Icons.arrow_back, color: iconColor),
               onPressed: onBack,
             )
           : null,
@@ -48,6 +61,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       centerTitle: true,
       actions: actions,
+      flexibleSpace: Container(decoration: BoxDecoration(gradient: gradient)),
     );
   }
 }
