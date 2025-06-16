@@ -6,9 +6,9 @@ import 'package:frontend/features/auth/data/models/user_signup_request.dart';
 import 'package:frontend/features/auth/presentation/screens/home_screen.dart';
 import 'package:frontend/features/medics/presentation/pages/medic_main_page.dart';
 import 'package:frontend/features/users/presentation/pages/user_main_page.dart';
-import 'package:frontend/utils/auth_store.dart';
-import 'package:frontend/utils/validators/auth_form_validator.dart';
-import 'package:frontend/utils/validators/auth_validator.dart';
+import 'package:frontend/core/utils/auth_store.dart';
+import 'package:frontend/core/utils/validators/auth_form_validator.dart';
+import 'package:frontend/core/utils/validators/auth_validator.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:frontend/features/auth/data/models/login_request.dart';
 import 'package:frontend/features/auth/data/models/auth_response.dart';
@@ -74,6 +74,7 @@ class AuthController extends ChangeNotifier {
     confirmPassword: confirmPassword,
     firstName: userSignupDto.firstName,
     lastName: userSignupDto.lastName,
+    licenseNumber: "",
     isMedic: false,
     );
 
@@ -105,6 +106,7 @@ class AuthController extends ChangeNotifier {
     confirmPassword: confirmPassword,
     firstName: medicSignupDto.firstName,
     lastName: medicSignupDto.lastName,
+    licenseNumber: medicSignupDto.licenseNumber,  // ← NEW
     isMedic: true,
     );
 
@@ -164,7 +166,7 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
 
     Navigator.of(context).pushNamedAndRemoveUntil(
-      '/login',
+      '/home',
       (route) => false,
     );
   }

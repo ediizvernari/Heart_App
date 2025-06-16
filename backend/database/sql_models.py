@@ -34,17 +34,32 @@ class Medic(Base):
     street_address = Column(String)
 
     city_id = Column(Integer, ForeignKey("cities.id"))
+    registry_id = Column(Integer, ForeignKey("medic_registry.id"), nullable=True)
+    
     city = relationship("City")
-
     patients = relationship("User", back_populates="medic")
     medical_services = relationship("MedicalService", back_populates="medic", cascade="all, delete-orphan")
     appointments = relationship("Appointment", back_populates="medic", cascade="all, delete-orphan")
     appointment_suggestions = relationship("AppointmentSuggestion", back_populates="medic", cascade="all, delete-orphan")
     availabilities = relationship("MedicAvailability", back_populates="medic", cascade="all, delete-orphan")
+    registry = relationship("MedicRegistry", back_populates="medics")
 
     class Config:
         from_attributes = True
 
+class MedicRegistry(Base):
+    __tablename__ = 'medic_registry'
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    first_name = Column(String, nullable=False, index=True)
+    last_name = Column(String, nullable=False, index=True)
+    license_number = Column(String, nullable=False, unique=True, index=True)
+    lookup_hash = Column(String, nullable=False, unique=True, index=True)
+
+    medics = relationship("Medic", back_populates="registry")
+
+    class Config:
+        from_attributes = True    
 
 class Country(Base):
     __tablename__ = 'countries'

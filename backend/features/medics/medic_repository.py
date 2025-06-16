@@ -3,7 +3,7 @@ from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.crud.utils import create_entity, get_entity_by_field, list_entities
-from backend.database.sql_models import City, Country, Medic, User
+from backend.database.sql_models import City, Country, Medic, MedicRegistry, User
 
 class MedicRepository:
     def __init__(self, db: AsyncSession):

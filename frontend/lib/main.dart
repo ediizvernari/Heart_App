@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:frontend/core/constants/app_colors.dart';
+import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/features/auth/presentation/screens/splash_redirect_screen.dart';
 import 'package:provider/provider.dart';
 
-import 'package:frontend/utils/auth_store.dart';
+import 'package:frontend/core/utils/auth_store.dart';
 import 'package:frontend/routers/app_router.dart';
 import 'package:frontend/features/users/presentation/controllers/user_controller.dart';
 import 'package:frontend/features/user_health_data/presentation/controllers/user_health_data_controller.dart';
@@ -94,10 +94,7 @@ class HealthApp extends StatelessWidget {
     return MaterialApp(
       title: 'Health App',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primaryRed),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light,
       builder: (context, child) => Directionality(
         textDirection: TextDirection.ltr,
         child: child!,

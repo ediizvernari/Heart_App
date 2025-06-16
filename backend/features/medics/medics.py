@@ -9,7 +9,6 @@ from backend.features.medics.medic_schemas             import (
     AssignedUserOutSchema,
 )
 from backend.features.medics.medic_service             import MedicService
-from backend.features.user_health_data.deps            import get_user_health_data_service
 from backend.features.user_health_data.user_health_data_schemas import UserHealthDataOutSchema
 from backend.features.user_medical_record.deps        import get_user_medical_record_service
 from backend.features.user_medical_record.user_medical_records_schemas import UserMedicalRecordOutSchema

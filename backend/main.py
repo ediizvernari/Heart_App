@@ -16,6 +16,7 @@ from backend.features.users import users
 from backend.features.appointments.scheduling import scheduling
 from fastapi.middleware.cors import CORSMiddleware
 from backend.scripts.medical_service_seed import seed_cardiology_medical_service_types
+from backend.scripts.medic_registry_seed import seed_medic_registry
 
 if sys.platform.startswith("win"):
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -30,6 +31,7 @@ async def on_startup():
     await create_tables()
     async with SessionLocal() as db:
         await seed_cardiology_medical_service_types(db)
+        await seed_medic_registry(db)
 
 origins = [
     "https://10.0.2.2",

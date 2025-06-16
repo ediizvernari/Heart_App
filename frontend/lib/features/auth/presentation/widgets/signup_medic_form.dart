@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/widgets/rounded_button.dart';
 import 'package:frontend/core/constants/app_colors.dart';
-import 'package:frontend/utils/validators/auth_validator.dart';
+import 'package:frontend/core/utils/validators/auth_validator.dart';
 import 'package:frontend/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:frontend/features/auth/data/models/medic_signup_request.dart';
 
@@ -21,6 +21,7 @@ class _SignupMedicFormState extends State<SignupMedicForm> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _licenseController = TextEditingController();
   final _streetController = TextEditingController();
   final _cityController = TextEditingController();
   final _countryController = TextEditingController();
@@ -32,6 +33,7 @@ class _SignupMedicFormState extends State<SignupMedicForm> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _licenseController.dispose();
     _streetController.dispose();
     _cityController.dispose();
     _countryController.dispose();
@@ -44,7 +46,8 @@ class _SignupMedicFormState extends State<SignupMedicForm> {
       lastName: _lastNameController.text.trim(),
       email: _emailController.text.trim(),
       password: _passwordController.text,
-      confirmPassword:_confirmPasswordController.text,
+      confirmPassword: _confirmPasswordController.text,
+      licenseNumber: _licenseController.text.trim(),
       isMedic: true,
     );
     if (!mounted) return;
@@ -70,6 +73,7 @@ class _SignupMedicFormState extends State<SignupMedicForm> {
       password: _passwordController.text,
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
+      licenseNumber: _licenseController.text.trim(),
       streetAddress: _streetController.text.trim(),
       city: _cityController.text.trim(),
       country: _countryController.text.trim(),
@@ -116,6 +120,8 @@ class _SignupMedicFormState extends State<SignupMedicForm> {
       _field(_passwordController,'Password', obscure: true),
       const SizedBox(height: 16),
       _field(_confirmPasswordController, 'Confirm Password', obscure: true),
+      const SizedBox(height: 16),
+      _field(_licenseController, 'License Number'),
       const SizedBox(height: 24),
       RoundedButton(
         text: 'Next',

@@ -8,15 +8,17 @@ from backend.utils.encryption_utils import encrypt_data, encrypt_fields, decrypt
 from backend.core.auth import create_access_token
 from backend.features.location.location_service import LocationService
 from .medic_repository import MedicRepository
+from .medic_registry_repository import MedicRegistryRepository
 from .medic_schemas import MedicCreateSchema, MedicOutSchema, AssignedUserOutSchema
 
 ph = PasswordHasher()
 
 class MedicService:
-    def __init__(self, medic_repo: MedicRepository, location_service: LocationService, user_health_data_service: UserHealthDataService):
+    def __init__(self, medic_repo: MedicRepository, location_service: LocationService, user_health_data_service: UserHealthDataService, medic_registry_repo: MedicRegistryRepository):
         self._medic_repo = medic_repo
         self._location_service = location_service
         self._user_health_data_service = user_health_data_service
+        self._medic_registry_repo = medic_registry_repo
 
     async def signup_medic(self, medic_payload: MedicCreateSchema) -> str:
         if await self._medic_repo.get_medic_by_email(medic_payload.email):
@@ -33,7 +35,7 @@ class MedicService:
             )
         country_id = country.id
 
-        city_hash      = make_lookup_hash(medic_payload.city)
+        city_hash = make_lookup_hash(medic_payload.city)
         encrypted_city = encrypt_data(medic_payload.city)
 
         city = await self._location_service.repo.get_city_by_lookup_hash_and_country_id(lookup_hash=city_hash, country_id=country_id)
@@ -45,6 +47,11 @@ class MedicService:
             )
         city_id = city.id
 
+        registry_id_lookup = make_lookup_hash(medic_payload.license_number)
+        registry_entry = await self._medic_registry_repo.get_registry_medic_by_lookup_hash(registry_id_lookup)
+        if registry_entry is None:
+            raise HTTPException(400, "License number not found in registry")
+
         hashed_password = ph.hash(medic_payload.password)
         encrypted_personal = encrypt_fields(
             medic_payload,
@@ -55,6 +62,7 @@ class MedicService:
             email=medic_payload.email,
             password=hashed_password,
             city_id=city_id,
+            registry_id=registry_entry.id,
             **encrypted_personal
         )
 

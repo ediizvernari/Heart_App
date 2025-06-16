@@ -59,8 +59,11 @@ class AuthValidator {
     required String confirmPassword,
     required String firstName,
     required String lastName,
+    required String licenseNumber,
     required bool isMedic,
   }) async {
+    if (licenseNumber.isEmpty && isMedic) return 'License number is required';
+
     final emailError = await validateEmail(email, isMedic: isMedic);
     if (emailError != null) return emailError;
 

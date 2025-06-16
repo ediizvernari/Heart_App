@@ -5,6 +5,7 @@ class MedicCreateSchema(BaseModel):
     last_name: str
     email: str
     password: str
+    license_number:str
     street_address: str
     city: str
     country:str
