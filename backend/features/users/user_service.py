@@ -1,98 +1,108 @@
 from argon2 import PasswordHasher
-from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
-
-
+from backend.config import ENCRYPTED_USER_FIELDS
+from backend.core.auth import create_access_token
+from backend.database.sql_models import User
 from backend.features.medics.medic_schemas import MedicOutSchema
 from backend.features.medics.medic_service import MedicService
-from backend.utils.encryption_utils import decrypt_fields, encrypt_fields
-from backend.core.auth import create_access_token
+from backend.features.users.user_schemas import (
+    UserCreateSchema,
+    UserAssignmentStatus,
+    UserOutSchema,
+)
+from backend.utils.encryption_utils import encrypt_fields, decrypt_fields
 from backend.features.users.user_repository import UserRepository
-from backend.features.users.user_schemas import UserCreateSchema, UserAssignmentStatus, UserOutSchema
-from backend.features.medics.medic_repository import MedicRepository
 
 class UserService:
-    def __init__(self, user_repo: UserRepository, medic_repo: MedicRepository, medic_service: MedicService):
+    def __init__(self, user_repo: UserRepository, medic_service: MedicService):
         self._user_repo = user_repo
-        self._medic_repo = medic_repo
         self._medic_service = medic_service
 
-    async def _get_user_by_id(self, user_id: int) -> UserOutSchema:
-        encrypted_user = await self._user_repo.get_user_by_id(user_id)
-
-        if not encrypted_user:
-            raise HTTPException(404, "User not found")
-
-        decrypted_user_data = decrypt_fields(encrypted_user, ["first_name", "last_name"])
-
+    async def _map_user_to_schema(self, user_record: User) -> UserOutSchema:
+        decrypted_fields = decrypt_fields(user_record, ENCRYPTED_USER_FIELDS)
+        
         return UserOutSchema(
-            first_name=decrypted_user_data["first_name"],
-            last_name=decrypted_user_data["last_name"],
-            email=encrypted_user.email,
-            id=encrypted_user.id,
+            id=user_record.id,
+            first_name=decrypted_fields["first_name"],
+            last_name=decrypted_fields["last_name"],
+            email=user_record.email,
         )
 
     async def create_user(self, user_payload: UserCreateSchema) -> UserOutSchema:
-        ph = PasswordHasher()
-        
+        print(f"[INFO] Creating user account for email={user_payload.email}")
         if await self._user_repo.get_by_email(user_payload.email):
-            raise HTTPException(400, "Email already registered")
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email already registered")
         
+        ph = PasswordHasher()
         user_hashed_password = ph.hash(user_payload.password)
-        encrypted_fields = encrypt_fields(user_payload, ["first_name", "last_name"])
-
-        user_dict = {
-            **encrypted_fields,
-            "email": user_payload.email,
-            "password": user_hashed_password,
-        }
-
-        user = await self._user_repo.create(**user_dict)
         
-        return await self._get_user_by_id(user.id)
+        raw_user_data = user_payload.model_dump()
+        
+        encrypted_fields = encrypt_fields(raw_user_data, ENCRYPTED_USER_FIELDS)
+        
+        user_dict = {**encrypted_fields, "email":user_payload.email, "password":user_hashed_password}
+        user_record = await self._user_repo.create(**user_dict)
+        
+        return await self._map_user_to_schema(user_record)
+
+
+    async def get_user_by_id(self, user_id: int) -> UserOutSchema:
+        user_record = await self._user_repo.get_user_by_id(user_id)
+        
+        if not user_record:
+            raise HTTPException(404, "User not found")
+        return await self._map_user_to_schema(user_record)
 
     async def signup_user(self, user_payload: UserCreateSchema) -> str:
-        if not self.check_user_email(user_payload.email):
-            raise HTTPException(409, "Email already registered")
-        user = await self.create_user(user_payload)
-        token = create_access_token({"sub": user.id, "role": "user"})
+        print(f"[INFO] Signing up user email={user_payload.email}")
+        
+        if await self._user_repo.get_by_email(user_payload.email):
+            raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
+        
+        user_schema = await self.create_user(user_payload)
+        
+        token = create_access_token({"sub":user_schema.id, "role":"user"})
+        
         return token
 
-    async def check_user_email(self, email: str) -> dict:
+    async def get_user_email_availability(self, email: str) -> dict:
         if await self._user_repo.get_by_email(email):
-            raise HTTPException(409, "Email already registered")
-        return {"available": True}
+            raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
+        return {"available":True}
 
     async def assign_user_to_medic(self, user_id: int, medic_id: int) -> UserOutSchema:
-        user = await self._user_repo.get_user_by_id(user_id)
-        if not user:
+        print(f"[INFO] Assigning user {user_id} to medic {medic_id}")
+        
+        user_record = await self._user_repo.get_user_by_id(user_id)
+        if not user_record:
             raise HTTPException(404, "User not found")
-        medic = await self._medic_repo.get_medic_by_id(medic_id)
+        
+        medic = await self._medic_service.get_medic_by_id(medic_id)
         if not medic:
             raise HTTPException(404, "Medic not found")
-        user.medic_id = medic_id
-        await self._user_repo.db.commit()
-        await self._user_repo.db.refresh(user)
-
-        return await self._get_user_by_id(user.id)
+        
+        await self._user_repo.assign_medic(user_id, medic_id)
+        updated = await self._user_repo.get_user_by_id(user_id)
+        
+        return await self._map_user_to_schema(updated)
 
     async def unassign_medic(self, user_id: int) -> UserOutSchema:
-        user = await self._user_repo.get_user_by_id(user_id)
-        if not user:
+        print(f"[INFO] Unassigning medic for user {user_id}")
+        user_object = await self._user_repo.get_user_by_id(user_id)
+        if not user_object:
             raise HTTPException(404, "User not found")
-        user.medic_id = None
-        await self._user_repo.db.commit()
-        await self._user_repo.db.refresh(user)
+        
+        await self._user_repo.unassign_medic(user_id)
+        updated = await self._user_repo.get_user_by_id(user_id)
+        
+        return await self._map_user_to_schema(updated)
 
-        return await self._get_user_by_id(user.id)
-    
     async def get_user_assignment_status(self, user_id: int) -> UserAssignmentStatus:
-        user = await self._user_repo.get_user_by_id(user_id)
-        if not user:
+        user_object = await self._user_repo.get_user_by_id(user_id)
+        
+        if not user_object:
             raise HTTPException(404, "User not found")
-        return UserAssignmentStatus(
-            has_assigned_medic=user.medic_id is not None,
-        )
+        return UserAssignmentStatus(has_assigned_medic=user_object.medic_id is not None)
 
     async def get_assigned_medic(self, user_id: int) -> MedicOutSchema:
         user_object = await self._user_repo.get_user_by_id(user_id)
