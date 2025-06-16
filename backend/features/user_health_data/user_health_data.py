@@ -21,4 +21,4 @@ async def user_has_health_data(current_user: User = Depends(get_current_account)
 
 @router.get("/get_user_health_data_for_user", response_model=UserHealthDataOutSchema)
 async def get_user_health_data_for_user(current_user: User = Depends(get_current_account), user_health_data_service: UserHealthDataService = Depends(get_user_health_data_service)):
-    return await user_health_data_service.get_user_health_data(user_id=current_user.id)
+    return await user_health_data_service.get_user_health_data_by_user_id(user_id=current_user.id)
