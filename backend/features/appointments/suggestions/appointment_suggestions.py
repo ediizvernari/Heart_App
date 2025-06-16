@@ -29,7 +29,6 @@ async def get_my_assigned_users_appointment_suggestions(current_medic: Medic = D
 async def get_suggestion_by_id(appointment_suggestion_id: int, appointment_suggestion_service: AppointmentSuggestionService = Depends(get_suggestion_service)):
     return await appointment_suggestion_service.get_appointment_suggestion_by_id(appointment_suggestion_id)
 
-#TODO: Maybe this function is not needed
 @router.delete("/{appointment_suggestion_id}", status_code=204)
 async def delete_appointment_suggestion(appointment_suggestion_id: int, current_medic: Medic = Depends(get_current_account), appointment_suggestion_service: AppointmentSuggestionService = Depends(get_suggestion_service)):
     await appointment_suggestion_service.delete_appointment_suggestion(appointment_suggestion_id)

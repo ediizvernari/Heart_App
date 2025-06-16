@@ -1,156 +1,167 @@
-from typing import List
-from fastapi import HTTPException
-from datetime import datetime
 import asyncio
+from typing import List, Union
 
-from backend.database.sql_models import Appointment, Medic, User
+from fastapi import HTTPException
+
+from backend.config import ENCRYPTED_APPOINTMENT_FIELDS
+from backend.database.sql_models import Medic, User
+from backend.features.appointments.core.appointment_repository import AppointmentRepository
 from backend.utils.encryption_utils import encrypt_data, encrypt_fields, decrypt_fields
-from .appointment_repository import AppointmentRepository
-from .appointment_schemas import AppointmentCreateSchema, AppointmentOutSchema
-from backend.features.medical_service.medical_service_service import MedicalServiceService
 from backend.features.appointments.scheduling.scheduling_service import SchedulingService
+from backend.features.medical_service.medical_service_service import MedicalServiceService
+from .appointment_schemas import AppointmentCreateSchema, AppointmentOutSchema
+
 
 class AppointmentService:
-    def __init__(self, appointment_repo: AppointmentRepository, scheduling_service: SchedulingService, medical_service_service: MedicalServiceService):
-        self._appointment_repo = appointment_repo
-        self._scheduling_service = scheduling_service
-        self._medical_service_service = medical_service_service
+    def __init__(self, appointment_repository: AppointmentRepository, scheduling_service: SchedulingService, medical_service_service: MedicalServiceService):
+        self._appointment_repository=appointment_repository
+        self._scheduling_service=scheduling_service
+        self._medical_service=medical_service_service
 
-    async def _ensure_medic_owns_appointment(self, medic_id, appointment_id: int):  
-        appointment = await self._appointment_repo.get_appointment_by_id(appointment_id)
-        if not appointment:
-            raise HTTPException(status_code=404, detail="Appointment not found")
-        if appointment.medic_id != medic_id:
-            raise HTTPException(status_code=403, detail="Not authorized to cancel this appointment")
+    async def _ensure_medic_owns_appointment(self, medic_id: int, appointment_id: int) -> None:
+        appointment_record = await self._appointment_repository.get_by_id(appointment_id)
+        
+        if not appointment_record:
+            print(f"[ERROR] Appointment {appointment_id} not found")
+            raise HTTPException(404, "Appointment not found")
+        
+        if appointment_record.medic_id!=medic_id:
+            print(f"[WARNING] Medic {medic_id} unauthorized for appointment {appointment_id}")
+            raise HTTPException(403, "Not authorized")
 
-    async def _ensure_user_has_appointment(self, user_id: int, appointment_id: int):
-        appointment = await self._appointment_repo.get_appointment_by_id(appointment_id)
-        if not appointment:
-            raise HTTPException(status_code=404, detail="Appointment not found")
-        if appointment.user_id != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized to cancel this appointment")
+    async def _ensure_user_owns_appointment(self, user_id: int, appointment_id: int) -> None:
+        appointment_record = await self._appointment_repository.get_by_id(appointment_id)
+        
+        if not appointment_record:
+            print(f"[ERROR] Appointment {appointment_id} not found")
+            raise HTTPException(404, "Appointment not found")
+        
+        if appointment_record.user_id!=user_id:
+            print(f"[WARNING] User {user_id} unauthorized for appointment {appointment_id}")
+            raise HTTPException(403, "Not authorized")
 
-    async def _get_appointment_by_id(self, appointment_id: int) -> AppointmentOutSchema:
-        encrypted_appointment = await self._appointment_repo.get_appointment_by_id(appointment_id)
-        decrypted_fields = decrypt_fields(encrypted_appointment, ["address", "medical_service_name", "medical_service_price", "appointment_start", "appointment_end", "appointment_status"])
+    async def _map_appointment_to_schema(self, appointment_id: int) -> AppointmentOutSchema:
+        appointment_record = await self._appointment_repository.get_by_id(appointment_id)
+        
+        if not appointment_record:
+            raise HTTPException(404, "Appointment not found")
 
+        decrypted_values = decrypt_fields(appointment_record, ENCRYPTED_APPOINTMENT_FIELDS)
+        
         return AppointmentOutSchema(
-            id=appointment_id,
-            user_id=encrypted_appointment.user_id,
-            medic_id=encrypted_appointment.medic_id,
-            medical_service_id=encrypted_appointment.medical_service_id,
-
-            medical_service_name=decrypted_fields["medical_service_name"],
-            medical_service_price=int(decrypted_fields["medical_service_price"]),
-            
-            address=decrypted_fields["address"],
-            appointment_start=decrypted_fields["appointment_start"],
-            appointment_end=decrypted_fields["appointment_end"],
-            appointment_status=decrypted_fields["appointment_status"],
-            created_at=encrypted_appointment.created_at,
-            updated_at=encrypted_appointment.updated_at,
+            id=appointment_record.id,
+            user_id=appointment_record.user_id,
+            medic_id=appointment_record.medic_id,
+            medical_service_id=appointment_record.medical_service_id,
+            medical_service_name=decrypted_values["medical_service_name"],
+            medical_service_price=int(decrypted_values["medical_service_price"]),
+            address=decrypted_values["address"],
+            appointment_start=decrypted_values["appointment_start"],
+            appointment_end=decrypted_values["appointment_end"],
+            appointment_status=decrypted_values["appointment_status"],
+            created_at=appointment_record.created_at,
+            updated_at=appointment_record.updated_at,
         )
 
     async def get_user_appointments(self, user_id: int) -> List[AppointmentOutSchema]:
-        encrypted_user_appointments = await self._appointment_repo.get_user_appointments(user_id)
-        return await asyncio.gather(
-            *[self._get_appointment_by_id(appointment.id) for appointment in encrypted_user_appointments]
-        )
+        appointment_records = await self._appointment_repository.get_user_appointments(user_id)
+
+        results: List[AppointmentOutSchema] = []
+        for rec in appointment_records:
+            results.append(await self._map_appointment_to_schema(rec.id))
+        return results
 
     async def get_medic_appointments(self, medic_id: int) -> List[AppointmentOutSchema]:
-        encrypted_medic_appointments = await self._appointment_repo.get_medic_appointments(medic_id)
-        return await asyncio.gather(
-            *[self._get_appointment_by_id(appointment.id) for appointment in encrypted_medic_appointments]
-        )
+        appointment_records = await self._appointment_repository.get_medic_appointments(medic_id)
+
+        results: List[AppointmentOutSchema] = []
+        for rec in appointment_records:
+            results.append(await self._map_appointment_to_schema(rec.id))
+        return results
 
     async def create_appointment(self, user_id: int, appointment_payload: AppointmentCreateSchema) -> AppointmentOutSchema:
-        medical_service = await self._medical_service_service.get_medical_service_by_id(appointment_payload.medical_service_id)
+        print(f"[INFO] Creating appointment for user_id={user_id}, medic_id={appointment_payload.medic_id}, service_id={appointment_payload.medical_service_id}")
 
+        medical_service=await self._medical_service.get_medical_service_by_id(appointment_payload.medical_service_id)
         if not medical_service:
-            raise HTTPException(404, detail="Medical Service not found")
-        
-        #TODO: Maybe I need to drop the try catch
-        try:
-            date_start = appointment_payload.appointment_start
-            date_end = appointment_payload.appointment_end
-        except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid datetime format")
-        
-        target_date = date_start.date()
-        free_slot_models = await self._scheduling_service.get_free_time_slots_for_a_day(appointment_payload.medic_id, target_date, medical_service.duration_minutes)
-        free_slots = [(slot.start, slot.end) for slot in free_slot_models]
+            print(f"[ERROR] Medical service {appointment_payload.medical_service_id} not found")
+            raise HTTPException(404, "Medical Service not found")
 
-        requested_slot = (
-            f"{date_start.hour:02d}:{date_start.minute:02d}",
-            f"{date_end.hour:02d}:{date_end.minute:02d}"
+        appointment_start = appointment_payload.appointment_start
+        appointment_end = appointment_payload.appointment_end
+        target_date = appointment_start.date()
+
+        available_slots_models=await self._scheduling_service.get_free_time_slots_for_a_day(
+            appointment_payload.medic_id, target_date, medical_service.duration_minutes
+        )
+        available_slots={(slot.start, slot.end) for slot in available_slots_models}
+        requested_slot=(f"{appointment_start.hour:02d}:{appointment_start.minute:02d}", f"{appointment_end.hour:02d}:{appointment_end.minute:02d}")
+
+        print(f"[DEBUG] Available slots={available_slots}, requested={requested_slot}")
+        if requested_slot not in available_slots:
+            print(f"[WARNING] Requested slot {requested_slot} unavailable for medic {appointment_payload.medic_id}")
+            raise HTTPException(409, "Unavailable time slot")
+
+        encrypted_fields = encrypt_fields({
+            "address":appointment_payload.address,
+            "appointment_start":appointment_start.isoformat(),
+            "appointment_end":appointment_end.isoformat(),
+            "appointment_status":"pending",
+            "medical_service_name":medical_service.name,
+            "medical_service_price":str(medical_service.price),
+        }, ENCRYPTED_APPOINTMENT_FIELDS)
+
+        new_appointment=await self._appointment_repository.create(
+            user_id=user_id,
+            medic_id=appointment_payload.medic_id,
+            medical_service_id=appointment_payload.medical_service_id,
+            address=encrypted_fields["address"],
+            appointment_start=encrypted_fields["appointment_start"],
+            appointment_end=encrypted_fields["appointment_end"],
+            appointment_status=encrypted_fields["appointment_status"],
+            medical_service_name=encrypted_fields["medical_service_name"],
+            medical_service_price=encrypted_fields["medical_service_price"],
         )
 
-        print(f"[DEBUG] Comparing against raw slots: {free_slots}")
-        print(f"[DEBUG] Requested slot: {requested_slot}")
+        return await self._map_appointment_to_schema(new_appointment.id)
 
-        if requested_slot not in free_slots:
-            raise HTTPException(status_code=409, detail="Unavailable time slot")
+
+    async def change_appointment_status(self, current_account: Union[Medic, User], appointment_id: int, new_appointment_status: str) -> AppointmentOutSchema:
+        print(f"[INFO] Changing status for appointment_id={appointment_id} to {new_appointment_status} by account_id={current_account.id}")
+
+        appointment_record = await self._appointment_repository.get_by_id(appointment_id)
         
-        encrypted_appointment_fields = encrypt_fields({
-            "address":           appointment_payload.address,
-            "appointment_start": appointment_payload.appointment_start.isoformat(),
-            "appointment_end":   appointment_payload.appointment_end.isoformat(),
-            "appointment_status": "pending"
-        }, ["address", "appointment_start", "appointment_end", "appointment_status"])
+        if not appointment_record:
+            print(f"[ERROR] Appointment {appointment_id} not found for status change")
+            raise HTTPException(404, "Appointment not found")
 
-        appointment: Appointment = await self._appointment_repo.create_user_appointment(
-            user_id = user_id,
-            medic_id = appointment_payload.medic_id,
-            medical_service_id = appointment_payload.medical_service_id,
-            address = encrypted_appointment_fields["address"],
-            appointment_start = encrypted_appointment_fields["appointment_start"],
-            appointment_end = encrypted_appointment_fields["appointment_end"],
-            appointment_status = encrypted_appointment_fields["appointment_status"],
-            medical_service_name = encrypt_data(medical_service.name),
-            medical_service_price = encrypt_data(str(medical_service.price)),
-        )
-
-        return await self._get_appointment_by_id(appointment.id)
-
-    async def change_appointment_status(self, current_account, appointment_id: int, new_appointment_status: str):
-        appointment = await self._appointment_repo.get_appointment_by_id(appointment_id)
-        if not appointment:
-            raise HTTPException(404, detail="Appointment not found")
+        is_medic=isinstance(current_account, Medic)
         
-        if isinstance(current_account, Medic):
-            if appointment.medic_id != current_account.id:
-                raise HTTPException(403, "Not permitted to change this appointment")
-        else:
-            if appointment.user_id != current_account.id:
-                raise HTTPException(403, "Not permitted to change this appointment")
+        if (is_medic and appointment_record.medic_id!=current_account.id) or (not is_medic and appointment_record.user_id!=current_account.id):
+            print(f"[WARNING] Account {current_account.id} unauthorized to change appointment {appointment_id}")
+            raise HTTPException(403, "Not permitted to change this appointment")
 
-        encrypted_new_status = encrypt_data(new_appointment_status)
-        await self._appointment_repo.update_appointment(appointment_id, {"appointment_status": encrypted_new_status})
-
-        return await self._get_appointment_by_id(appointment_id)
-
-    async def accept_appointment(self, current_medic: Medic, appointment_id: int):
-        await self._ensure_medic_owns_appointment(current_medic.id, appointment_id)
+        encrypted_status = encrypt_data(new_appointment_status)
         
-        return await self.change_appointment_status(current_medic, appointment_id, "accepted")
+        await self._appointment_repository.update(appointment_id, {"appointment_status":encrypted_status})
+        return await self._map_appointment_to_schema(appointment_id)
 
-    async def reject_appointment(self, current_medic: Medic, appointment_id: int):
-        await self._ensure_medic_owns_appointment(current_medic.id, appointment_id)
+    async def accept_appointment(self, medic: Medic, appointment_id: int) -> AppointmentOutSchema:
+        await self._ensure_medic_owns_appointment(medic.id, appointment_id)
+        return await self.change_appointment_status(medic, appointment_id, "accepted")
 
-        return await self.change_appointment_status(current_medic, appointment_id, "rejected")
+    async def reject_appointment(self, medic: Medic, appointment_id: int) -> AppointmentOutSchema:
+        await self._ensure_medic_owns_appointment(medic.id, appointment_id)
+        return await self.change_appointment_status(medic, appointment_id, "rejected")
 
-    async def complete_appointment(self, current_medic: Medic, appointment_id: int):
-        await self._ensure_medic_owns_appointment(current_medic.id, appointment_id)
+    async def complete_appointment(self, medic: Medic, appointment_id: int) -> AppointmentOutSchema:
+        await self._ensure_medic_owns_appointment(medic.id, appointment_id)
+        return await self.change_appointment_status(medic, appointment_id, "completed")
 
-        return await self.change_appointment_status(current_medic, appointment_id, "completed")
+    async def cancel_user_appointment(self, user: User, appointment_id: int) -> AppointmentOutSchema:
+        await self._ensure_user_owns_appointment(user.id, appointment_id)
+        return await self.change_appointment_status(user, appointment_id, "canceled")
 
-    async def cancel_user_appointment(self, current_user: User, appointment_id: int) -> None:
-        await self._ensure_user_has_appointment(current_user.id, appointment_id)
-
-        return await self.change_appointment_status(current_user, appointment_id, "canceled")
-
-    async def cancel_medic_appointment(self, current_medic: Medic, appointment_id: int) -> None:
-        await self._ensure_medic_owns_appointment(current_medic.id, appointment_id)
-
-        return await self.change_appointment_status(current_medic, appointment_id, "canceled")
-    
+    async def cancel_medic_appointment(self, medic: Medic, appointment_id: int) -> AppointmentOutSchema:
+        await self._ensure_medic_owns_appointment(medic.id, appointment_id)
+        return await self.change_appointment_status(medic, appointment_id, "canceled")

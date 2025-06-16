@@ -22,13 +22,10 @@ def _format_hhmm(t: time) -> str:
     return f"{t.hour:02d}:{t.minute:02d}"
 
 
-def _split_into_slots(
-    spans: List[Tuple[time, time]],
-    target_date: date,
-    slot_minute_duration: int
-) -> List[TimeSlotSchema]:
+def _split_into_slots(spans: List[Tuple[time, time]], target_date: date, slot_minute_duration: int) -> List[TimeSlotSchema]:
     slots: List[TimeSlotSchema] = []
     step = timedelta(minutes=slot_minute_duration)
+    
     for start, end in spans:
         current = datetime.combine(target_date, start)
         limit = datetime.combine(target_date, end)
@@ -51,6 +48,7 @@ class SchedulingService:
         weekday = target_date.weekday()
         base_windows: List[Tuple[time, time]] = []
         availabilities = await self._medic_availability_service.get_all_medic_availabilities(medic_id)
+        
         for avail in availabilities:
             if avail.weekday == weekday:
                 start = _parse_hhmm_to_time(avail.start_time)
@@ -59,12 +57,7 @@ class SchedulingService:
                     base_windows.append((start, end))
         return sorted(base_windows)
 
-    async def _get_busy_windows(
-        self,
-        medic_id: int,
-        target_date: date
-    ) -> List[Tuple[time, time]]:
-    
+    async def _get_busy_windows(self, medic_id: int, target_date: date) -> List[Tuple[time, time]]: 
         busy_slots: List[Tuple[time, time]] = []
     
         encrypted_rows = await self._appointment_repo.get_medic_appointments(medic_id)
@@ -82,6 +75,7 @@ class SchedulingService:
 
     def _create_free_spans(self, base_windows: List[Tuple[time, time]], busy_windows: List[Tuple[time, time]]) -> List[Tuple[time, time]]:
         free_spans: List[Tuple[time, time]] = []
+        
         for win_start, win_end in base_windows:
             cursor = win_start
             overlaps = [b for b in busy_windows if b[0] < win_end and b[1] > win_start]
@@ -98,6 +92,7 @@ class SchedulingService:
         base = await self._get_base_windows(medic_id, target_date)
         busy = await self._get_busy_windows(medic_id, target_date)
         spans = self._create_free_spans(base, busy)
+        
         return _split_into_slots(spans, target_date, slot_minute_duration)
 
     async def get_current_user_free_time_slots(self, current_user: User, target_date: date, medical_service_id: Optional[int] = None) -> List[TimeSlotSchema]:
@@ -109,4 +104,5 @@ class SchedulingService:
             if svc.medic_id != current_user.medic_id:
                 raise HTTPException(status_code=404, detail="Medical service not found")
             duration = svc.duration_minutes
+        
         return await self.get_free_time_slots_for_a_day(current_user.medic_id, target_date, duration)
