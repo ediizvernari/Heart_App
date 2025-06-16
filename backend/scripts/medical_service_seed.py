@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.features.medical_service.medical_service_type_repository import MedicalServiceTypeRepository
 from backend.features.medical_service.medical_service_repository import MedicalServiceRepository
 from backend.features.medical_service.medical_service_service import MedicalServiceService
 
@@ -21,10 +22,11 @@ CARDIOLOGY_SERVICE_TYPES = [
 ]
 
 async def seed_cardiology_medical_service_types(db: AsyncSession):
-    repo    = MedicalServiceRepository(db)
-    service = MedicalServiceService(repo)
+    type_repo = MedicalServiceTypeRepository(db)
+    service_repo = MedicalServiceRepository(db)
+    service = MedicalServiceService(type_repo, service_repo)
 
-    if await repo.count() > 0:
+    if await type_repo.count() > 0:
         print("MedicalServiceType table already populated, skipping.")
         return
 
