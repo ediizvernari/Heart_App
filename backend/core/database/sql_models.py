@@ -83,6 +83,7 @@ class City(Base):
     country_id = Column(Integer, ForeignKey("countries.id"))
 
     country = relationship("Country", back_populates="cities")
+    appointments = relationship("Appointment", back_populates="city")
 
     class Config:
         from_attributes = True
@@ -163,6 +164,7 @@ class Appointment(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     medic_id = Column(Integer, ForeignKey("medics.id"))
     medical_service_id = Column(Integer, ForeignKey("medical_services.id"))
+    city_id = Column(Integer, ForeignKey("cities.id"))
 
     medical_service_name = Column(String, nullable=False)
     medical_service_price = Column(String, nullable=False)
@@ -178,6 +180,7 @@ class Appointment(Base):
     user = relationship("User", back_populates="appointments")
     medic = relationship("Medic", back_populates="appointments")
     medical_service = relationship("MedicalService", back_populates="appointments")
+    city = relationship("City", back_populates="appointments")
 
     class Config:
         from_attributes = True
