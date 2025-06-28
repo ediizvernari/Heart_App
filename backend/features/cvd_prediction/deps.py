@@ -2,7 +2,7 @@ from typing import AsyncGenerator
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.database.connection import get_db
+from backend.core.database.connection import get_db
 from backend.features.user_health_data.deps      import get_user_health_data_service
 from backend.features.user_health_data.user_health_data_service import UserHealthDataService
 from backend.features.user_medical_record.deps  import get_user_medical_record_service

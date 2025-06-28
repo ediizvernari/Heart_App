@@ -3,8 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.repository.generic_repository import GenericRepository
-from backend.database.sql_models import UserHealthData
-
+from backend.core.database.sql_models import UserHealthData
 
 class UserHealthDataRepository(GenericRepository[UserHealthData]):
     def __init__(self, db: AsyncSession):

@@ -1,8 +1,7 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
-from backend.database.sql_models import User
-from backend.features.auth.deps                         import get_current_account
-from backend.features.user_health_data.deps             import get_user_health_data_service
+from fastapi import APIRouter, Depends
+from backend.core.database.sql_models import User
+from backend.features.auth.deps import get_current_account
+from backend.features.user_health_data.deps import get_user_health_data_service
 from backend.features.user_health_data.user_health_data_schemas import (
     UserHealthDataSchema,
     UserHealthDataOutSchema,

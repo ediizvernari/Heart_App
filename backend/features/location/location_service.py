@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import HTTPException
-from backend.database.sql_models import City, Country
-from backend.utils.encryption_utils import decrypt_data, encrypt_data, encrypt_fields, decrypt_fields, make_lookup_hash
+from backend.core.database.sql_models import City, Country
+from backend.core.utils.encryption_utils import decrypt_data, encrypt_data, encrypt_fields, decrypt_fields, make_lookup_hash
 from backend.features.location.location_repository import LocationRepository
 from .location_schemas import (
     CountrySchema,

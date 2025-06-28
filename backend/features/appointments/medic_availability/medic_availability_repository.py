@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.core.repository.generic_repository import GenericRepository
-from backend.database.sql_models import MedicAvailability
+from backend.core.database.sql_models import MedicAvailability
 
 class MedicAvailabilityRepository(GenericRepository[MedicAvailability]):
     def __init__(self, db: AsyncSession):

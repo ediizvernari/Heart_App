@@ -1,7 +1,7 @@
-from typing    import List
-from fastapi   import APIRouter, Depends, status
+from typing import List
+from fastapi import APIRouter, Depends, status
 
-from backend.database.sql_models import Medic
+from backend.core.database.sql_models import Medic
 from backend.features.auth.deps import get_current_account  
 from backend.features.appointments.deps import get_medic_availability_service 
 from backend.features.appointments.medic_availability.medic_availability_service import MedicAvailabilityService 

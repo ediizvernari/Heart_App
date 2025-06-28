@@ -1,7 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel
 
-#TODO: Maybe put the status here
 class AppointmentSuggestionCreateSchema(BaseModel):
     medical_service_id: int
     reason: str
@@ -16,4 +15,4 @@ class AppointmentSuggestionOutSchema(BaseModel):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True

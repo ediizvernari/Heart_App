@@ -2,7 +2,7 @@ from argon2 import PasswordHasher
 from fastapi import HTTPException, status
 from backend.config import ENCRYPTED_USER_FIELDS
 from backend.core.auth import create_access_token
-from backend.database.sql_models import User
+from backend.core.database.sql_models import User
 from backend.features.medics.medic_schemas import MedicOutSchema
 from backend.features.medics.medic_service import MedicService
 from backend.features.users.user_schemas import (
@@ -10,7 +10,7 @@ from backend.features.users.user_schemas import (
     UserAssignmentStatus,
     UserOutSchema,
 )
-from backend.utils.encryption_utils import encrypt_fields, decrypt_fields
+from backend.core.utils.encryption_utils import encrypt_fields, decrypt_fields
 from backend.features.users.user_repository import UserRepository
 
 class UserService:
@@ -66,8 +66,11 @@ class UserService:
         return token
 
     async def get_user_email_availability(self, email: str) -> dict:
+        print(f"[INFO] Checking email availability for {email}")
+        
         if await self._user_repo.get_by_email(email):
             raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
+        print(f"[INFO] Email {email} is available")
         return {"available":True}
 
     async def assign_user_to_medic(self, user_id: int, medic_id: int) -> UserOutSchema:
@@ -95,16 +98,23 @@ class UserService:
         await self._user_repo.unassign_medic(user_id)
         updated = await self._user_repo.get_user_by_id(user_id)
         
+        print (f"[INFO] User {user_id} unassigned from medic, updated user: {updated}")
         return await self._map_user_to_schema(updated)
 
     async def get_user_assignment_status(self, user_id: int) -> UserAssignmentStatus:
+        print(f"[INFO] Checking assignment status for user {user_id}")
+        
         user_object = await self._user_repo.get_user_by_id(user_id)
         
         if not user_object:
             raise HTTPException(404, "User not found")
+        
+        print(f"[INFO] User {user_id} has assigned medic: {user_object.medic_id is not None}")
         return UserAssignmentStatus(has_assigned_medic=user_object.medic_id is not None)
 
     async def get_assigned_medic(self, user_id: int) -> MedicOutSchema:
+        print(f"[INFO] Retrieving assigned medic for user {user_id}")
+        
         user_object = await self._user_repo.get_user_by_id(user_id)
         if not user_object:
             raise HTTPException(404, "User not found")
@@ -112,4 +122,5 @@ class UserService:
         if not user_object.medic_id:
             raise HTTPException(404, "No medic assigned")
         
+        print(f"[INFO] User with id {user_id} is assigned to medic with id {user_object.medic_id}")
         return await self._medic_service.get_medic_by_id(user_object.medic_id)

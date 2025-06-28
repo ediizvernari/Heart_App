@@ -11,8 +11,9 @@ class AuthService:
         self._user_repo = user_repo
         self._medic_repo = medic_repo
 
-
     async def login_account(self, payload: LoginSchema) -> TokenSchema:
+        print(f"[INFO] Login attempt for email={payload.email}")
+
         found_user = await self._user_repo.get_by_email(payload.email)
         if found_user and verify_password(payload.password, found_user.password):
             token = create_access_token(data={"sub": found_user.id, "role": "user"})

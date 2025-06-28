@@ -1,7 +1,7 @@
 from typing import AsyncGenerator
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from backend.database.connection import get_db
+from backend.core.database.connection import get_db
 
 from .location_repository import LocationRepository
 from .location_service import LocationService

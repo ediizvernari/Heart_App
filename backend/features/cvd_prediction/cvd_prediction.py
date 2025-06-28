@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from backend.database.sql_models                 import User
-from backend.features.auth.deps                  import get_current_account
-from backend.features.cvd_prediction.deps        import get_cvd_prediction_service
+from fastapi import APIRouter, Depends
+from backend.core.database.sql_models import User
+from backend.features.auth.deps import get_current_account
+from backend.features.cvd_prediction.deps import get_cvd_prediction_service
 from backend.features.cvd_prediction.cvd_prediction_schema import PredictionResultSchema
 from backend.features.cvd_prediction.cvd_prediction_service import CVDPredictionService
 

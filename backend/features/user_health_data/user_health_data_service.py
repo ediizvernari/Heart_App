@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 
-from backend.utils.encryption_utils import encrypt_fields, decrypt_fields
+from backend.core.utils.encryption_utils import encrypt_fields, decrypt_fields
 from backend.config import ENCRYPTED_USER_HEALTH_DATA_FIELDS
 from backend.features.user_health_data.user_health_data_repository import UserHealthDataRepository
 from backend.features.user_health_data.user_health_data_schemas import UserHealthDataOutSchema, UserHealthDataSchema

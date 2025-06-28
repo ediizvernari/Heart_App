@@ -1,12 +1,9 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 
-from backend.database.sql_models import User
+from backend.core.database.sql_models import User
 from backend.features.auth.deps      import get_current_account
 from backend.features.users.deps     import get_user_service
 from backend.features.users.user_schemas import (
-    UserCreateSchema,
-    UserOutSchema,
     MedicAssignmentRequest,
     UserAssignmentStatus,
 )

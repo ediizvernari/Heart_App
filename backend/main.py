@@ -1,7 +1,9 @@
 import asyncio
 import sys
 from fastapi import FastAPI
-from backend.database.connection import SessionLocal, engine, Base
+
+from backend.core.database.connection import SessionLocal, engine, Base
+
 from backend.features.appointments.core import appointments
 from backend.features.appointments.medic_availability import medic_availability
 from backend.features.appointments.suggestions import appointment_suggestions

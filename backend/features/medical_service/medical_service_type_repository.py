@@ -3,7 +3,7 @@ from sqlalchemy import func
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.core.repository.generic_repository import GenericRepository
-from backend.database.sql_models import MedicalServiceType
+from backend.core.database.sql_models import MedicalServiceType
 
 class MedicalServiceTypeRepository(GenericRepository[MedicalServiceType]):
     def __init__(self, db: AsyncSession):
@@ -16,4 +16,3 @@ class MedicalServiceTypeRepository(GenericRepository[MedicalServiceType]):
 
     async def get_by_name(self, name: str) -> Optional[MedicalServiceType]:
         return await self.get_by_field(MedicalServiceType.name == name)
-

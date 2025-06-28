@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from backend.config import ENCRYPTED_APPOINTMENT_SUGGESTION_FIELDS
 from backend.features.appointments.suggestions.appointment_suggestions_repository import AppointmentSuggestionRepository
 from backend.features.medical_service.medical_service_service import MedicalServiceService
-from backend.utils.encryption_utils import encrypt_fields, decrypt_fields
+from backend.core.utils.encryption_utils import encrypt_fields, decrypt_fields
 from .appointment_suggestion_schemas import AppointmentSuggestionCreateSchema, AppointmentSuggestionOutSchema
 
 class AppointmentSuggestionService:
@@ -30,10 +30,14 @@ class AppointmentSuggestionService:
         )
 
     async def get_user_appointment_suggestions(self, user_id: int) -> List[AppointmentSuggestionOutSchema]:
+        print(f"[INFO] Getting appointment suggestions for user_id={user_id}")
+        
         suggestion_records = await self._suggestion_repository.get_user_appointment_suggestions(user_id)
         return await asyncio.gather(*(self._map_suggestion_to_schema(r.id) for r in suggestion_records))
 
     async def get_medic_appointment_suggestions(self, medic_id: int) -> List[AppointmentSuggestionOutSchema]:
+        print(f"[INFO] Getting appointment suggestions for medic_id={medic_id}")
+
         suggestion_records = await self._suggestion_repository.get_medic_appointment_suggestions(medic_id)
         return await asyncio.gather(*(self._map_suggestion_to_schema(r.id) for r in suggestion_records))
     

@@ -1,7 +1,7 @@
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.core.repository.generic_repository import GenericRepository
-from backend.database.sql_models import MedicalService
+from backend.core.database.sql_models import MedicalService
 
 class MedicalServiceRepository(GenericRepository[MedicalService]):
     def __init__(self, db: AsyncSession):

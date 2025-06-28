@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, Boolean, func
+from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, func
 from sqlalchemy.orm import relationship
 from .connection import Base
 
@@ -34,7 +34,7 @@ class Medic(Base):
     street_address = Column(String)
 
     city_id = Column(Integer, ForeignKey("cities.id"))
-    registry_id = Column(Integer, ForeignKey("medic_registry.id"), nullable=True)
+    registry_id = Column(Integer, ForeignKey("medic_registry.id"), nullable=True, unique=True)
     
     city = relationship("City")
     patients = relationship("User", back_populates="medic")
@@ -84,6 +84,7 @@ class City(Base):
 
     country = relationship("Country", back_populates="cities")
     appointments = relationship("Appointment", back_populates="city")
+    medics = relationship("Medic", back_populates="city", cascade="all, delete-orphan")
 
     class Config:
         from_attributes = True

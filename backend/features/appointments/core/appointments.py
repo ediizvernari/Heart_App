@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import APIRouter, Depends, Query
-from backend.database.sql_models import User, Medic
+from backend.core.database.sql_models import User, Medic
 from backend.features.auth.deps import get_current_account
 from backend.features.appointments.deps import get_appointment_service
 from backend.features.appointments.core.appointment_service import AppointmentService

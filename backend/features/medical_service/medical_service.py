@@ -1,6 +1,6 @@
 from typing import List
-from fastapi import APIRouter, Depends, status
-from backend.database.sql_models import Medic
+from fastapi import APIRouter, Depends
+from backend.core.database.sql_models import Medic
 from backend.features.auth.deps import get_current_account
 from backend.features.medical_service.deps import get_medical_service_svc
 from backend.features.medical_service.medical_service_schemas import (
@@ -11,9 +11,7 @@ from backend.features.medical_service.medical_service_schemas import (
 )
 from backend.features.medical_service.medical_service_service import MedicalServiceService
 
-
 router = APIRouter()
-
 
 #Medical Service Type routers
 @router.get("/medical_service_types", response_model=list[MedicalServiceTypeOutSchema])

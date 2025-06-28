@@ -7,7 +7,6 @@ class CityWithCountrySchema(BaseModel):
 class CountrySchema(BaseModel):
     name: str
 
-#TODO: See if these are needed
 class CountryOutSchema(BaseModel):
     id: int
     name: str

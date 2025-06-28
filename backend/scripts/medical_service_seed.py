@@ -9,16 +9,11 @@ CARDIOLOGY_SERVICE_TYPES = [
     "ECG (Electrocardiogram)",
     "Echocardiogram",
     "Exercise Stress Test",
-    "Holter Monitor",
     "Cardiac MRI",
     "Cardiac CT Scan",
-    "Coronary Angiography",
-    "Lipid Panel",
-    "Blood Pressure Check",
     "Cardiac Consultation",
     "Cardiac Rehabilitation Session",
     "Pacemaker/Device Check",
-    "Event Monitor",
 ]
 
 async def seed_cardiology_medical_service_types(db: AsyncSession):

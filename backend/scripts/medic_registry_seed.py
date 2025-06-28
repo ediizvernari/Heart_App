@@ -1,13 +1,13 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.database.connection import SessionLocal
+from backend.core.database.connection import SessionLocal
 from backend.features.medics.medic_registry_repository import MedicRegistryRepository
-from backend.utils.encryption_utils import make_lookup_hash, encrypt_data
+from backend.core.utils.encryption_utils import make_lookup_hash, encrypt_data
 
 MOCK_MEDICS = [
-    { "first_name": "Ioana", "last_name": "Popescu", "license_number": "CMR5663001"},
-    { "first_name": "Valentin", "last_name": "Ionescu", "license_number": "CMR6021042"},
-    { "first_name": "Medic", "last_name": "Bun", "license_number": "CMR5555555"},
+    { "first_name": "Maria", "last_name": "Popescu", "license_number": "CMR5663001"},
+    { "first_name": "Dana", "last_name": "Cepeu", "license_number": "CMR6260590"},
+    { "first_name": "Maria", "last_name": "Popescu", "license_number": "CMR5555555"},
 ]
 
 async def seed_medic_registry(db: AsyncSession):

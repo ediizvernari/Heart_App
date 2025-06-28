@@ -1,7 +1,7 @@
-from typing import Any, List
+from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.core.repository.generic_repository import GenericRepository
-from backend.database.sql_models import AppointmentSuggestion
+from backend.core.database.sql_models import AppointmentSuggestion
 
 class AppointmentSuggestionRepository(GenericRepository[AppointmentSuggestion]):
     def __init__(self, db: AsyncSession):

@@ -4,8 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import ExpiredSignatureError, JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.database.connection import get_db
-from backend.database.sql_models import Medic, User
+from backend.core.database.connection import get_db
 from backend.features.users.deps import get_user_repo
 from backend.features.medics.deps import get_medic_repo
 from .auth_service import AuthService
@@ -18,44 +17,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 async def get_auth_service(user_repo:  UserRepository  = Depends(get_user_repo), medic_repo: MedicRepository = Depends(get_medic_repo)) -> AsyncGenerator[AuthService, None]:
     yield AuthService(user_repo, medic_repo)
 
-
-async def get_current_account(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db), user_repo:  UserRepository = Depends(get_user_repo), medic_repo: MedicRepository = Depends(get_medic_repo)) -> Union[User, Medic]:
-
-    creds_exc = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        account_id = int(payload.get("sub", 0))
-        role = payload.get("role")
-        if role not in ("user", "medic"):
-            raise creds_exc
-    except ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    except (JWTError, ValueError):
-        raise creds_exc
-
-    if role == "user":
-        account = await user_repo.get_user_by_id(account_id)
-    else:
-        account = await medic_repo.get_medic_by_id(account_id)
-
-    if not account:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Account not found",
-        )
-
-    return account
-
-async def get_current_account(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db),user_repo:  UserRepository  = Depends(lambda db=Depends(get_db): UserRepository(db)), medic_repo: MedicRepository = Depends(lambda db=Depends(get_db): MedicRepository(db)),):
+async def get_current_account(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db), user_repo:  UserRepository = Depends(lambda db=Depends(get_db): UserRepository(db)), medic_repo: MedicRepository = Depends(lambda db=Depends(get_db): MedicRepository(db))):
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",

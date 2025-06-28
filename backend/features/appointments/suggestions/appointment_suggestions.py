@@ -1,7 +1,7 @@
-from typing            import List
-from fastapi           import APIRouter, Depends, Query
+from typing import List
+from fastapi import APIRouter, Depends, Query
 
-from backend.database.sql_models import User, Medic
+from backend.core.database.sql_models import User, Medic
 from backend.features.auth.deps import get_current_account
 from backend.features.appointments.deps import get_suggestion_service
 from backend.features.appointments.suggestions.appointment_suggestions_service import AppointmentSuggestionService
@@ -9,7 +9,7 @@ from backend.features.appointments.suggestions.appointment_suggestion_schemas im
     AppointmentSuggestionCreateSchema,
     AppointmentSuggestionOutSchema,
 )
-from backend.utils.encryption_utils import encrypt_data
+from backend.core.utils.encryption_utils import encrypt_data
 
 router = APIRouter()
 
@@ -37,4 +37,3 @@ async def delete_appointment_suggestion(appointment_suggestion_id: int, current_
 async def patch_appointment_suggestion_status(appointment_suggestion_id: int, new_appointment_suggestion_status: str = Query(...), current_user: User = Depends(get_current_account), appointment_suggestion_service: AppointmentSuggestionService = Depends(get_suggestion_service)):
     await appointment_suggestion_service.change_appointment_suggestion_status(appointment_suggestion_id, {"status": encrypt_data(new_appointment_suggestion_status)})
     return await appointment_suggestion_service.get_appointment_suggestion_by_id(appointment_suggestion_id)
-                                              

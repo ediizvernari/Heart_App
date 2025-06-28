@@ -2,7 +2,7 @@ from typing import List
 from fastapi import HTTPException
 
 from backend.config import ENCRYPTED_MEDICAL_SERVICE_FIELDS
-from backend.utils.encryption_utils import encrypt_data, encrypt_fields, decrypt_fields, decrypt_data
+from backend.core.utils.encryption_utils import encrypt_data, encrypt_fields, decrypt_fields, decrypt_data
 from .medical_service_type_repository import MedicalServiceTypeRepository
 from .medical_service_repository import MedicalServiceRepository
 from .medical_service_schemas import (
@@ -124,6 +124,8 @@ class MedicalServiceService:
         return await self.get_medical_service_by_id(medical_service_id)
 
     async def delete_medical_service_for_medic(self, medic_id: int, medical_service_id: int):
+        print(f"[INFO] Deleting medical service id={medical_service_id} for medic_id={medic_id}")
+
         medical_service_object = await self._medical_service_repo.get_by_id(medical_service_id)
         
         if not medical_service_object or medical_service_object.medic_id != medic_id:

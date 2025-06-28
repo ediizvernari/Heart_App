@@ -4,7 +4,7 @@ from fastapi import HTTPException
 
 from backend.config import ENCRYPTED_MEDIC_AVAILABILITY_FIELDS
 from backend.features.appointments.medic_availability.medic_availability_repository import MedicAvailabilityRepository
-from backend.utils.encryption_utils import encrypt_fields, decrypt_fields
+from backend.core.utils.encryption_utils import encrypt_fields, decrypt_fields
 from .medic_availability_schemas import (
     MedicAvailabilityCreateSchema,
     MedicAvailabilityOutSchema,

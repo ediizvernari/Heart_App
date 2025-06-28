@@ -3,12 +3,12 @@ from typing import TYPE_CHECKING, List, Optional, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
 
-from backend.database.sql_models import User
+from backend.core.database.sql_models import User
 from backend.features.appointments.core.appointment_repository import AppointmentRepository
 from backend.features.medical_service.medical_service_service import MedicalServiceService
 from backend.features.appointments.medic_availability.medic_availability_service import MedicAvailabilityService
 from backend.features.appointments.scheduling.scheduling_schemas import TimeSlotSchema
-from backend.utils.encryption_utils import decrypt_fields
+from backend.core.utils.encryption_utils import decrypt_fields
 
 if TYPE_CHECKING:
     from backend.features.appointments.core.appointment_service import AppointmentService
@@ -89,20 +89,23 @@ class SchedulingService:
         return free_spans
 
     async def get_free_time_slots_for_a_day(self, medic_id: int, target_date: date, slot_minute_duration: int) -> List[TimeSlotSchema]:
+        print(f"[INFO] Calculating free time slots for medic_id={medic_id}, date={target_date}, duration={slot_minute_duration}")
+        
         base = await self._get_base_windows(medic_id, target_date)
         busy = await self._get_busy_windows(medic_id, target_date)
         spans = self._create_free_spans(base, busy)
         
+        print(f"[DEBUG] Found {len(_split_into_slots(spans, target_date, slot_minute_duration))} free slots")
         return _split_into_slots(spans, target_date, slot_minute_duration)
 
     async def get_current_user_free_time_slots(self, current_user: User, target_date: date, medical_service_id: Optional[int] = None) -> List[TimeSlotSchema]:
+        print(f"[INFO] Getting free time slots for user_id={current_user.id}, date={target_date}, medical_service_id={medical_service_id}")
         if not current_user.medic_id:
             raise HTTPException(status_code=403, detail="You have no assigned medic")
         duration = 30
         if medical_service_id:
-            svc = await self._medical_service.get_medical_service_by_id(medical_service_id)
-            if svc.medic_id != current_user.medic_id:
+            medical_service = await self._medical_service.get_medical_service_by_id(medical_service_id)
+            if medical_service.medic_id != current_user.medic_id:
                 raise HTTPException(status_code=404, detail="Medical service not found")
-            duration = svc.duration_minutes
-        
-        return await self.get_free_time_slots_for_a_day(current_user.medic_id, target_date, duration)
+            duration = medical_service.duration_minutes
+        return await self.get_free_time_slots_for_a_day(current_user.medic_id, target_date, duration)    

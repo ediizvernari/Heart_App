@@ -3,7 +3,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, Query
 
-from backend.database.sql_models import Medic
+from backend.core.database.sql_models import Medic
 from backend.features.auth.deps import get_current_account
 from backend.features.appointments.deps import get_scheduling_service
 from backend.features.appointments.scheduling.scheduling_service import SchedulingService

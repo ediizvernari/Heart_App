@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.get("/check_email_for_user")
 async def check_email(email: str, user_service: UserService = Depends(get_user_service)):
-    return await user_service.check_user_email(email)
+    return await user_service.get_user_email_availability(email)
 
 @router.get("/check_email_for_medic")
 async def check_email_for_medic(email: str, medic_service: MedicService = Depends(get_medic_service)):

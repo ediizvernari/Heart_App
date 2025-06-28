@@ -1,30 +1,9 @@
 import base64
-from datetime import date
 import hashlib
 import hmac
 import unicodedata
 import os
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-
-from ..database.sql_models import UserHealthData, Medic, City, Country
-from ..features.medics.medic_schemas import MedicOutSchema
-
-ENCRYPTED_FIELDS = {
-    "birth_date",
-    "height",
-    "weight",
-    "cholesterol_level",
-    "ap_hi",
-    "ap_lo",
-}
-
-ENCRYPTED_MEDIC_FIELDS = {
-    "first_name",
-    "last_name",
-    "street_address",
-    "city",
-    "country",
-}
 
 AES_KEY = os.getenv("AES_KEY")
 if not AES_KEY:
@@ -87,7 +66,7 @@ def decrypt_data(encrypted_data_b64: str) -> str:
         decrypted = decryptor.update(ciphertext) + decryptor.finalize()
         return decrypted.decode()
     except Exception as e:
-        print(f"Decryption failed: {e}")
+        print(f"[ERROR] Decryption failed: {e}")
         return "[DECRYPTION ERROR]"
 
 def decrypt_fields(obj, fields: list[str]) -> dict:
@@ -100,45 +79,3 @@ def decrypt_fields(obj, fields: list[str]) -> dict:
             print(f"[ERROR] Decryption failed for field '{field}': {e}")
             decrypted[field] = "[DECRYPTION ERROR]"
     return decrypted
-
-#TODO: Use the decrypt_fields function for refactoring other functions across the project
-def decrypt_health_data_fields_for_user(encrypted_user_health_data: dict) -> dict:
-    decrypted_user_health_data = {}
-    
-    for key, value in encrypted_user_health_data.items():
-        if key in ENCRYPTED_FIELDS and isinstance(value, (str, bytes)):
-            try:
-                decrypted_user_health_data[key] = decrypt_data(value)
-            except Exception as e:
-                decrypted_user_health_data[key] = "[DECRYPTION ERROR]"
-        else:
-            decrypted_user_health_data[key] = value
-    
-    return decrypted_user_health_data
-
-def decrypt_health_data_fields_for_user_prediction(encrypted_data: UserHealthData) -> dict:
-    data = dict(encrypted_data.__dict__)
-    data.pop('_sa_instance_state', None)
-
-    decrypted = decrypt_health_data_fields_for_user(data)
-
-    try:
-        birth_date = date.fromisoformat(decrypted["birth_date"])
-        height = float(decrypted["height"])
-        weight = float(decrypted["weight"])
-        cholesterol_level = int(decrypted["cholesterol_level"])
-        ap_hi = int(decrypted["ap_hi"])
-        ap_lo = int(decrypted["ap_lo"])
-
-        return {
-            "birth_date": birth_date,
-            "height": height,
-            "weight": weight,
-            "cholesterol_level": cholesterol_level,
-            "ap_hi": ap_hi,
-            "ap_lo": ap_lo,
-        }
-
-    except Exception as e:
-        print(f"[ERROR] Failed to parse decrypted data: {e}")
-        raise ValueError("Invalid decrypted health data format")

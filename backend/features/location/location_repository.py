@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.repository.generic_repository import GenericRepository
-from backend.database.sql_models import Country, City
+from backend.core.database.sql_models import Country, City
 
 
 class CountryRepository(GenericRepository[Country]):
@@ -59,6 +59,6 @@ class LocationRepository:
         return result.all()
 
     async def is_city_from_country(self, city_name: str, country_id: int) -> bool:
-        statement   = select(City).where(City.name == city_name, City.country_id == country_id)
+        statement = select(City).where(City.name == city_name, City.country_id == country_id)
         result = await self._db.execute(statement)
         return result.scalar_one_or_none() is not None
