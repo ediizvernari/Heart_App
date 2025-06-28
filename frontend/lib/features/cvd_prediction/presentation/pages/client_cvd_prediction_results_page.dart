@@ -14,18 +14,15 @@ class CvdPredictionResultsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final ctrl = context.watch<CvdPredictionController>();
 
-    // dacă încă nu avem date, arătăm loader pe fundalul gradient
     if (ctrl.userHealthData == null || ctrl.predictionResult == null) {
       return Scaffold(
         body: Stack(
           children: [
-            // fundal gradient full-screen
             Container(
               decoration: const BoxDecoration(
                 gradient: AppColors.primaryGradient,
               ),
             ),
-            // loader centrat în SafeArea
             const SafeArea(
               child: Center(child: CircularProgressIndicator()),
             ),
