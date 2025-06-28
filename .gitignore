@@ -1,0 +1,11 @@
+cert.key
+cert.pem
+.vscode/
+.frontend/test/
+/frontend/.metadata
+
+/android/
+.dart_tool/
+build/
+.flutter-plugins*
+.metadata
