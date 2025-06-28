@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/constants/app_text_styles.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/constants/app_colors.dart';
 
@@ -19,19 +20,12 @@ class DatePickerField extends StatelessWidget {
       child: InputDecorator(
         decoration: InputDecoration(
           labelText: 'Select Date',
-          labelStyle: const TextStyle(color: Colors.black87),
+          labelStyle: AppTextStyles.subtitle,
           filled: true,
-          fillColor: Colors.white.withValues(alpha: 51), // 20% white
+          fillColor: AppColors.background,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide: const BorderSide(
-              color: Colors.black54,
-              width: 1.5,
-            ),
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide.none,
           ),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -41,12 +35,12 @@ class DatePickerField extends StatelessWidget {
           children: [
             Text(
               DateFormat.yMMMMd().format(selectedDate),
-              style: const TextStyle(color: Colors.black87),
+              style: AppTextStyles.body,
             ),
             const Icon(
-              Icons.calendar_today,
+              Icons.calendar_month,
               size: 20,
-              color: AppColors.primaryRed,
+              color: AppColors.primaryBlue,
             ),
           ],
         ),

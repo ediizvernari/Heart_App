@@ -7,7 +7,7 @@ import '../controllers/user_appointments_controller.dart';
 import '../controllers/medic_appointments_controller.dart';
 
 import 'package:frontend/features/users/presentation/controllers/user_controller.dart';
-import 'package:frontend/features/medical_service/presentation/controllers/medical_service_controller.dart';
+import 'package:frontend/features/medical_services/presentation/controllers/medical_service_controller.dart';
 import 'package:frontend/features/appointments/scheduling/presentation/medic_schedule_controller.dart';
 import '../widgets/user_appointment_form_dialog.dart';
 import '../widgets/appointment_item.dart';
@@ -53,7 +53,7 @@ class _AppointmentsPanelState extends State<AppointmentsPanel> {
         child: Text(
           'No appointments controller found',
           style: AppTextStyles.dialogContent.copyWith(
-            color: AppColors.primaryRed,
+            color: AppColors.primaryBlue,
           ),
         ),
       );
@@ -93,12 +93,12 @@ class _AppointmentsPanelState extends State<AppointmentsPanel> {
                       label: Text(
                         label,
                         style: AppTextStyles.subheader.copyWith(
-                          color: isSelected ? Colors.white : Colors.black87,
+                          color: isSelected ? AppColors.background : AppColors.textPrimary,
                         ),
                       ),
                       selected: isSelected,
-                      selectedColor: AppColors.primaryRed,
-                      backgroundColor: Colors.grey.shade200,
+                      selectedColor: AppColors.primaryBlue,
+                      backgroundColor: AppColors.softGrey,
                       showCheckmark: false,
                       onSelected: (_) {
                         setState(() {
@@ -121,7 +121,7 @@ class _AppointmentsPanelState extends State<AppointmentsPanel> {
                   child: Text(
                     'Error: $error',
                     style: AppTextStyles.dialogContent.copyWith(
-                      color: AppColors.primaryRed,
+                      color: AppColors.primaryBlue,
                     ),
                   ),
                 ),
@@ -132,7 +132,7 @@ class _AppointmentsPanelState extends State<AppointmentsPanel> {
                   child: Text(
                     'No ${_selectedStatus[0].toUpperCase()}${_selectedStatus.substring(1)} appointments.',
                     style: AppTextStyles.dialogContent.copyWith(
-                      color: Colors.black54,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -144,15 +144,18 @@ class _AppointmentsPanelState extends State<AppointmentsPanel> {
                   itemCount: filtered.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (_, index) {
-                    final appt = filtered[index];
+                    final appointment = filtered[index];
                     return AppointmentItem(
-                      appointment: appt,
+                      appointment: appointment,
+                      isMedicView: isMedic,
                       onUpdateStatus: isMedic
                           ? (newStatus) => medicController!.updateAppointmentStatus(
-                                appt.id,
+                                appointment.id,
                                 newStatus,
                               )
-                          : null,
+                          : (appointment.appointmentStatus == 'pending' || appointment.appointmentStatus == 'confirmed')
+                            ? (newStatus) => userController?.updateAppointmentStatus(appointment.id, newStatus)
+                            : null,
                     );
                   },
                 ),
@@ -166,23 +169,23 @@ class _AppointmentsPanelState extends State<AppointmentsPanel> {
             bottom: 16,
             right: 16,
             child: FloatingActionButton(
-              backgroundColor: AppColors.primaryRed,
-              child: const Icon(Icons.add, color: Colors.white),
+              backgroundColor: AppColors.primaryBlue,
+              child: const Icon(Icons.add, color: AppColors.background),
               onPressed: () {
-                final userCtrl = context.read<UserController>();
-                final medicalServiceCtrl = context.read<MedicalServiceController>();
-                final medicScheduleCtrl = context.read<MedicScheduleController>();
-                final appointmentCtrl = context.read<UserAppointmentsController>();
+                final userController = context.read<UserController>();
+                final medicalServiceController = context.read<MedicalServiceController>();
+                final medicScheduleController = context.read<MedicScheduleController>();
+                final appointmentController = context.read<UserAppointmentsController>();
 
                 showDialog(
                   context: context,
                   builder: (dialogCtx) {
                     return MultiProvider(
                       providers: [
-                        ChangeNotifierProvider.value(value: userCtrl),
-                        ChangeNotifierProvider.value(value: appointmentCtrl),
-                        ChangeNotifierProvider.value(value: medicalServiceCtrl),
-                        ChangeNotifierProvider.value(value: medicScheduleCtrl),
+                        ChangeNotifierProvider.value(value: userController),
+                        ChangeNotifierProvider.value(value: appointmentController),
+                        ChangeNotifierProvider.value(value: medicalServiceController),
+                        ChangeNotifierProvider.value(value: medicScheduleController),
                       ],
                       child: const UserAppointmentFormDialog(),
                     );

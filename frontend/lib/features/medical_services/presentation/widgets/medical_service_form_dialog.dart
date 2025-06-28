@@ -17,6 +17,7 @@ class MedicalServiceFormDialog extends StatefulWidget {
 
 class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
   final _formKey = GlobalKey<FormState>();
+  int? _selectedTypeId;
   late TextEditingController _medicalServiceNameController;
   late TextEditingController _medicalServicePriceController;
   late TextEditingController _medicalServiceDurationController;
@@ -24,10 +25,11 @@ class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
   @override
   void initState() {
     super.initState();
-    final svc = widget.service;
-    _medicalServiceNameController = TextEditingController(text: svc?.name ?? '');
-    _medicalServicePriceController = TextEditingController(text: svc != null ? svc.price.toString() : '');
-    _medicalServiceDurationController = TextEditingController(text: svc != null ? svc.durationMinutes.toString() : '');
+    final medicalService = widget.service;
+    _selectedTypeId = medicalService?.medicalServiceTypeId;
+    _medicalServiceNameController = TextEditingController(text: medicalService?.name ?? '');
+    _medicalServicePriceController = TextEditingController(text: medicalService != null ? medicalService.price.toString() : '');
+    _medicalServiceDurationController = TextEditingController(text: medicalService != null ? medicalService.durationMinutes.toString() : '');
 
     final controller = context.read<MedicalServiceController>();
     if (controller.medicalServiceTypes.isEmpty) {
@@ -46,10 +48,11 @@ class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<MedicalServiceController>();
+    final types = controller.medicalServiceTypes;
 
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
@@ -60,53 +63,88 @@ class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-
                 Text(
                   widget.service == null ? 'New Service' : 'Edit Service',
-                  style: AppTextStyles.dialogTitle.copyWith(
-                    color: AppColors.primaryRed,
+                  style: AppTextStyles.dialogTitle,
+                ),
+                const SizedBox(height: 12),
+
+                DropdownButtonFormField<int>(
+                  isExpanded: true,
+                  value: _selectedTypeId,
+                  decoration: InputDecoration(
+                    labelText: 'Service Type',
+                    labelStyle: AppTextStyles.subheader.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(24)),
+                    ),
+                    hintText: types.isEmpty ? 'Loading types…' : null,
+                    hintStyle: AppTextStyles.dialogContent.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
                   ),
+                  items: types
+                      .map((t) => DropdownMenuItem<int>(
+                            value: t.id,
+                            child: Text(
+                              t.name,
+                              style: AppTextStyles.dialogContent.copyWith(
+                                color: AppColors.textPrimary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ))
+                      .toList(),
+                  onChanged:
+                      types.isEmpty ? null : (v) => setState(() => _selectedTypeId = v),
+                  validator: (v) =>
+                      v == null ? 'Please select a type' : null,
                 ),
                 const SizedBox(height: 12),
 
                 TextFormField(
                   controller: _medicalServiceNameController,
                   style: AppTextStyles.dialogContent.copyWith(
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                   decoration: InputDecoration(
                     labelText: 'Name',
                     labelStyle: AppTextStyles.subheader.copyWith(
-                      color: Colors.black54,
+                      color: AppColors.textPrimary,
                     ),
-                    border: const OutlineInputBorder(),
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(24)),
+                    ),
                   ),
                   validator: (v) =>
                       v == null || v.trim().isEmpty ? 'Required' : null,
                 ),
                 const SizedBox(height: 12),
 
-                // 4) Price field
                 TextFormField(
                   controller: _medicalServicePriceController,
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   style: AppTextStyles.dialogContent.copyWith(
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                   decoration: InputDecoration(
                     labelText: 'Price',
                     labelStyle: AppTextStyles.subheader.copyWith(
-                      color: Colors.black54,
+                      color: AppColors.textPrimary,
                     ),
-                    border: const OutlineInputBorder(),
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(24)),
+                    ),
                     prefixText: '\$ ',
                     prefixStyle: AppTextStyles.dialogContent.copyWith(
-                      color: Colors.black54,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   validator: (v) {
-                    if (v == null || double.tryParse(v.trim()) == null) {
+                    if (v == null || int.tryParse(v.trim()) == null) {
                       return 'Enter a valid number';
                     }
                     return null;
@@ -114,19 +152,20 @@ class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
                 ),
                 const SizedBox(height: 12),
 
-                // 5) Duration field
                 TextFormField(
                   controller: _medicalServiceDurationController,
                   keyboardType: TextInputType.number,
                   style: AppTextStyles.dialogContent.copyWith(
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                   decoration: InputDecoration(
                     labelText: 'Duration (min)',
                     labelStyle: AppTextStyles.subheader.copyWith(
-                      color: Colors.black54,
+                      color: AppColors.textPrimary,
                     ),
-                    border: const OutlineInputBorder(),
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(24)),
+                    ),
                   ),
                   validator: (v) {
                     if (v == null || int.tryParse(v.trim()) == null) {
@@ -137,25 +176,29 @@ class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
                 ),
                 const SizedBox(height: 20),
 
-                // 6) Actions: Cancel & Create/Save
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
+                      style: TextButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                      ),
                       onPressed: () => Navigator.of(context).pop(),
                       child: Text(
                         'Cancel',
                         style: AppTextStyles.dialogButton.copyWith(
-                          color: Colors.black54,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryRed,
+                        backgroundColor: AppColors.primaryBlue,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(24),
                         ),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
@@ -164,16 +207,16 @@ class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
                       ),
                       onPressed: () {
                         if (!_formKey.currentState!.validate()) return;
-                        _formKey.currentState!.save();
 
                         final name = _medicalServiceNameController.text.trim();
                         final price = double.parse(_medicalServicePriceController.text.trim());
                         final duration = int.parse(_medicalServiceDurationController.text.trim());
+                        final typeId = _selectedTypeId!;
 
                         final newService = MedicalService(
                           id: widget.service?.id ?? 0,
                           medicId: widget.service?.medicId ?? 0,
-                          medicalServiceTypeId: widget.service?.medicalServiceTypeId ?? 0,
+                          medicalServiceTypeId: typeId,
                           name: name,
                           price: price.toInt(),
                           durationMinutes: duration,
@@ -188,9 +231,7 @@ class _MedicalServiceFormDialogState extends State<MedicalServiceFormDialog> {
                       },
                       child: Text(
                         widget.service == null ? 'Create' : 'Save',
-                        style: AppTextStyles.buttonText.copyWith(
-                          color: Colors.white,
-                        ),
+                        style: AppTextStyles.buttonText
                       ),
                     ),
                   ],

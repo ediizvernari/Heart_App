@@ -32,7 +32,7 @@ class ActionCard extends StatelessWidget {
               Icon(
                 icon,
                 size: 36,
-                color: isPrimary ? AppColors.primaryRed : Colors.grey[800],
+                color: isPrimary ? AppColors.primaryBlue : Colors.grey[800],
               ),
               const SizedBox(height: 12),
               Text(label, textAlign: TextAlign.center),

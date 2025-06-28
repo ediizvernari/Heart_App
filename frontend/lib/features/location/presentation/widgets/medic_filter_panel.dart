@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/constants/app_colors.dart';
 import 'city_autocomplete_field.dart';
 
 class MedicFilterPanel extends StatefulWidget {
@@ -49,9 +50,12 @@ class _MedicFilterPanelState extends State<MedicFilterPanel> {
         const SizedBox(height: 12),
         TextField(
           controller: widget.countryController,
+          style: const TextStyle(color: AppColors.textPrimary),
           decoration: const InputDecoration(
             labelText: 'Country',
-            border: OutlineInputBorder(),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            ),
           ),
         ),
         const SizedBox(height: 12),

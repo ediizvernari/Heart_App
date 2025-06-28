@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_colors.dart';
-import 'package:frontend/core/constants/app_text_styles.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
+import 'package:frontend/core/constants/app_text_styles.dart';
+
 import '../../data/models/medic_availability_model.dart';
 import '../controllers/medic_availability_controller.dart';
 
@@ -17,14 +18,20 @@ class _NewSlotDialogState extends State<NewSlotDialog> {
   TimeOfDay? _start, _end;
   static const _labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+  bool get _isValidInterval {
+    if (_start == null || _end == null) return false;
+    final startMinutes = _start!.hour * 60 + _start!.minute;
+    final endMinutes = _end!.hour * 60 + _end!.minute;
+    return endMinutes > startMinutes;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final medicAvailabilityController =
-        context.read<MedicAvailabilityController>();
+    final medicAvailabilityController = context.read<MedicAvailabilityController>();
 
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
@@ -33,11 +40,9 @@ class _NewSlotDialogState extends State<NewSlotDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              const Text(
                 'Add Availability Slot',
-                style: AppTextStyles.dialogTitle.copyWith(
-                  color: AppColors.primaryRed,
-                ),
+                style: AppTextStyles.dialogTitle,
               ),
               const SizedBox(height: 12),
 
@@ -46,14 +51,20 @@ class _NewSlotDialogState extends State<NewSlotDialog> {
                 value: _weekday,
                 decoration: InputDecoration(
                   labelText: 'Day of Week',
-                  labelStyle: AppTextStyles.subheader.copyWith(
-                    color: Colors.black54,
+                  labelStyle: AppTextStyles.subtitle,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  border: const OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: AppColors.primaryBlue),
+                  ),
                   hintText: _weekday == null ? 'Select a day' : null,
-                  hintStyle: AppTextStyles.dialogContent.copyWith(
-                    color: Colors.black38,
-                  ),
+                  hintStyle: AppTextStyles.body
                 ),
                 items: List.generate(
                   7,
@@ -61,34 +72,27 @@ class _NewSlotDialogState extends State<NewSlotDialog> {
                     value: i,
                     child: Text(
                       _labels[i],
-                      style: AppTextStyles.dialogContent.copyWith(
-                        color: Colors.black87,
-                      ),
+                      style: AppTextStyles.body
                     ),
                   ),
                 ),
                 onChanged: (v) => setState(() => _weekday = v),
-                validator: (v) => v == null ? 'Required' : null,
               ),
               const SizedBox(height: 12),
 
               Row(
                 children: [
-                  Text('Start:', style: AppTextStyles.dialogContent),
+                  const Text('Start:', style: AppTextStyles.dialogContent),
                   const Spacer(),
                   Text(
                     _start?.format(context) ?? '—',
-                    style: AppTextStyles.dialogContent.copyWith(
-                      color: Colors.black87,
-                    ),
+                    style: AppTextStyles.dialogContent
                   ),
                   TextButton(
                     onPressed: () => _pickTime(isStart: true),
-                    child: Text(
+                    child: const Text(
                       'Pick',
-                      style: AppTextStyles.buttonText.copyWith(
-                        color: AppColors.primaryRed,
-                      ),
+                      style: AppTextStyles.blueButtonText
                     ),
                   ),
                 ],
@@ -96,68 +100,75 @@ class _NewSlotDialogState extends State<NewSlotDialog> {
 
               Row(
                 children: [
-                  Text('End:', style: AppTextStyles.dialogContent),
+                  const Text('End:', style: AppTextStyles.dialogContent),
                   const Spacer(),
                   Text(
                     _end?.format(context) ?? '—',
-                    style: AppTextStyles.dialogContent.copyWith(
-                      color: Colors.black87,
-                    ),
+                    style: AppTextStyles.dialogContent
                   ),
                   TextButton(
                     onPressed: () => _pickTime(isStart: false),
-                    child: Text(
+                    child: const Text(
                       'Pick',
-                      style: AppTextStyles.buttonText.copyWith(
-                        color: AppColors.primaryRed,
-                      ),
+                      style: AppTextStyles.blueButtonText
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 20),
 
+              if (_start != null && _end != null && !_isValidInterval) ...[
+                const Text(
+                  'End time must be after start time',
+                  style: TextStyle(color: AppColors.errorRed),
+                ),
+                const SizedBox(height: 12),
+              ],
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(
+                    child: const Text(
                       'Cancel',
-                      style: AppTextStyles.dialogButton.copyWith(
-                        color: Colors.black54,
-                      ),
+                      style: AppTextStyles.blackDialogButton
                     ),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryRed,
+                      backgroundColor: AppColors.primaryBlue,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 12,
                       ),
                     ),
-                    onPressed: (_weekday != null && _start != null && _end != null)
+                    onPressed: (_weekday != null && _start != null && _end != null && _isValidInterval)
                         ? () async {
                             Navigator.pop(context);
+                            final messenger = ScaffoldMessenger.of(context);
                             final slot = MedicAvailability(
                               id: 0,
                               weekday: _weekday!,
                               startTime: _format(_start!),
                               endTime: _format(_end!),
                             );
-                            await medicAvailabilityController.addAvailability(slot);
+                            try {
+                              await medicAvailabilityController.addAvailability(slot);
+                            } catch (e) {
+                              messenger.showSnackBar(
+                                SnackBar(content: Text('Error: $e')),
+                              );
+                            }
                           }
                         : null,
-                    child: Text(
+                    child: const Text(
                       'Save',
-                      style: AppTextStyles.buttonText.copyWith(
-                        color: Colors.white,
-                      ),
+                      style: AppTextStyles.buttonText
                     ),
                   ),
                 ],
@@ -170,24 +181,22 @@ class _NewSlotDialogState extends State<NewSlotDialog> {
   }
 
   Future<void> _pickTime({required bool isStart}) async {
-    final picked = await showTimePicker(
+    final pickedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
     );
-    if (picked != null) {
+    if (pickedTime != null) {
       setState(() {
         if (isStart) {
-          _start = picked;
+          _start = pickedTime;
         } else {
-          _end = picked;
+          _end = pickedTime;
         }
       });
     }
   }
 
   String _format(TimeOfDay t) {
-    return t.hour.toString().padLeft(2, '0') +
-        ':' +
-        t.minute.toString().padLeft(2, '0');
+    return '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
   }
 }

@@ -30,19 +30,19 @@ class _SignupUserFormState extends State<SignupUserForm> {
   }
 
   Future<void> _handleSignup() async {
-    final dto = UserSignupRequest(
+    final userSignupRequestDto = UserSignupRequest(
       email: _emailController.text.trim(),
       password: _passwordController.text,
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
     );
-    final authCtrl = context.read<AuthController>()
-      ..email = dto.email
-      ..password = dto.password;
+    final authController = context.read<AuthController>()
+      ..email = userSignupRequestDto.email
+      ..password = userSignupRequestDto.password;
 
-    await authCtrl.signupUser(
+    await authController.signupUser(
       context: context,
-      userSignupDto: dto,
+      userSignupDto: userSignupRequestDto,
       confirmPassword: _confirmPasswordController.text,
     );
   }
@@ -55,10 +55,10 @@ class _SignupUserFormState extends State<SignupUserForm> {
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
+            color: AppColors.background.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.3),
+              color: AppColors.background.withValues(alpha: 0.3),
               width: 1.5,
             ),
           ),
@@ -70,9 +70,9 @@ class _SignupUserFormState extends State<SignupUserForm> {
                 controller: _firstNameController,
                 decoration: InputDecoration(
                   hintText: 'First Name',
-                  hintStyle: const TextStyle(color: Colors.white70),
+                  hintStyle: const TextStyle(color: AppColors.background),
                   filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.2),
+                  fillColor: AppColors.background.withValues(alpha: 0.2),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                     borderSide: BorderSide.none,
@@ -80,7 +80,7 @@ class _SignupUserFormState extends State<SignupUserForm> {
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 20, vertical: 16),
                 ),
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.background),
               ),
               const SizedBox(height: 16),
 
@@ -88,9 +88,9 @@ class _SignupUserFormState extends State<SignupUserForm> {
                 controller: _lastNameController,
                 decoration: InputDecoration(
                   hintText: 'Last Name',
-                  hintStyle: const TextStyle(color: Colors.white70),
+                  hintStyle: const TextStyle(color: AppColors.background),
                   filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.2),
+                  fillColor: AppColors.background.withValues(alpha: 0.2),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                     borderSide: BorderSide.none,
@@ -98,7 +98,7 @@ class _SignupUserFormState extends State<SignupUserForm> {
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 20, vertical: 16),
                 ),
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.background),
               ),
               const SizedBox(height: 16),
 
@@ -107,9 +107,9 @@ class _SignupUserFormState extends State<SignupUserForm> {
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   hintText: 'Email',
-                  hintStyle: const TextStyle(color: Colors.white70),
+                  hintStyle: const TextStyle(color: AppColors.background),
                   filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.2),
+                  fillColor: AppColors.background.withValues(alpha: 0.2),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                     borderSide: BorderSide.none,
@@ -117,7 +117,7 @@ class _SignupUserFormState extends State<SignupUserForm> {
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 20, vertical: 16),
                 ),
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.background),
               ),
               const SizedBox(height: 16),
 
@@ -126,9 +126,9 @@ class _SignupUserFormState extends State<SignupUserForm> {
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: 'Password',
-                  hintStyle: const TextStyle(color: Colors.white70),
+                  hintStyle: const TextStyle(color: AppColors.background),
                   filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.2),
+                  fillColor: AppColors.background.withValues(alpha: 0.2),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                     borderSide: BorderSide.none,
@@ -136,7 +136,7 @@ class _SignupUserFormState extends State<SignupUserForm> {
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 20, vertical: 16),
                 ),
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.background),
               ),
               const SizedBox(height: 16),
 
@@ -145,9 +145,9 @@ class _SignupUserFormState extends State<SignupUserForm> {
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: 'Confirm Password',
-                  hintStyle: const TextStyle(color: Colors.white70),
+                  hintStyle: const TextStyle(color: AppColors.background),
                   filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.2),
+                  fillColor: AppColors.background.withValues(alpha: 0.2),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                     borderSide: BorderSide.none,
@@ -155,19 +155,19 @@ class _SignupUserFormState extends State<SignupUserForm> {
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 20, vertical: 16),
                 ),
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.background),
               ),
               const SizedBox(height: 32),
 
               context.watch<AuthController>().isLoading
                   ? const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation(Colors.white),
+                      valueColor: AlwaysStoppedAnimation(AppColors.background),
                     )
                   : RoundedButton(
                       text: 'Sign Up',
                       onPressed: _handleSignup,
-                      backgroundColor: AppColors.primaryRed,
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppColors.primaryBlue,
+                      foregroundColor: AppColors.background,
                       borderRadius: 30,
                       elevation: 8,
                     ),

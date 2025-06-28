@@ -70,9 +70,7 @@ class DialogUtils {
             ElevatedButton(
               child: const Text("Confirm & View Prediction Results"),
               onPressed: () {
-                // dismiss only the dialog
                 Navigator.of(dialogContext).pop();
-                // then invoke your async confirm handler
                 onConfirm(dialogContext);
               },
             ),

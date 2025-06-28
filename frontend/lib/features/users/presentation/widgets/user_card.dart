@@ -26,7 +26,6 @@ class UserCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title
             Text(
               '${user.firstName} ${user.lastName}',
               style: AppTextStyles.header,
@@ -47,7 +46,7 @@ class UserCard extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryRed,
+                  backgroundColor: AppColors.primaryBlue,
 
                 ),
                 onPressed: onSuggest,

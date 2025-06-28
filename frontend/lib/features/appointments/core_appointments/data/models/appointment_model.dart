@@ -1,3 +1,6 @@
+import 'package:frontend/features/medics/data/models/medic.dart';
+import 'package:frontend/features/users/data/models/user_model.dart';
+
 class Appointment {
   final int id;
   final int userId;
@@ -12,6 +15,9 @@ class Appointment {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  final User patient;
+  final Medic medic;
+
   Appointment({
     required this.id,
     required this.userId,
@@ -25,6 +31,8 @@ class Appointment {
     required this.appointmentStatus,
     required this.createdAt,
     required this.updatedAt,
+    required this.patient,
+    required this.medic,
   });
 
   factory Appointment.fromJson(Map<String, dynamic> json) => Appointment(
@@ -40,6 +48,8 @@ class Appointment {
         appointmentStatus: json['appointment_status'] as String,
         createdAt: DateTime.parse(json['created_at'] as String),
         updatedAt: DateTime.parse(json['updated_at'] as String),
+        patient: User.fromJson(json['patient'] as Map<String, dynamic>),
+        medic: Medic.fromJson(json['medic'] as Map<String, dynamic>),
       );
 
   Map<String, dynamic> toJsonForCreate() {

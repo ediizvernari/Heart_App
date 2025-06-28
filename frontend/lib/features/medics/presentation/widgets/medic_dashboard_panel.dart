@@ -15,68 +15,54 @@ class MedicDashboardPanel extends StatelessWidget {
   final VoidCallback onAppointments;
   final VoidCallback onAvailability;
 
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 72),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: ActionCard(
-                    icon: Icons.people, 
-                    label: 'My Assigned Users',
-                    onTap: onAssignedUsers,
-                  ),
-                ),
+ @override
+Widget build(BuildContext context) {
+  return SingleChildScrollView(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 72),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: ActionCard(
+                icon: Icons.people,
+                label: 'My Assigned Users',
+                onTap: onAssignedUsers,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: ActionCard(
-                    icon: Icons.medical_services,
-                    label: 'My Medical Services',
-                    onTap: onMedicalServices,
-                  ),
-                ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: ActionCard(
+                icon: Icons.medical_services,
+                label: 'My Medical Services',
+                onTap: onMedicalServices,
               ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          Row(
-            children: [
-              Expanded(
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: ActionCard(
-                    icon: Icons.calendar_today,
-                    label: 'My Appointments',
-                    onTap: onAppointments,
-                  ),
-                ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: ActionCard(
+                icon: Icons.calendar_today,
+                label: 'My Appointments',
+                onTap: onAppointments,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: ActionCard(
-                    icon: Icons.access_time,
-                    label: 'My Time Availability',
-                    onTap: onAvailability,
-                  ),
-                ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: ActionCard(
+                icon: Icons.access_time,
+                label: 'My Time Availability',
+                onTap: onAvailability,
               ),
-            ],
-          ),
-        ],
-      ),
-    );
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
   }
 }

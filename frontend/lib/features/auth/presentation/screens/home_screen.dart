@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/widgets/ekg_signal.dart';
 import 'package:frontend/widgets/custom_app_bar.dart';
 import 'package:frontend/core/constants/app_colors.dart';
 import 'package:provider/provider.dart';
@@ -10,19 +11,18 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authCtrl = context.watch<AuthController>();
-
-    if (authCtrl.error != null) {
+    final authController = context.watch<AuthController>();
+    if (authController.error != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
             title: const Text('Error'),
-            content: Text(authCtrl.error!),
+            content: Text(authController.error!),
             actions: [
               TextButton(
                 onPressed: () {
-                  authCtrl.clearError();
+                  authController.clearError();
                   Navigator.pop(context);
                 },
                 child: const Text('OK'),
@@ -33,23 +33,40 @@ class HomeScreen extends StatelessWidget {
       });
     }
 
+    const ekgData = <double>[0, 0, 0, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 1, -1, 0, 0, 0, 0, 0, 1, -1, 0];
+
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.primaryGradient,
-        ),
-        child: const SafeArea(
-          child: Column(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final totalHeight = constraints.maxHeight;
+          final totalWidth = constraints.maxWidth;
+          return Stack(
             children: [
-              CustomAppBar(title: 'Welcome to the Health App!'),
-              Expanded(
-                child: Center(
-                  child: HomeForm(),
+              Container(
+                width: totalWidth,
+                height: totalHeight,
+                decoration: const BoxDecoration(
+                  gradient: AppColors.primaryGradient,
                 ),
               ),
+
+              const SafeArea(
+                child: Column(
+                  children: [
+                    CustomAppBar(title: 'Welcome to the Heart App!'),
+                    Expanded(child: Center(child: HomeForm())),
+                  ],
+                ),
+              ),
+
+              EkgSignal(
+                data: ekgData,
+                bottomOffset: totalHeight * 0.15,
+                height: totalHeight * 0.1,
+              ),
             ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }

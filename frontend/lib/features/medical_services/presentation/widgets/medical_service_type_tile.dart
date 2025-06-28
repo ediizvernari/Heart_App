@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../data/models/medical_service.dart';
 import '../../data/models/medical_service_type.dart';
@@ -21,9 +20,7 @@ class MedicalServiceTypeTile extends StatelessWidget {
     return ExpansionTile(
       title: Text(
         type.name,
-        style: AppTextStyles.buttonText.copyWith(
-          color: AppColors.primaryRed,
-        ),
+        style: AppTextStyles.blueButtonText
       ),
       children: services
           .map(

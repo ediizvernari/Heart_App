@@ -30,17 +30,17 @@ class MedicalServiceItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Medical Service Name
                   Text(
                     service.name,
-                    style: AppTextStyles.header.copyWith(
-                      color: Colors.black87,
-                    ),
+                    style: AppTextStyles.cardTitle
                   ),
                   const SizedBox(height: 4),
+                  // Medical Service Price and Duration
                   Text(
                     '\$${service.price.toStringAsFixed(2)} • ${service.durationMinutes} min',
                     style: AppTextStyles.subheader.copyWith(
-                      color: Colors.black87,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ],
@@ -50,9 +50,10 @@ class MedicalServiceItem extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Edit button
                 IconButton(
                   icon: const Icon(Icons.edit, size: 20),
-                  color: AppColors.primaryRed,
+                  color: AppColors.primaryBlue,
                   onPressed: () {
                     showDialog(
                       context: context,
@@ -63,9 +64,11 @@ class MedicalServiceItem extends StatelessWidget {
                     );
                   },
                 ),
+
+                // Delete button
                 IconButton(
                   icon: const Icon(Icons.delete, size: 20),
-                  color: AppColors.primaryRed,
+                  color: AppColors.primaryBlue,
                   onPressed: () {
                     medicalServiceController.deleteMedicalService(service.id);
                   },

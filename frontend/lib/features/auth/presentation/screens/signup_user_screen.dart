@@ -10,19 +10,19 @@ class SignupUserScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authCtrl = context.watch<AuthController>();
+    final authController = context.watch<AuthController>();
 
-    if (authCtrl.error != null) {
+    if (authController.error != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showDialog<void>(
           context: context,
           builder: (_) => AlertDialog(
             title: const Text('Error'),
-            content: Text(authCtrl.error!),
+            content: Text(authController.error!),
             actions: [
               TextButton(
                 onPressed: () {
-                  authCtrl.clearError();
+                  authController.clearError();
                   Navigator.pop(context);
                 },
                 child: const Text('OK'),

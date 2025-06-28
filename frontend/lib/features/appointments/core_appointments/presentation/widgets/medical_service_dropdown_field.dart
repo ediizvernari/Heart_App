@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_colors.dart';
-import 'package:frontend/features/medical_service/data/models/medical_service.dart';
+import 'package:frontend/features/medical_services/data/models/medical_service.dart';
 
 class MedicalServiceDropdownField extends StatelessWidget {
   final List<MedicalService> medicalServices;
@@ -27,16 +27,20 @@ class MedicalServiceDropdownField extends StatelessWidget {
     return DropdownButtonFormField<int>(
       decoration: InputDecoration(
         labelText: 'Select Service',
-        labelStyle: const TextStyle(color: Colors.black87),
+        labelStyle: const TextStyle(color: AppColors.textPrimary),
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 51), // 20% white
+        fillColor: AppColors.background,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
         ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Colors.grey),
+        ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: const BorderSide(color: Colors.black54, width: 1.5),
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: AppColors.primaryBlue),
         ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -44,8 +48,7 @@ class MedicalServiceDropdownField extends StatelessWidget {
       dropdownColor: AppColors.cardBackground,
       style: Theme.of(context)
           .textTheme
-          .bodyLarge!
-          .copyWith(color: Colors.black87),
+          .bodyLarge!,
       isExpanded: true,
       value: selectedMedicalServiceId,
       items: medicalServices
@@ -54,7 +57,7 @@ class MedicalServiceDropdownField extends StatelessWidget {
               value: s.id,
               child: Text(
                 '${s.name} – \$${s.price.toStringAsFixed(2)}',
-                style: const TextStyle(color: Colors.black87),
+                style: const TextStyle(color: AppColors.textPrimary),
               ),
             ),
           )

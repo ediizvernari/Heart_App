@@ -19,7 +19,7 @@ class AvailabilityItem extends StatelessWidget {
 
     return Card(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(24),
       ),
       elevation: 2,
       child: Padding(
@@ -30,14 +30,12 @@ class AvailabilityItem extends StatelessWidget {
             Expanded(
               child: Text(
                 '$dayName • ${slot.startTime}–${slot.endTime}',
-                style: AppTextStyles.header.copyWith(
-                  color: Colors.black87,
-                ),
+                style: AppTextStyles.subtitle
               ),
             ),
             IconButton(
               icon: const Icon(Icons.delete, size: 20),
-              color: AppColors.primaryRed,
+              color: AppColors.primaryBlue,
               onPressed: onDelete,
             ),
           ],

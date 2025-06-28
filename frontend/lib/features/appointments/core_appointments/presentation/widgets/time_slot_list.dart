@@ -22,7 +22,7 @@ class TimeSlotList extends StatelessWidget {
     if (isLoading) {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation(AppColors.primaryRed),
+          valueColor: AlwaysStoppedAnimation(AppColors.primaryBlue),
         ),
       );
     }
@@ -30,7 +30,7 @@ class TimeSlotList extends StatelessWidget {
     if (freeSlots.isEmpty) {
       return const Text(
         'No available slots',
-        style: TextStyle(color: Colors.black54, fontSize: 16),
+        style: TextStyle(color: AppColors.textPrimary),
         textAlign: TextAlign.center,
       );
     }

@@ -6,10 +6,10 @@ class AppTheme {
   static ThemeData get light {
     final base = ThemeData.light();
     return base.copyWith(
-      primaryColor: AppColors.primaryRed,
+      primaryColor: AppColors.primaryBlue,
       colorScheme: base.colorScheme.copyWith(
-        primary: AppColors.primaryRed,
-        secondary: AppColors.primaryRed,
+        primary: AppColors.primaryBlue,
+        secondary: AppColors.primaryBlue,
       ),
       scaffoldBackgroundColor: Colors.white,
 
@@ -29,7 +29,7 @@ class AppTheme {
       ],
 
       floatingActionButtonTheme: base.floatingActionButtonTheme.copyWith(
-        backgroundColor: AppColors.primaryRed,
+        backgroundColor: AppColors.primaryBlue,
         foregroundColor: Colors.white,
       ),
 
@@ -41,13 +41,14 @@ class AppTheme {
 
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primaryRed,
+          foregroundColor: AppColors.primaryBlue,
           textStyle: AppTextStyles.buttonText,
         ),
       ),
+      
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryRed,
+          backgroundColor: AppColors.primaryBlue,
           foregroundColor: Colors.white,
           textStyle: AppTextStyles.buttonText,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),

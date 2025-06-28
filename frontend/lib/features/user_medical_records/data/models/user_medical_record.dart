@@ -23,7 +23,6 @@ class UserMedicalRecord {
     required this.createdAt,
   });
 
-  //TODO: Change the backend types of the schemas
   factory UserMedicalRecord.fromJson(Map<String, dynamic> json) {
     final cvdRiskString = json['cvd_risk'] as String;
     final heightString = json['height'] as String;

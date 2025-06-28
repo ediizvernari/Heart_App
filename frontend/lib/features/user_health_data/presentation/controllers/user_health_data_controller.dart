@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/user_health_data/data/models/user_health_data_model.dart';
 import 'package:frontend/features/user_health_data/data/repositories/user_health_data_repository.dart';
-import 'package:frontend/services/api_exception.dart';
+import 'package:frontend/core/network/api_exception.dart';
 
 class UserHealthDataController extends ChangeNotifier {
   final UserHealthDataRepository _userHealthDataRepository;

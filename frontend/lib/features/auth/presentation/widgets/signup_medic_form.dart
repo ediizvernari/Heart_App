@@ -68,7 +68,7 @@ class _SignupMedicFormState extends State<SignupMedicForm> {
   }
 
   Future<void> _handleSignup() async {
-    final dto = MedicSignupRequest(
+    final medicSignupRequestDto = MedicSignupRequest(
       email: _emailController.text.trim(),
       password: _passwordController.text,
       firstName: _firstNameController.text.trim(),
@@ -79,12 +79,12 @@ class _SignupMedicFormState extends State<SignupMedicForm> {
       country: _countryController.text.trim(),
     );
     final authCtrl = context.read<AuthController>()
-      ..email = dto.email
-      ..password = dto.password;
+      ..email = medicSignupRequestDto.email
+      ..password = medicSignupRequestDto.password;
 
     await authCtrl.signupMedic(
       context: context,
-      medicSignupDto: dto,
+      medicSignupDto: medicSignupRequestDto,
       confirmPassword: _confirmPasswordController.text,
     );
   }
@@ -97,9 +97,9 @@ class _SignupMedicFormState extends State<SignupMedicForm> {
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
+            color: AppColors.background.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1.5),
+            border: Border.all(color: AppColors.background.withValues(alpha: 0.3), width: 1.5),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: _step == 0 ? _buildStep0() : _buildStep1(),
@@ -126,8 +126,8 @@ class _SignupMedicFormState extends State<SignupMedicForm> {
       RoundedButton(
         text: 'Next',
         onPressed: _handleNext,
-        backgroundColor: AppColors.primaryRed,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.primaryBlue,
+        foregroundColor: AppColors.background,
         borderRadius: 30,
         elevation: 8,
       ),
@@ -135,7 +135,7 @@ class _SignupMedicFormState extends State<SignupMedicForm> {
   );
 
   Widget _buildStep1() {
-    final authCtrl = context.read<AuthController>();
+    final authController = context.read<AuthController>();
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -151,21 +151,21 @@ class _SignupMedicFormState extends State<SignupMedicForm> {
               child: RoundedButton(
                 text: 'Back',
                 onPressed: () => setState(() => _step = 0),
-                backgroundColor: Colors.white.withValues(alpha: 0.2),
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.background.withValues(alpha: 0.2),
+                foregroundColor: AppColors.background,
                 borderRadius: 30,
                 elevation: 0,
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: authCtrl.isLoading
+              child: authController.isLoading
                 ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Colors.white)))
                 : RoundedButton(
                     text: 'Sign Up',
                     onPressed: _handleSignup,
-                    backgroundColor: AppColors.primaryRed,
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.primaryBlue,
+                    foregroundColor: AppColors.background,
                     borderRadius: 30,
                     elevation: 8,
                   ),
@@ -186,12 +186,12 @@ class _SignupMedicFormState extends State<SignupMedicForm> {
       controller: ctl,
       obscureText: obscure,
       keyboardType: keyboard,
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(color: AppColors.background),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Colors.white70),
+        hintStyle: const TextStyle(color: AppColors.background),
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.2),
+        fillColor: AppColors.background.withValues(alpha: 0.2),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
           borderSide: BorderSide.none,

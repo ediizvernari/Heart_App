@@ -1,42 +1,25 @@
-import 'package:frontend/services/api_exception.dart';
-import '../api/user_medical_record_api.dart';
+import 'package:frontend/features/user_medical_records/data/api/user_medical_record_api.dart';
 import '../models/user_medical_record.dart';
 import 'user_medical_record_repository.dart';
 
-class UserMedicalRecordImpl implements UserMedicalRecordRepository {
+class UserMedicalRecordRepositoryImpl implements UserMedicalRecordRepository {
   @override
-  Future<List<UserMedicalRecord>> getAllMedicalRecordsForUser() async {
-    try {
-      return await UserMedicalRecordApi.getAllMedicalRecordsForUser();
-    } on ApiException {
-      rethrow;
-    }
+  Future<List<UserMedicalRecord>> getAllMedicalRecordsForUser() {
+    return UserMedicalRecordApi.getAllMedicalRecordsForUser();
   }
 
   @override
-  Future<UserMedicalRecord> getLatestUserMedicalRecord() async {
-    try {
-      return await UserMedicalRecordApi.getLatestUserMedicalRecord();
-    } on ApiException {
-      rethrow;
-    }
+  Future<UserMedicalRecord> getLatestUserMedicalRecord() {
+    return UserMedicalRecordApi.getLatestUserMedicalRecord();
   }
 
   @override
-  Future<List<UserMedicalRecord>> getAllMedicalRecordsByUserId(int userId) async {
-    try {
-      return await UserMedicalRecordApi.getAllMedicalRecordsByUserId(userId);
-    } on ApiException {
-      rethrow;
-    }
+  Future<List<UserMedicalRecord>> getAllMedicalRecordsByUserId(int userId) {
+    return UserMedicalRecordApi.getAllMedicalRecordsByUserId(userId);
   }
 
   @override
-  Future<UserMedicalRecord> getLatestMedicalRecordByUserId(int userId) async {
-    try {
-      return await UserMedicalRecordApi.getLatestMedicalRecordByUserId(userId);
-    } on ApiException {
-      rethrow;
-    }
+  Future<UserMedicalRecord> getLatestMedicalRecordByUserId(int userId) {
+    return UserMedicalRecordApi.getLatestMedicalRecordByUserId(userId);
   }
 }

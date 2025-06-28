@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/medical_service/presentation/widgets/medical_service_form_dialog.dart';
+import 'package:frontend/features/medical_services/presentation/widgets/medical_service_form_dialog.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -76,13 +76,13 @@ class _MedicalServicesPageState extends State<MedicalServicesPage> {
                                 type.name,
                                 style: AppTextStyles.subheader.copyWith(
                                   color: isSelected
-                                      ? Colors.white
-                                      : Colors.black87,
+                                      ? AppColors.background
+                                      : AppColors.textPrimary,
                                 ),
                               ),
                               selected: isSelected,
-                              selectedColor: AppColors.primaryRed,
-                              backgroundColor: Colors.grey.shade200,
+                              selectedColor: AppColors.primaryBlue,
+                              backgroundColor: AppColors.background,
                               onSelected: (_) {
                                 setState(() {
                                   _selectedMedicalServiceTypeId = type.id;
@@ -100,9 +100,7 @@ class _MedicalServicesPageState extends State<MedicalServicesPage> {
                         Center(
                           child: Text(
                             'Error: ${medicalServiceController.error}',
-                            style: AppTextStyles.dialogContent.copyWith(
-                              color: Colors.redAccent,
-                            ),
+                            style: AppTextStyles.errorText
                           ),
                         )
                       ] else if (filteredServices.isEmpty) ...[
@@ -110,7 +108,7 @@ class _MedicalServicesPageState extends State<MedicalServicesPage> {
                           child: Text(
                             'No services found.',
                             style: AppTextStyles.dialogContent.copyWith(
-                              color: Colors.black54,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                         )
@@ -136,7 +134,7 @@ class _MedicalServicesPageState extends State<MedicalServicesPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primaryRed,
+        backgroundColor: AppColors.primaryBlue,
         onPressed: () {
           showDialog(
             context: context,
@@ -146,7 +144,7 @@ class _MedicalServicesPageState extends State<MedicalServicesPage> {
             ),
           );
         },
-        child: const Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.add, color: AppColors.background),
       ),
     );
   }

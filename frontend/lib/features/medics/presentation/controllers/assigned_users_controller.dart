@@ -16,28 +16,28 @@ class AssignedUsersController extends ChangeNotifier {
   final Map<int, UserMedicalRecord?> assignedUsersLatestRecordMap = {};
 
   Future<void> getAssignedUsers() async {
-  isLoading     = true;
-  errorMessage  = null;
-  notifyListeners();
-
-  try {
-    assignedUsers = await _medicRepository.getAssignedUsers();
-    assignedUsersHealthDataMap.clear();
-    assignedUsersLatestRecordMap.clear();
-
-    for (final u in assignedUsers) {
-      try {
-        assignedUsersLatestRecordMap[u.id] =
-          await _medicRepository.getAssignedUserLastMedicalRecord(u.id);
-      } catch (_) {
-        assignedUsersLatestRecordMap[u.id] = null;
-      }
-    }
-  } catch (e) {
-    errorMessage = e.toString();
-  } finally {
-    isLoading = false;
+    isLoading = true;
+    errorMessage = null;
     notifyListeners();
+
+    try {
+      assignedUsers = await _medicRepository.getAssignedUsers();
+      assignedUsersHealthDataMap.clear();
+      assignedUsersLatestRecordMap.clear();
+
+      for (final u in assignedUsers) {
+        try {
+          assignedUsersLatestRecordMap[u.id] =
+            await _medicRepository.getAssignedUserLastMedicalRecord(u.id);
+        } catch (_) {
+          assignedUsersLatestRecordMap[u.id] = null;
+        }
+      }
+    } catch (e) {
+      errorMessage = e.toString();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
-}
 }

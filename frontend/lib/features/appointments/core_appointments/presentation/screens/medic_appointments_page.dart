@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/medical_service/presentation/controllers/medical_service_controller.dart';
+import 'package:frontend/features/medical_services/presentation/controllers/medical_service_controller.dart';
 import 'package:frontend/features/appointments/core_appointments/presentation/widgets/appointments_panel.dart';
 import 'package:frontend/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';

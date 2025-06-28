@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:frontend/features/auth/data/api/auth_api.dart';
-import 'package:frontend/services/api_exception.dart';
+import 'package:frontend/core/network/api_exception.dart';
 import 'auth_form_validator.dart';
 
 class AuthValidator {
@@ -40,10 +40,7 @@ class AuthValidator {
     return null;
   }
 
-  static Future<String?> validateAllFieldsForLogin({
-    required String email,
-    required String password,
-  }) async {
+  static Future<String?> validateAllFieldsForLogin({required String email, required String password}) async {
     final String? emailError = AuthFormValidator.validateEmailFormat(email);
     if (emailError != null) return emailError;
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/constants/app_colors.dart';
 import 'package:frontend/core/constants/app_text_styles.dart';
+
 import '../controllers/medic_availability_controller.dart';
 import '../widgets/medic_availability_item.dart';
 
@@ -14,23 +14,21 @@ class AvailabilityBody extends StatelessWidget {
     if (controller.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
+
     if (controller.error != null) {
       return Center(
         child: Text(
           'Error: ${controller.error}',
-          style: AppTextStyles.dialogContent.copyWith(
-            color: AppColors.primaryRed,
-          ),
+          style: AppTextStyles.errorText
         ),
       );
     }
+
     if (controller.medicAvailabilities.isEmpty) {
-      return Center(
+      return const Center(
         child: Text(
           'No availability slots yet.',
-          style: AppTextStyles.dialogContent.copyWith(
-            color: Colors.black54,
-          ),
+          style: AppTextStyles.subheader
         ),
       );
     }
@@ -39,11 +37,11 @@ class AvailabilityBody extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       itemCount: controller.medicAvailabilities.length,
       itemBuilder: (ctx, index) {
-        final slot = controller.medicAvailabilities[index];
+        final medicAvailabilitySlot = controller.medicAvailabilities[index];
         return AvailabilityItem(
-          slot: slot,
+          slot: medicAvailabilitySlot,
           onDelete: () {
-            _confirmDelete(ctx, slot.id, controller);
+            _confirmDelete(ctx, medicAvailabilitySlot.id, controller);
           },
         );
       },
@@ -51,39 +49,28 @@ class AvailabilityBody extends StatelessWidget {
   }
 
   void _confirmDelete(
-      BuildContext ctx, int slotId, MedicAvailabilityController ctl) {
+      BuildContext context, int availabilitySlotId, MedicAvailabilityController medicAvailabilityController) {
     showDialog(
-      context: ctx,
+      context: context,
       builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        title: Text(
-          'Delete this slot?',
-          style: AppTextStyles.dialogTitle.copyWith(
-            color: AppColors.primaryRed,
-          ),
-        ),
+        title: const Text('Delete this slot?'),
+        content: const Text('Are you sure you want to delete this availability slot?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
               'Cancel',
-              style: AppTextStyles.dialogButton.copyWith(
-                color: Colors.black54,
-              ),
+              style: AppTextStyles.canceldialogButton
             ),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(ctx);
-              ctl.removeAvailability(slotId);
+              Navigator.pop(context);
+              medicAvailabilityController.removeAvailability(availabilitySlotId);
             },
-            child: Text(
+            child: const Text(
               'Delete',
-              style: AppTextStyles.dialogButton.copyWith(
-                color: AppColors.primaryRed,
-              ),
+              style: AppTextStyles.dialogButton
             ),
           ),
         ],

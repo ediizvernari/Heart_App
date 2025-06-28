@@ -1,9 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+
+import 'package:frontend/core/constants/app_colors.dart';
 import 'package:frontend/widgets/rounded_button.dart';
-import 'package:frontend/features/auth/presentation/screens/login_screen.dart';
-import 'package:frontend/features/auth/presentation/screens/signup_user_screen.dart';
-import 'package:frontend/features/auth/presentation/screens/signup_medic_screen.dart';
 
 class HomeForm extends StatelessWidget {
   const HomeForm({super.key});
@@ -16,10 +15,10 @@ class HomeForm extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
+            color: AppColors.background.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.3),
+              color: AppColors.background.withValues(alpha: 0.3),
               width: 1.5,
             ),
           ),
@@ -29,26 +28,17 @@ class HomeForm extends StatelessWidget {
             children: [
               RoundedButton(
                 text: 'Log In',
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                ),
+                onPressed: () => Navigator.of(context).pushNamed('/login'),
               ),
               const SizedBox(height: 16),
               RoundedButton(
                 text: 'User Sign Up',
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SignupUserScreen()),
-                ),
+                onPressed: () => Navigator.of(context).pushNamed('/signup_user'),
               ),
               const SizedBox(height: 16),
               RoundedButton(
                 text: 'Medic Sign Up',
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SignupMedicScreen()),
-                ),
+                onPressed: () => Navigator.of(context).pushNamed('/signup_medic'),
               ),
             ],
           ),

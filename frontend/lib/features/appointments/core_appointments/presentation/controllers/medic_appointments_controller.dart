@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/services/api_exception.dart';
+import 'package:frontend/core/network/api_exception.dart';
 import '../../data/models/appointment_model.dart';
 import '../../data/repositories/appointments_repository.dart';
 
@@ -25,15 +25,13 @@ class MedicAppointmentsController extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
-
-    print("LoadingState: ${isLoading}");
   }
 
   Future<void> updateAppointmentStatus(int appointmentId, String newAppointmentStatus) async {
     _setLoading(true);
 
     try {
-      final updatedAppointment = await _appointmentRepository.updateAppointmentStatus(appointmentId: appointmentId, newAppointmentStatus: newAppointmentStatus);
+      final updatedAppointment = await _appointmentRepository.updateAppointmentStatus(appointmentId, newAppointmentStatus);
       final appointmentIndex = medicAppointments.indexWhere((a) => a.id == appointmentId);
       
       if (appointmentIndex != -1) medicAppointments[appointmentIndex] = updatedAppointment;

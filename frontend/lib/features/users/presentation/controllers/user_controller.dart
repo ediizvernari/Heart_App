@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/users/data/repositories/user_repository.dart';
 import 'package:frontend/features/medics/data/models/medic.dart';
-import 'package:frontend/services/api_exception.dart';
+import 'package:frontend/core/network/api_exception.dart';
 import '../../data/models/assignment_status.dart';
 
 class UserController extends ChangeNotifier {

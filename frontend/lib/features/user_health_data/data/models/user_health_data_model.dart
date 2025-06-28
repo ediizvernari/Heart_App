@@ -1,4 +1,3 @@
-//TODO: Change their types into the according type
 import 'package:intl/intl.dart';
 
 class UserHealthData {

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:frontend/features/medical_service/data/repositories/medical_service_repository.dart';
-import 'package:frontend/services/api_exception.dart';
+import 'package:frontend/features/medical_services/data/repositories/medical_service_repository.dart';
+import 'package:frontend/core/network/api_exception.dart';
 import '../../data/models/medical_service.dart';
 import '../../data/models/medical_service_type.dart';
 
@@ -16,10 +16,10 @@ class MedicalServiceController extends ChangeNotifier {
   String? _error;
 
   List<MedicalServiceType> get medicalServiceTypes => List.unmodifiable(_medicalServiceTypes);
-  List<MedicalService>    get medicalServices => List.unmodifiable(_medicalServices);
-  bool get loadingTypes    => _isLoadingTypes;
+  List<MedicalService> get medicalServices => List.unmodifiable(_medicalServices);
+  bool get loadingTypes => _isLoadingTypes;
   bool get loadingServices => _isLoadingServices;
-  String? get error        => _error;
+  String? get error => _error;
 
   Future<void> getAllMedicalServiceData() async {
     await Future.wait([getAllMedicalServiceTypes(), getMyMedicalServices()]);

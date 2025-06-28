@@ -25,7 +25,7 @@ class MedicInteractionsPanel extends StatelessWidget {
               Expanded(
                 child: ActionCard(
                   icon: Icons.message,
-                  label: 'Suggestions',
+                  label: 'My Suggestions',
                   onTap: onSuggestions,
                 ),
               ),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/appointments/scheduling/data/models/time_slot_model.dart';
 import 'package:frontend/features/appointments/scheduling/data/repositories/schedule_repository.dart';
-import 'package:frontend/services/api_exception.dart';
+import 'package:frontend/core/network/api_exception.dart';
 
 class MedicScheduleController extends ChangeNotifier {
-   final ScheduleRepository _scheduleRepository;
+  final ScheduleRepository _scheduleRepository;
 
   MedicScheduleController(this._scheduleRepository);
 
@@ -12,12 +12,11 @@ class MedicScheduleController extends ChangeNotifier {
   bool isLoading = false;
   String? error;
 
-  Future<void> getFreeTimeSlotsForAssignedMedic({required String isoDate, int? medicalServiceId}) async {
+  Future<void> getFreeTimeSlotsForAssignedMedic({required String targetDate, int? medicalServiceId}) async {
     _setLoading(true);
 
-    _setLoading(true);
     try {
-      freeTimeSlots = await _scheduleRepository.getFreeSlotsForAssignedMedic(isoDate, medicalServiceId);
+      freeTimeSlots = await _scheduleRepository.getFreeSlotsForAssignedMedic(targetDate, medicalServiceId);
       error = null;
     } on ApiException catch (e) {
       error = e.responseBody;
@@ -30,11 +29,13 @@ class MedicScheduleController extends ChangeNotifier {
 
   void _setLoading(bool v) {
     isLoading = v;
+    if (v) error = null;
     notifyListeners();
   }
 
   void clear() {
     freeTimeSlots = [];
+    error = null;
     notifyListeners();
   }
 }

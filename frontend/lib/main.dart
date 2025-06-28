@@ -8,7 +8,7 @@ import 'package:frontend/core/utils/auth_store.dart';
 import 'package:frontend/routers/app_router.dart';
 import 'package:frontend/features/users/presentation/controllers/user_controller.dart';
 import 'package:frontend/features/user_health_data/presentation/controllers/user_health_data_controller.dart';
-import 'package:frontend/features/medical_service/presentation/controllers/medical_service_controller.dart';
+import 'package:frontend/features/medical_services/presentation/controllers/medical_service_controller.dart';
 import 'package:frontend/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:frontend/features/appointments/scheduling/presentation/medic_schedule_controller.dart';
 import 'package:frontend/features/location/presentation/controller/location_controller.dart';
@@ -17,7 +17,7 @@ import 'package:frontend/features/cvd_prediction/presentation/controllers/cvd_pr
 
 import 'package:frontend/features/users/data/repositories/user_repository_impl.dart';
 import 'package:frontend/features/user_health_data/data/repositories/user_health_data_repository_impl.dart';
-import 'package:frontend/features/medical_service/data/repositories/medical_service_repository_impl.dart';
+import 'package:frontend/features/medical_services/data/repositories/medical_service_repository_impl.dart';
 import 'package:frontend/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:frontend/features/appointments/scheduling/data/repositories/schedule_repository_impl.dart';
 import 'package:frontend/features/location/data/repositories/location_repository_impl.dart';

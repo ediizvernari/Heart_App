@@ -3,7 +3,7 @@ import 'package:frontend/features/cvd_prediction/data/models/prediction_result.d
 import 'package:frontend/features/cvd_prediction/data/repositories/cvd_prediction_repository.dart';
 import 'package:frontend/features/user_health_data/data/models/user_health_data_model.dart';
 import 'package:frontend/features/user_health_data/data/repositories/user_health_data_repository.dart';
-import 'package:frontend/services/api_exception.dart';
+import 'package:frontend/core/network/api_exception.dart';
 
 class CvdPredictionController extends ChangeNotifier {
   final UserHealthDataRepository _userHealthDataRepository;
@@ -43,6 +43,10 @@ class CvdPredictionController extends ChangeNotifier {
   }
 
   Future<void> predictCvdProbability() async {
+    _error = null;
+    _cvdPredictionResult = null;
+    notifyListeners();
+
     if(_userHealthData == null) {
       await getUserHealthDataForPrediction();
       if(_userHealthData == null) {

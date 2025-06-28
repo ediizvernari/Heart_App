@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/services/api_exception.dart';
+import 'package:frontend/core/network/api_exception.dart';
 import '../../data/models/user_medical_record.dart';
 import '../../data/repositories/user_medical_record_repository.dart';
 

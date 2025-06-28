@@ -59,14 +59,12 @@ class APIConstants {
   static const getAllUserAppointmentsUrl = '$baseUrl/appointments/my_appointments';
   static const getAllMedicAppointmentsUrl = '$baseUrl/appointments/medic_appointments';
   static const bookAppointmentUrl = '$baseUrl/appointments/';
-  //TODO: Maybe this will throw a 404
   static String changeAppointmentStatusUrl(int id, String status) => '$baseUrl/appointments/$id/status?new_appointment_status=$status';
 
 
   //Appointment_Suggestions
   static String appointmentSuggestionForUser(int userId) => '$baseUrl/suggestions/users/$userId';
    static String changeAppointmentSuggestionStatusUrl(int appointmentSuggestionId, String appointmentSuggestionStatus) => '$baseUrl/suggestions/$appointmentSuggestionId/status?new_appointment_suggestion_status=$appointmentSuggestionStatus';
-  //TODO: Maybe do a router just for pending appointment suggestions that should be used by the users
   static const getAllUsersSuggestionsUrl = '$baseUrl/suggestions/mine';
   static const getAllMedicSuggestionsUrl = '$baseUrl/suggestions/for_medic';
   static String getAppointmentSuggestionById(int suggestionId) =>  '$baseUrl/suggestions/$suggestionId';

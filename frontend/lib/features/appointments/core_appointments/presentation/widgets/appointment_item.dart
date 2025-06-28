@@ -10,30 +10,24 @@ typedef StatusCallback = void Function(String newStatus);
 class AppointmentItem extends StatelessWidget {
   final Appointment appointment;
   final StatusCallback? onUpdateStatus;
+  final bool isMedicView;
 
   const AppointmentItem({
     required this.appointment,
     this.onUpdateStatus,
+    required this.isMedicView,
     Key? key,
   }) : super(key: key);
 
-  String get _formattedDate {
-    final dt = appointment.appointmentStart;
-    return DateFormat.yMMMd().add_jm().format(dt);
+  String get _appointmentCreationDate {
+    final created = appointment.createdAt;
+    return DateFormat.yMMMd().add_jm().format(created);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isMedicView = onUpdateStatus != null;
-
-    final primaryTextStyle = AppTextStyles.header.copyWith(color: Colors.black87);
-    final captionStyle = AppTextStyles.subheader.copyWith(color: Colors.black54);
-    final statusLabelStyle = AppTextStyles.buttonText.copyWith(
-      color: AppColors.primaryRed,
-      fontSize: 12,
-    );
-
-    final serviceName = appointment.medicalServiceName;
+    final status = appointment.appointmentStatus;
+    final medicalServiceName = appointment.medicalServiceName;
 
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -46,23 +40,41 @@ class AppointmentItem extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(_formattedDate, style: primaryTextStyle),
                 Chip(
-                  backgroundColor: AppColors.primaryRed.withAlpha(30),
+                  backgroundColor: AppColors.primaryBlue.withAlpha(30),
                   label: Text(
-                    appointment.appointmentStatus.toUpperCase(),
-                    style: statusLabelStyle,
+                    status.toUpperCase(),
+                    style: AppTextStyles.chipLabel,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
 
-            Text('Service: $serviceName', style: primaryTextStyle),
-            const SizedBox(height: 4),
-
-            Text('Address: ${appointment.address}', style: captionStyle),
+            Text('Created: $_appointmentCreationDate', style: AppTextStyles.caption),
             const SizedBox(height: 12),
+
+            Text(
+              'Pacient: ${appointment.patient.firstName} ${appointment.patient.lastName}',
+              style: AppTextStyles.body,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Medic: Dr. ${appointment.medic.firstName} ${appointment.medic.lastName}',
+              style: AppTextStyles.body,
+            ),
+            const SizedBox(height: 12),
+
+            Text('Country: ${appointment.medic.country}', style: AppTextStyles.body),
+            const SizedBox(height: 2),
+            Text('City: ${appointment.medic.city}', style: AppTextStyles.body),
+            const SizedBox(height: 8),
+            Text('Address: ${appointment.address}', style: AppTextStyles.body),
+            const SizedBox(height: 12),
+            Text('Medical Service: $medicalServiceName', style: AppTextStyles.body),
+            const SizedBox(height: 4),
+            Text('Price: ${appointment.medicalServicePrice} RON', style: AppTextStyles.body),
+            const SizedBox(height: 8),
 
             if (isMedicView) ...[
               const Divider(),
@@ -71,17 +83,28 @@ class AppointmentItem extends StatelessWidget {
                 children: [
                   _StatusButton(
                     label: 'Confirm',
-                    onPressed: () => onUpdateStatus!('confirmed'),
+                    onPressed: () => onUpdateStatus?.call('confirmed'),
                   ),
                   const SizedBox(width: 8),
                   _StatusButton(
                     label: 'Complete',
-                    onPressed: () => onUpdateStatus!('completed'),
+                    onPressed: () => onUpdateStatus?.call('completed'),
                   ),
                   const SizedBox(width: 8),
                   _StatusButton(
                     label: 'Cancel',
-                    onPressed: () => onUpdateStatus!('cancelled'),
+                    onPressed: () => onUpdateStatus?.call('cancelled'),
+                  ),
+                ],
+              ),
+            ] else if (onUpdateStatus != null && (status == 'pending' || status == 'confirmed')) ...[
+              const Divider(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _StatusButton(
+                    label: 'Cancel',
+                    onPressed: () => onUpdateStatus!.call('cancelled'),
                   ),
                 ],
               ),
@@ -107,14 +130,11 @@ class _StatusButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       style: TextButton.styleFrom(
-        backgroundColor: AppColors.primaryRed.withAlpha(30),
+        backgroundColor: AppColors.primaryBlue.withAlpha(20),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       ),
       onPressed: onPressed,
-      child: Text(
-        label,
-        style: AppTextStyles.buttonText.copyWith(color: AppColors.primaryRed),
-      ),
+      child: Text(label, style: AppTextStyles.chipLabel),
     );
   }
 }

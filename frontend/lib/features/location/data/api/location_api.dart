@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:frontend/features/location/data/model/city_country_suggestion.dart';
-import 'package:frontend/services/api_exception.dart';
+import 'package:frontend/core/network/api_exception.dart';
 import 'package:frontend/core/api_constants.dart';
 import 'package:frontend/core/network/api_client.dart';
 

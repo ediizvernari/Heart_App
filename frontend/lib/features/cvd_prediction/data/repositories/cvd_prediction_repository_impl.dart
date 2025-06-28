@@ -1,18 +1,15 @@
-import 'package:frontend/features/auth/data/auth_exception.dart';
-import 'package:frontend/features/cvd_prediction/data/api/cvd_prediction_api.dart';
-import 'package:frontend/features/cvd_prediction/data/models/prediction_result.dart';
 import 'package:frontend/features/cvd_prediction/data/repositories/cvd_prediction_repository.dart';
-import 'package:frontend/services/api_exception.dart';
+import 'package:frontend/core/network/api_exception.dart';
+import '../api/cvd_prediction_api.dart';
+import '../models/prediction_result.dart';
 
 class CvdPredictionRepositoryImpl implements CvdPredictionRepository {
   @override
-  Future<PredictionResult> getCvdPredictionPercentage() async {
-    try {
-      return await CvdPredictionApi.getCvdPredictionPercentage();
-    } on ApiException catch (e) {
-      throw AuthException.networkError(e.message);
-    } catch (e) {
-      throw AuthException.networkError(e.toString());
-    }
+  Future<PredictionResult> getCvdPredictionPercentage() {
+    return CvdPredictionApi.getCvdPredictionPercentage()
+      .onError((error, stack) {
+        if (error is ApiException) throw error;
+        throw ApiException(-1, error.toString());
+      });
   }
 }

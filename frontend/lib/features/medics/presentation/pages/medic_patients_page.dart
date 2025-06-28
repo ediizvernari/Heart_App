@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_colors.dart';
 import 'package:frontend/core/constants/app_text_styles.dart';
+import 'package:frontend/features/appointments/appointments_suggestions/presentation/widgets/appointment_medic_suggestion_form_dialog.dart';
 import 'package:frontend/widgets/custom_app_bar.dart';
 import 'package:frontend/features/medics/data/repositories/medic_repository_impl.dart';
 import 'package:frontend/features/medics/presentation/controllers/assigned_users_controller.dart';
 import 'package:frontend/features/users/presentation/widgets/user_card.dart';
 import 'package:frontend/features/user_medical_records/presentation/widgets/user_medical_record_card.dart';
-import 'package:frontend/features/appointments/appointments_suggestions/presentation/widgets/appointment_medic_suggestion_form_dialog.dart';
 import 'package:provider/provider.dart';
 
 class MedicPatientsPage extends StatefulWidget {
@@ -17,15 +17,15 @@ class MedicPatientsPage extends StatefulWidget {
 }
 
 class _MedicPatientsPageState extends State<MedicPatientsPage> {
-  late AssignedUsersController _ctrl;
+  late AssignedUsersController _assignedUsersController;
   bool _loading = true;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      _ctrl = AssignedUsersController(MedicRepositoryImpl());
-      await _ctrl.getAssignedUsers();
+      _assignedUsersController = AssignedUsersController(MedicRepositoryImpl());
+      await _assignedUsersController.getAssignedUsers();
       setState(() => _loading = false);
     });
   }
@@ -48,7 +48,7 @@ class _MedicPatientsPageState extends State<MedicPatientsPage> {
                 child: _loading
                     ? const Center(child: CircularProgressIndicator())
                     : ChangeNotifierProvider.value(
-                        value: _ctrl,
+                        value: _assignedUsersController,
                         child: Consumer<AssignedUsersController>(
                           builder: (ctx, c, _) {
                             if (c.isLoading) {
@@ -58,7 +58,7 @@ class _MedicPatientsPageState extends State<MedicPatientsPage> {
                               return Center(
                                 child: Text(
                                   'Error: ${c.errorMessage}',
-                                  style: AppTextStyles.subheader.copyWith(color: Colors.red),
+                                  style: AppTextStyles.errorText,
                                 ),
                               );
                             }
@@ -79,7 +79,7 @@ class _MedicPatientsPageState extends State<MedicPatientsPage> {
                                 return UserCard(
                                   user: user,
                                   recordCard: rec != null
-                                      ? UserMedicalRecordCard(assignedUserMedicalRecord: rec)
+                                      ? UserMedicalRecordCard(userMedicalRecord: rec)
                                       : null,
                                   onSuggest: () => showDialog(
                                     context: context,

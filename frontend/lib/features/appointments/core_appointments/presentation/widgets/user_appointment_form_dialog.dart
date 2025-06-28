@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/appointments/core_appointments/data/models/appointment_request.dart';
 import 'package:frontend/features/appointments/core_appointments/presentation/widgets/medical_service_dropdown_field.dart';
 import 'package:frontend/features/medics/data/models/medic.dart';
 import 'package:intl/intl.dart';
@@ -9,9 +10,8 @@ import 'package:frontend/core/constants/app_text_styles.dart';
 
 import 'package:frontend/features/users/presentation/controllers/user_controller.dart';
 import 'package:frontend/features/appointments/core_appointments/presentation/controllers/user_appointments_controller.dart';
-import 'package:frontend/features/medical_service/presentation/controllers/medical_service_controller.dart';
+import 'package:frontend/features/medical_services/presentation/controllers/medical_service_controller.dart';
 import 'package:frontend/features/appointments/scheduling/presentation/medic_schedule_controller.dart';
-import 'package:frontend/features/appointments/core_appointments/data/models/appointment_model.dart';
 import 'package:frontend/features/appointments/scheduling/data/models/time_slot_model.dart';
 
 import 'date_picker_field.dart';
@@ -45,17 +45,18 @@ class _UserAppointmentFormDialogState
     await userController.getMyAssignedMedic();
 
     final maybeMedic = userController.assignedMedic;
+
+    if (!mounted) return;
     if (maybeMedic == null) {
       Navigator.of(context).pop();
       return;
     }
     _assignedMedic = maybeMedic;
 
-    final medicalServiceController =
-        context.read<MedicalServiceController>();
-    await medicalServiceController
-        .getMedicalServicesForAssignedMedic(_assignedMedic.id);
+    final medicalServiceController = context.read<MedicalServiceController>();
+    await medicalServiceController.getMedicalServicesForAssignedMedic(_assignedMedic.id);
 
+    if (!mounted) return;
     context.read<MedicScheduleController>().clear();
 
     if (!mounted) return;
@@ -65,7 +66,7 @@ class _UserAppointmentFormDialogState
   }
 
   Future<void> _pickDate() async {
-    final picked = await showDatePicker(
+    final pickedDate = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
       firstDate: DateTime.now(),
@@ -74,13 +75,13 @@ class _UserAppointmentFormDialogState
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: AppColors.primaryRed,
-              onPrimary: Colors.white,
-              onSurface: Colors.black87,
+              primary: AppColors.primaryBlue,
+              onPrimary: AppColors.background,
+              onSurface: AppColors.textPrimary,
             ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.primaryRed,
+                foregroundColor: AppColors.primaryBlue,
               ),
             ),
           ),
@@ -88,8 +89,8 @@ class _UserAppointmentFormDialogState
         );
       },
     );
-    if (picked != null && picked != _selectedDate) {
-      setState(() => _selectedDate = picked);
+    if (pickedDate != null && pickedDate != _selectedDate) {
+      setState(() => _selectedDate = pickedDate);
       _reloadSlots();
     }
   }
@@ -98,11 +99,8 @@ class _UserAppointmentFormDialogState
     final medicalServiceId = _selectedMedicalServiceId;
     if (medicalServiceId == null) return;
 
-    final isoDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
-    context.read<MedicScheduleController>().getFreeTimeSlotsForAssignedMedic(
-          isoDate: isoDate,
-          medicalServiceId: medicalServiceId,
-        );
+    final targetDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    context.read<MedicScheduleController>().getFreeTimeSlotsForAssignedMedic(targetDate: targetDate, medicalServiceId: medicalServiceId);
   }
 
   Future<void> _assign(TimeSlot slot) async {
@@ -121,30 +119,17 @@ class _UserAppointmentFormDialogState
       slot.endDateTime.minute,
     );
 
-    final medicalService = context
-        .read<MedicalServiceController>()
-        .medicalServices
-        .firstWhere((s) => s.id == _selectedMedicalServiceId);
-
-    final appt = Appointment(
-      id: 0,
-      userId: 0,
+    final appointmentRequest = AppointmentRequest(
       medicId: _assignedMedic.id,
       medicalServiceId: _selectedMedicalServiceId!,
       address: _assignedMedic.streetAddress,
-      medicalServiceName: medicalService.name,
-      medicalServicePrice: medicalService.price,
       appointmentStart: start,
       appointmentEnd: end,
-      appointmentStatus: 'pending',
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
     );
 
     try {
-      await context
-          .read<UserAppointmentsController>()
-          .createAppointment(appt);
+      await context.read<UserAppointmentsController>().createAppointment(appointmentRequest);
+      if (!mounted) return;
       Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
@@ -156,17 +141,12 @@ class _UserAppointmentFormDialogState
 
   @override
   Widget build(BuildContext context) {
-    final medicalServiceController =
-        context.watch<MedicalServiceController>();
-    final scheduleController =
-        context.watch<MedicScheduleController>();
-    final services =
-        medicalServiceController.medicalServices;
+    final medicalServiceController = context.watch<MedicalServiceController>();
+    final scheduleController = context.watch<MedicScheduleController>();
+    final medicalServices = medicalServiceController.medicalServices;
 
     return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding:
-          const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      backgroundColor: AppColors.cardBackground,
       child: Center(
         child: FractionallySizedBox(
           widthFactor: 0.9,
@@ -176,10 +156,10 @@ class _UserAppointmentFormDialogState
               borderRadius: BorderRadius.circular(24),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 153),
+                  color: AppColors.cardBackground,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 76),
+                    color: AppColors.cardBackground,
                     width: 1.5,
                   ),
                 ),
@@ -193,14 +173,14 @@ class _UserAppointmentFormDialogState
                         'New Appointment',
                         style: AppTextStyles.welcomeHeader
                             .copyWith(
-                          color: AppColors.primaryRed,
+                          color: AppColors.primaryBlue,
                         ),
                         textAlign: TextAlign.center,
                       ),
                     ),
                     const Divider(
                       height: 1,
-                      color: Colors.white24,
+                      color: AppColors.background,
                     ),
 
                     Expanded(
@@ -209,7 +189,7 @@ class _UserAppointmentFormDialogState
                               child: CircularProgressIndicator(
                                 valueColor:
                                     AlwaysStoppedAnimation(
-                                        AppColors.primaryRed),
+                                        AppColors.primaryBlue),
                               ),
                             )
                           : SingleChildScrollView(
@@ -229,7 +209,7 @@ class _UserAppointmentFormDialogState
                                       height: 16),
 
                                   MedicalServiceDropdownField(
-                                    medicalServices: services,
+                                    medicalServices: medicalServices,
                                     selectedMedicalServiceId:
                                         _selectedMedicalServiceId,
                                     onChanged: (id) {
@@ -259,7 +239,7 @@ class _UserAppointmentFormDialogState
 
                     const Divider(
                       height: 1,
-                      color: Colors.white24,
+                      color: AppColors.background,
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8),
@@ -271,7 +251,7 @@ class _UserAppointmentFormDialogState
                           child: const Text(
                             'Cancel',
                             style: TextStyle(
-                              color: AppColors.primaryRed,
+                              color: AppColors.primaryBlue,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

@@ -1,11 +1,12 @@
-import 'package:frontend/services/api_exception.dart';
+import 'package:frontend/core/network/api_exception.dart';
+import 'package:frontend/features/appointments/core_appointments/data/models/appointment_request.dart';
 import '../api/appointment_api.dart';
 import '../models/appointment_model.dart';
 import 'appointments_repository.dart';
 
 class AppointmentsRepositoryImpl implements AppointmentRepository {
   @override
-  Future<Appointment> createAppointment(Appointment dto) async {
+  Future<Appointment> createAppointment(AppointmentRequest dto) async {
     try {
       return await AppointmentApi.createAppointment(dto);
     } on ApiException {
@@ -32,7 +33,7 @@ class AppointmentsRepositoryImpl implements AppointmentRepository {
   }
 
   @override
-  Future<Appointment> updateAppointmentStatus({required int appointmentId, required String newAppointmentStatus}) async {
+  Future<Appointment> updateAppointmentStatus(int appointmentId, String newAppointmentStatus) async {
     try {
       return await AppointmentApi.updateAppointmentStatus(appointmentId, newAppointmentStatus);
     } on ApiException {

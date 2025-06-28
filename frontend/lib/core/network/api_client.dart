@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:frontend/core/network/auth_interceptor.dart';
+import 'package:frontend/core/network/error_interceptor.dart';
 
 class ApiClient {
   static final Dio dioInstance = Dio(
@@ -9,7 +10,10 @@ class ApiClient {
       },
     ),
   )
-    ..interceptors.add(AuthInterceptor());
+    ..interceptors.addAll([
+      AuthInterceptor(),
+      ErrorInterceptor(),
+    ]);
 
   static Future<Response<T>> get<T>(String path, {Map<String, dynamic>? queryParameters, Options? options}) =>
    dioInstance.get<T>(path, queryParameters: queryParameters, options: options);

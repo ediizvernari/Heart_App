@@ -15,7 +15,7 @@ class UserHealthDataPage extends StatelessWidget {
         ),
         child: const SafeArea(
           child: Column(
-            children: const [
+            children: [
               CustomAppBar(title: 'Enter Health Data'),
               SizedBox(height: 24),
               Expanded(

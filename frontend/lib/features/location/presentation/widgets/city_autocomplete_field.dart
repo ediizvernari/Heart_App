@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/constants/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/features/location/presentation/controller/location_controller.dart';
 import '../../data/model/city_country_suggestion.dart';
@@ -59,10 +60,13 @@ class _CityAutocompleteFieldState extends State<CityAutocompleteField> {
       fieldViewBuilder: (context, textCtr, focusNode, onFieldSubmitted) {
         return TextField(
           controller: widget.controller,
+          style: const TextStyle(color: AppColors.textPrimary),
           focusNode: focusNode,
           decoration: const InputDecoration(
             labelText: 'City',
-            border: OutlineInputBorder(),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            ),
           ),
           onSubmitted: (_) => onFieldSubmitted(),
         );

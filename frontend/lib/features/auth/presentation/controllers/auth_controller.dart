@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/auth/data/auth_exception.dart';
+import 'package:frontend/features/auth/auth_exception/auth_exception.dart';
 import 'package:frontend/features/auth/data/repositories/auth_repository.dart';
 import 'package:frontend/features/auth/data/models/medic_signup_request.dart';
 import 'package:frontend/features/auth/data/models/user_signup_request.dart';
-import 'package:frontend/features/auth/presentation/screens/home_screen.dart';
-import 'package:frontend/features/medics/presentation/pages/medic_main_page.dart';
-import 'package:frontend/features/users/presentation/pages/user_main_page.dart';
 import 'package:frontend/core/utils/auth_store.dart';
 import 'package:frontend/core/utils/validators/auth_form_validator.dart';
 import 'package:frontend/core/utils/validators/auth_validator.dart';
@@ -29,6 +26,8 @@ class AuthController extends ChangeNotifier {
   AuthResponse? get authToken => _authResponse;
   String? get error => _error;
 
+  Map<String, List<String>> fieldErrors = {};
+
   set email(String value) {
     _email = value;
     notifyListeners();
@@ -44,6 +43,7 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> login({ required BuildContext context }) async {
+    final navigator = Navigator.of(context);
     final String? loginErrorMessage = await AuthValidator.validateAllFieldsForLogin(email: _email, password: _password);
     if(loginErrorMessage != null) {
       _error = loginErrorMessage;
@@ -57,17 +57,18 @@ class AuthController extends ChangeNotifier {
       _authResponse = await _repository.login(LoginRequest(email: _email, password: _password));
 
       await AuthStore.saveToken(_authResponse!.accessToken);
-      Navigator.of(context).pushReplacementNamed(_homeRouteForToken(_authResponse!.accessToken));
-    } on AuthException catch (e) {
-      _error = e.message;
+      navigator.pushReplacementNamed(_homeRouteForToken(_authResponse!.accessToken));
     } catch (_) {
-      _error = 'Login failed. Please try again.';
+      _error = 'Login failed. Please check your credentials and try again.';
+      notifyListeners();
     } finally {
       _setLoading(false);
     }
   }
 
   Future<void> signupUser ({required BuildContext context, required UserSignupRequest userSignupDto, required String confirmPassword}) async {
+    final navigator = Navigator.of(context);
+    
     final String? signUpErrorMessage = await AuthValidator.validateAllFieldsForSignUp(
     email: userSignupDto.email,
     password: userSignupDto.password,
@@ -89,7 +90,7 @@ class AuthController extends ChangeNotifier {
     try {
       _authResponse = await _repository.signupUser(userSignupDto);
       await AuthStore.saveToken(_authResponse!.accessToken);
-      Navigator.of(context).pushReplacementNamed(_homeRouteForToken(_authResponse!.accessToken));
+      navigator.pushReplacementNamed(_homeRouteForToken(_authResponse!.accessToken));
     } on AuthException catch (e) {
       _error = e.message;
     } catch (_) {
@@ -100,13 +101,15 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> signupMedic({required BuildContext context, required MedicSignupRequest medicSignupDto, required String confirmPassword}) async {
+    final navigator = Navigator.of(context);
+    
     final String? signUpErrorMessage = await AuthValidator.validateAllFieldsForSignUp(
     email: medicSignupDto.email,
     password: medicSignupDto.password,
     confirmPassword: confirmPassword,
     firstName: medicSignupDto.firstName,
     lastName: medicSignupDto.lastName,
-    licenseNumber: medicSignupDto.licenseNumber,  // ← NEW
+    licenseNumber: medicSignupDto.licenseNumber,
     isMedic: true,
     );
 
@@ -131,7 +134,7 @@ class AuthController extends ChangeNotifier {
     try {
       _authResponse = await _repository.signupMedic(medicSignupDto);
       await AuthStore.saveToken(_authResponse!.accessToken);
-      Navigator.of(context).pushReplacementNamed(_homeRouteForToken(_authResponse!.accessToken));
+      navigator.pushReplacementNamed(_homeRouteForToken(_authResponse!.accessToken));
     } on AuthException catch (e) {
       _error = e.message;
     } catch (_) {
@@ -142,6 +145,7 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> logout(BuildContext context) async {
+    final navigator = Navigator.of(context);
     final bool? shouldLogout = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -165,7 +169,7 @@ class AuthController extends ChangeNotifier {
     _authResponse = null;
     notifyListeners();
 
-    Navigator.of(context).pushNamedAndRemoveUntil(
+    navigator.pushNamedAndRemoveUntil(
       '/home',
       (route) => false,
     );
@@ -190,6 +194,7 @@ class AuthController extends ChangeNotifier {
 
   Future<void> ensureSession(BuildContext context) async {
     debugPrint('AuthStore.ensureSession: starting session check');
+    final navigator = Navigator.of(context);
 
     final token = await AuthStore.getToken();
     debugPrint('AuthStore.ensureSession: raw token = $token');
@@ -197,9 +202,9 @@ class AuthController extends ChangeNotifier {
     if (token == null) {
       debugPrint('AuthStore.ensureSession: no token found, redirecting to HomeScreen');
       await AuthStore.clearToken();
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-        (_) => false,
+      navigator.pushNamedAndRemoveUntil(
+        '/home',
+        (route) => false,
       );
       return;
     }
@@ -207,12 +212,13 @@ class AuthController extends ChangeNotifier {
     final expired = JwtDecoder.isExpired(token);
     debugPrint('AuthStore.ensureSession: token expired? $expired');
 
+    
     if (expired) {
       debugPrint('AuthStore.ensureSession: token expired, clearing and redirecting to HomeScreen');
       await AuthStore.clearToken();
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-        (_) => false,
+      navigator.pushNamedAndRemoveUntil(
+        '/home',
+        (route) => false,
       );
       return;
     }
@@ -222,19 +228,19 @@ class AuthController extends ChangeNotifier {
     debugPrint('AuthStore.ensureSession: decoded payload = $payload');
     debugPrint('AuthStore.ensureSession: user role = $role');
 
-    Widget next;
-    if (role == 'medic') {
-      debugPrint('AuthStore.ensureSession: navigating to MedicMainPage');
-      next = const MedicMainPage();
-    } else {
-      debugPrint('AuthStore.ensureSession: navigating to UserMainPage');
-      next = const UserMainPage();
-    }
+    final targetRoute = (role == 'medic')
+    ? '/medic_home'
+    : '/user_home';
 
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => next),
+    debugPrint(
+      'AuthStore.ensureSession: navigating to ${role == 'medic' ? 'MedicMainPage' : 'UserMainPage'}'
+    );
+
+    navigator.pushNamedAndRemoveUntil(
+      targetRoute,
       (_) => false,
     );
+
     debugPrint('AuthStore.ensureSession: navigation complete');
   }
 }

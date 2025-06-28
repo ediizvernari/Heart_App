@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/widgets/ekg_signal.dart';
+import 'package:frontend/features/users/presentation/controllers/user_controller.dart';
+import 'package:frontend/features/users/presentation/widgets/medic_interactions_panel.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/widgets/custom_app_bar.dart';
 import 'package:frontend/core/constants/app_colors.dart';
-import 'package:frontend/features/users/presentation/widgets/medic_interactions_panel.dart';
-import 'package:frontend/features/users/presentation/controllers/user_controller.dart';
 
 class MedicInteractionsPage extends StatelessWidget {
   const MedicInteractionsPage({Key? key}) : super(key: key);
@@ -29,20 +30,10 @@ class MedicInteractionsPage extends StatelessWidget {
       ),
     );
 
-    if (confirmed != true) {
-      return;
-    }
+    if (confirmed != true) return;
 
     try {
       await userController.unassignMedic();
-    } catch (e) {
-      if (context.mounted) {
-        Navigator.pushReplacementNamed(context, '/login');
-      }
-      return;
-    }
-
-    try {
       await userController.getMyAssignmentStatus();
     } catch (e) {
       if (context.mounted) {
@@ -56,31 +47,51 @@ class MedicInteractionsPage extends StatelessWidget {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.primaryGradient,
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              const CustomAppBar(title: 'Medic Interactions'),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final screenHeight = constraints.maxHeight;
+          final screenWidth = constraints.maxWidth;
 
-              Expanded(
-                child: SingleChildScrollView(
-                  child: MedicInteractionsPanel(
-                    onSuggestions: () => Navigator.pushNamed(context, '/user-suggestions'),
-                    onUnassign: () => _confirmUnassign(context),
-                    onAppointments: () => Navigator.pushNamed(context, '/user-appointments'),
-                  ),
+          return Stack(
+            children: [
+              Container(
+                width: screenWidth,
+                height: screenHeight,
+                decoration: const BoxDecoration(
+                  gradient: AppColors.primaryGradient,
                 ),
               ),
+
+              SafeArea(
+                child: Column(
+                  children: [
+                    const CustomAppBar(title: 'Interact with Your Medic'),
+
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: MedicInteractionsPanel(
+                          onSuggestions: () => Navigator.pushNamed(context, '/user-suggestions'),
+                          onUnassign: () => _confirmUnassign(context),
+                          onAppointments: () => Navigator.pushNamed(context, '/user-appointments'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              EkgSignal(
+                data: const <double>[0, 0, 0, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 1, -1, 0, 0, 0, 0, 0, 1, -1, 0],
+                bottomOffset: screenHeight * 0.15,
+                height: screenHeight * 0.1,
+              ),
             ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }

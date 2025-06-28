@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/widgets/ekg_signal.dart';
 import 'package:frontend/features/users/presentation/controllers/user_controller.dart';
 import 'package:frontend/features/users/presentation/widgets/user_dashboard_panel.dart';
 import 'package:provider/provider.dart';
@@ -34,35 +35,56 @@ class _UserMainPageState extends State<UserMainPage> {
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.primaryGradient,
-        ),
-        child: SafeArea(
-          child: Column(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final screenHeight = constraints.maxHeight;
+          final screenWidth = constraints.maxWidth;
+
+          return Stack(
             children: [
-              const CustomAppBar(
-                title: 'Welcome!',
-                onBack: null,
-                showBackButton: false,
-              ),
-
-              const Expanded(child: UserDashboardPanel()),
-
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: RoundedButton(
-                    text: 'Log Out',
-                    onPressed: () =>
-                        context.read<AuthController>().logout(context),
-                  ),
+              Container(
+                width: screenWidth,
+                height: screenHeight,
+                decoration: const BoxDecoration(
+                  gradient: AppColors.primaryGradient,
                 ),
               ),
+
+              SafeArea(
+                child: Column(
+                  children: [
+                    const CustomAppBar(
+                      title: 'Welcome!',
+                      onBack: null,
+                      showBackButton: false,
+                    ),
+
+                    const Expanded(child: UserDashboardPanel()),
+
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: RoundedButton(
+                          text: 'Log Out',
+                          onPressed: () =>
+                              context.read<AuthController>().logout(context),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              EkgSignal(
+                data: const <double>[
+                  0, 0, 0, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 1, -1, 0, 0, 0, 0, 0, 1, -1, 0],
+                bottomOffset: screenHeight * 0.15,
+                height: screenHeight * 0.1,
+              ),
             ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }

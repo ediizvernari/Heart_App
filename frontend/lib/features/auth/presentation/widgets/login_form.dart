@@ -37,9 +37,9 @@ class _LoginFormState extends State<LoginForm> {
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   hintText: 'Email',
-                  hintStyle: const TextStyle(color: Colors.white70),
+                  hintStyle: const TextStyle(color: AppColors.background),
                   filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.2),
+                  fillColor: AppColors.background.withValues(alpha: 0.2),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                     borderSide: BorderSide.none,
@@ -47,7 +47,7 @@ class _LoginFormState extends State<LoginForm> {
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 ),
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.background),
                 onChanged: (v) => authCtrl.email = v,
               ),
               const SizedBox(height: 16),
@@ -56,9 +56,9 @@ class _LoginFormState extends State<LoginForm> {
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: 'Password',
-                  hintStyle: const TextStyle(color: Colors.white70),
+                  hintStyle: const TextStyle(color: AppColors.background),
                   filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.2),
+                  fillColor: AppColors.background.withValues(alpha: 0.2),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                     borderSide: BorderSide.none,
@@ -66,7 +66,7 @@ class _LoginFormState extends State<LoginForm> {
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 ),
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.background),
                 onChanged: (v) => authCtrl.password = v,
               ),
               const SizedBox(height: 32),
@@ -78,8 +78,8 @@ class _LoginFormState extends State<LoginForm> {
                   : RoundedButton(
                       text: 'Submit',
                       onPressed: () => authCtrl.login(context: context),
-                      backgroundColor: AppColors.primaryRed,
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppColors.primaryBlue,
+                      foregroundColor: AppColors.background,
                       borderRadius: 30,
                       elevation: 8,
                     ),

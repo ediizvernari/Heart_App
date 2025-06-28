@@ -1,5 +1,5 @@
-import 'package:frontend/features/medical_service/data/models/medical_service.dart';
-import 'package:frontend/features/medical_service/data/models/medical_service_type.dart';
+import 'package:frontend/features/medical_services/data/models/medical_service.dart';
+import 'package:frontend/features/medical_services/data/models/medical_service_type.dart';
 
 abstract class MedicalServiceRepository {
   Future<List<MedicalServiceType>> getAllMedicalServiceTypes();

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/services/api_exception.dart';
+import 'package:frontend/core/network/api_exception.dart';
 import '../../data/models/appointment_suggestion_model.dart';
 import '../../data/repositories/appointment_suggestion_repository.dart';
 
@@ -21,8 +21,9 @@ class UserAppointmentSuggestionController extends ChangeNotifier {
       error = e.responseBody;
     } catch (e) {
       error = e.toString();
+    } finally {
+      _setLoading(false);
     }
-    _setLoading(false);
   }
 
   Future<void> respondToSuggestion(int appointmentSuggestionId, String newStatus) async {
@@ -38,8 +39,9 @@ class UserAppointmentSuggestionController extends ChangeNotifier {
       error = e.responseBody;
     } catch (e) {
       error = e.toString();
+    } finally {
+      _setLoading(false);
     }
-    _setLoading(false);
   }
 
   void _setLoading(bool v) {

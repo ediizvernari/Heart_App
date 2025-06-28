@@ -1,22 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/constants/app_colors.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/user_medical_record.dart';
 
 
 class UserMedicalRecordCard extends StatelessWidget {
-  final UserMedicalRecord assignedUserMedicalRecord;
+  final UserMedicalRecord userMedicalRecord;
 
   const UserMedicalRecordCard({
     Key? key,
-    required this.assignedUserMedicalRecord,
+    required this.userMedicalRecord,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final localTime = assignedUserMedicalRecord.createdAt.toLocal();
-    final formattedTime = DateFormat('HH:mm').format(localTime);
+    final recordedAtLocal = userMedicalRecord.createdAt.toLocal();
+
+    final formattedDate = DateFormat('yyyy-MM-dd').format(recordedAtLocal);
+    final formattedTime = DateFormat('HH:mm').format(recordedAtLocal);
+
+    final assignedUserDateOfBirth = userMedicalRecord.birthDate;
+    final formattedDateOfBirth = DateFormat('yyyy-MM-dd').format(assignedUserDateOfBirth);
+
+    String cholesterolLabel(int level) {
+      switch (level) {
+        case 1: return 'Normal';
+        case 2: return 'Above normal';
+        case 3: return 'Way above normal';
+        default: return 'unknown';
+      }
+    }
 
     return Card(
+      color: AppColors.background,
       elevation: 2,
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: Padding(
@@ -24,14 +40,15 @@ class UserMedicalRecordCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Recorded at: $formattedTime'),
+            Text('Recorded at: $formattedDate $formattedTime'),
             const SizedBox(height: 8),
-            Text('CVD Percentage Risk: ${assignedUserMedicalRecord.cvdRiskPercentage}'),
-            Text('Weight (Kg): ${assignedUserMedicalRecord.weightKg}'),
-            Text('Height (cm): ${assignedUserMedicalRecord.heightCm}'),
-            Text('Cholesterol Level: ${assignedUserMedicalRecord.cholesterolLevel}'),
-            Text('Systolic Blood Pressure: ${assignedUserMedicalRecord.systolicBloodPressure}'),
-            Text('Diastolic Blood Pressure: ${assignedUserMedicalRecord.diastolicBloodPressure}'),
+            Text('Date of birth: $formattedDateOfBirth'),
+            Text('CVD Percentage Risk: ${userMedicalRecord.cvdRiskPercentage}%'),
+            Text('Weight (Kg): ${userMedicalRecord.weightKg}'),
+            Text('Height (cm): ${userMedicalRecord.heightCm}'),
+            Text('Cholesterol Level: ${cholesterolLabel(userMedicalRecord.cholesterolLevel)}'),
+            Text('Systolic Blood Pressure: ${userMedicalRecord.systolicBloodPressure}'),
+            Text('Diastolic Blood Pressure: ${userMedicalRecord.diastolicBloodPressure}'),
           ],
         ),
       ),

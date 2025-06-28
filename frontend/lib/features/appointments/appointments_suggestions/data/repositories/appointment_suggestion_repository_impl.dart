@@ -1,42 +1,25 @@
-import 'package:frontend/services/api_exception.dart';
 import '../api/appointment_suggestion_api.dart';
 import '../models/appointment_suggestion_model.dart';
 import 'appointment_suggestion_repository.dart';
 
-class AppointmentSuggestionRepositoryImpl implements AppointmentSuggestionRepository{
+class AppointmentSuggestionRepositoryImpl implements AppointmentSuggestionRepository {
   @override
-  Future<List<AppointmentSuggestion>> getMyAppointmentSuggestions() async { 
-    try {
-      return await AppointmentSuggestionApi.getMyAppointmentSuggestions();
-    } on ApiException {
-      rethrow;
-    }
+  Future<List<AppointmentSuggestion>> getMyAppointmentSuggestions() {
+    return AppointmentSuggestionApi.getMyAppointmentSuggestions();
   }
 
   @override
-  Future<List<AppointmentSuggestion>> getMedicAppointmentSuggestions() async {
-    try {
-      return await AppointmentSuggestionApi.getMedicAppointmentSuggestions();
-    } on ApiException {
-      rethrow;
-    }
+  Future<List<AppointmentSuggestion>> getMedicAppointmentSuggestions() {
+    return AppointmentSuggestionApi.getMedicAppointmentSuggestions();
   }
 
   @override
-  Future<AppointmentSuggestion> createAppointmentSuggestion(AppointmentSuggestion dto) async {
-    try {
-      return await AppointmentSuggestionApi.createAppointmentSuggestion(dto);
-    } on ApiException {
-      rethrow;
-    }
+  Future<AppointmentSuggestion> createAppointmentSuggestion(AppointmentSuggestion dto) {
+    return AppointmentSuggestionApi.createAppointmentSuggestion(dto);
   }
 
   @override
-  Future<AppointmentSuggestion> updateAppointmentSuggestionStatus(int appointmentsuggestionId, String newAppointmentSuggestionStatus) async {
-    try {
-      return await AppointmentSuggestionApi.updateAppointmentSuggestionStatus(appointmentsuggestionId, newAppointmentSuggestionStatus);
-    } on ApiException {
-      rethrow;
-    }
+  Future<AppointmentSuggestion> updateAppointmentSuggestionStatus(int appointmentSuggestionId, String newAppointmentSuggestionStatus) {
+    return AppointmentSuggestionApi.updateAppointmentSuggestionStatus(appointmentSuggestionId, newAppointmentSuggestionStatus);
   }
 }

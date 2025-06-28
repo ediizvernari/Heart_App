@@ -41,7 +41,7 @@ class _MedicAvailabilityPageState extends State<MedicAvailabilityPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primaryRed,
+        backgroundColor: AppColors.primaryBlue,
         child: const Icon(Icons.add, color: Colors.white),
         onPressed: () {
           showDialog(

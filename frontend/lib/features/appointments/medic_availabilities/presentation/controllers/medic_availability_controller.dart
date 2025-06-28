@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/services/api_exception.dart';
+import 'package:frontend/core/network/api_exception.dart';
 import 'package:frontend/features/appointments/medic_availabilities/data/models/medic_availability_model.dart';
 import 'package:frontend/features/appointments/medic_availabilities/data/repositories/medic_availability_repository.dart';
 
