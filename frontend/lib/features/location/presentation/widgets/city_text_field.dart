@@ -4,16 +4,16 @@ import 'package:provider/provider.dart';
 import 'package:frontend/features/location/presentation/controller/location_controller.dart';
 import '../../data/model/city_country_suggestion.dart';
 
-class CityAutocompleteField extends StatefulWidget {
+class CityTextField extends StatefulWidget {
   final TextEditingController controller;
-  const CityAutocompleteField({Key? key, required this.controller})
+  const CityTextField({Key? key, required this.controller})
       : super(key: key);
 
   @override
-  _CityAutocompleteFieldState createState() => _CityAutocompleteFieldState();
+  _CityTextFieldState createState() => _CityTextFieldState();
 }
 
-class _CityAutocompleteFieldState extends State<CityAutocompleteField> {
+class _CityTextFieldState extends State<CityTextField> {
   @override
   Widget build(BuildContext context) {
     final locationController = context.read<LocationController>();
