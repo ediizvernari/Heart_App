@@ -1,3 +1,4 @@
+import logging
 from typing import List
 from fastapi import HTTPException, status
 
@@ -31,15 +32,13 @@ class UserMedicalRecordService:
         user_id  = user_medical_record_data.pop("user_id")
         cvd_risk = user_medical_record_data.pop("cvd_risk")
 
-        print(f"[INFO] Creating medical record for user_id={user_id}")
+        logging.debug(f"Creating medical record for user_id={user_id}")
 
         encrypted_user_medical_record_data = encrypt_fields(
             user_medical_record_data,
             ["birth_date", "height", "weight", "cholesterol_level", "ap_hi", "ap_lo"]
         )
         encrypted_user_medical_record_data["cvd_risk"] = encrypt_data(cvd_risk)
-
-        print(f"[DEBUG] Creating UserMedicalRecord with {encrypted_user_medical_record_data}")
 
         await self._user_medical_record_repo.create(
             user_id=user_id,
@@ -49,7 +48,7 @@ class UserMedicalRecordService:
         return await self.get_latest_user_medical_record_by_user_id(user_id)
 
     async def get_user_medical_records_by_user_id(self, user_id: int) -> List[UserMedicalRecordOutSchema]:
-        print(f"[INFO] Fetching all medical records for user_id={user_id}")
+        logging.debug(f"Getting all medical records for user_id={user_id}")
 
         rows = await self._user_medical_record_repo.get_all_user_medical_records_by_user(user_id)
         return [
@@ -58,7 +57,7 @@ class UserMedicalRecordService:
         ]
 
     async def get_latest_user_medical_record_by_user_id(self, user_id: int) -> UserMedicalRecordOutSchema:
-        print(f"[INFO] Fetching latest medical record for user_id={user_id}")
+        logging.debug(f"Getting latest medical record for user_id={user_id}")
 
         latest = await self._user_medical_record_repo.get_last_user_medical_record_by_user(user_id)
         if not latest:

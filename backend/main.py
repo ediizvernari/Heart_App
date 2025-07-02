@@ -9,7 +9,6 @@ from backend.features.appointments.medic_availability import medic_availability
 from backend.features.appointments.suggestions import appointment_suggestions
 from backend.features.auth import auth
 from backend.features.cvd_prediction import cvd_prediction
-from backend.features.location import location
 from backend.features.medical_service import medical_service
 from backend.features.medics import medics
 from backend.features.user_health_data import user_health_data
@@ -60,7 +59,6 @@ app.include_router(users.router, prefix="/users")
 app.include_router(user_health_data.router, prefix="/user_health_data")
 app.include_router(auth.router, prefix="/auth")
 app.include_router(cvd_prediction.router, prefix="/cvd_prediction")
-app.include_router(location.router, prefix="/location")
 app.include_router(medics.router, prefix="/medics")
 app.include_router(user_medical_records.router, prefix="/user_medical_records")
 app.include_router(scheduling.router, prefix="/scheduling")

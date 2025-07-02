@@ -1,3 +1,4 @@
+import logging
 from fastapi import HTTPException
 
 from backend.features.auth.auth_schemas import LoginSchema, TokenSchema
@@ -12,7 +13,7 @@ class AuthService:
         self._medic_repo = medic_repo
 
     async def login_account(self, payload: LoginSchema) -> TokenSchema:
-        print(f"[INFO] Login attempt for email={payload.email}")
+        logging.debug(f"Login attempt for email={payload.email}")
 
         found_user = await self._user_repo.get_by_email(payload.email)
         if found_user and verify_password(payload.password, found_user.password):

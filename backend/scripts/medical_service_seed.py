@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.features.medical_service.medical_service_type_repository import MedicalServiceTypeRepository
@@ -22,12 +24,12 @@ async def seed_cardiology_medical_service_types(db: AsyncSession):
     service = MedicalServiceService(type_repo, service_repo)
 
     if await type_repo.count() > 0:
-        print("MedicalServiceType table already populated, skipping.")
+        logging.info("MedicalServiceType table already populated, skipping.")
         return
 
     for name in CARDIOLOGY_SERVICE_TYPES:
         try:
             await service.create_medical_service_type(name)
         except Exception as e:
-            print(f"  × failed to seed {name}: {e}")
+            logging.error(f"  x failed to seed {name}: {e}")
             await db.rollback()

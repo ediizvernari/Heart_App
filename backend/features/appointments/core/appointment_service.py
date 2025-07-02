@@ -1,4 +1,4 @@
-import asyncio
+import logging
 from typing import List, Union
 
 from fastapi import HTTPException
@@ -28,28 +28,29 @@ class AppointmentService:
         appointment_record = await self._appointment_repository.get_by_id(appointment_id)
         
         if not appointment_record:
-            print(f"[ERROR] Appointment {appointment_id} not found")
+            logging.error(f"Appointment {appointment_id} not found")
             raise HTTPException(404, "Appointment not found")
         
-        if appointment_record.medic_id!=medic_id:
-            print(f"[WARNING] Medic {medic_id} unauthorized for appointment {appointment_id}")
+        if appointment_record.medic_id != medic_id:
+            logging.error(f"Medic {medic_id} unauthorized for appointment {appointment_id}")
             raise HTTPException(403, "Not authorized")
 
     async def _ensure_user_owns_appointment(self, user_id: int, appointment_id: int) -> None:
         appointment_record = await self._appointment_repository.get_by_id(appointment_id)
         
         if not appointment_record:
-            print(f"[ERROR] Appointment {appointment_id} not found")
+            logging.error(f"Appointment {appointment_id} not found")
             raise HTTPException(404, "Appointment not found")
         
-        if appointment_record.user_id!=user_id:
-            print(f"[WARNING] User {user_id} unauthorized for appointment {appointment_id}")
+        if appointment_record.user_id != user_id:
+            logging.error(f"User {user_id} unauthorized for appointment {appointment_id}")
             raise HTTPException(403, "Not authorized")
 
     async def _map_appointment_to_schema(self, appointment_id: int) -> AppointmentOutSchema:
         appointment_record = await self._appointment_repository.get_by_id(appointment_id)
         
         if not appointment_record:
+            logging.error(f"Appointment {appointment_id} not found")
             raise HTTPException(404, "Appointment not found")
 
         decrypted_values = decrypt_fields(appointment_record, ENCRYPTED_APPOINTMENT_FIELDS)
@@ -88,11 +89,11 @@ class AppointmentService:
         return results
 
     async def create_appointment(self, user_id: int, appointment_payload: AppointmentCreateSchema) -> AppointmentOutSchema:
-        print(f"[INFO] Creating appointment for user_id={user_id}, medic_id={appointment_payload.medic_id}, medical_service_id={appointment_payload.medical_service_id}")
+        logging.info(f"Creating appointment for user_id={user_id}, medic_id={appointment_payload.medic_id}, medical_service_id={appointment_payload.medical_service_id}")
 
         medical_service = await self._medical_service.get_medical_service_by_id(appointment_payload.medical_service_id)
         if not medical_service:
-            print(f"[ERROR] Medical service {appointment_payload.medical_service_id} not found")
+            logging.error(f"Medical service {appointment_payload.medical_service_id} not found")
             raise HTTPException(404, "Medical Service not found")
         
         medic_entity = await self._medic_repository.get_medic_by_id(appointment_payload.medic_id)
@@ -100,16 +101,16 @@ class AppointmentService:
         appointment_start = appointment_payload.appointment_start
         appointment_end = appointment_payload.appointment_end
         target_date = appointment_start.date()
-
+        
         available_slots_models=await self._scheduling_service.get_free_time_slots_for_a_day(
             appointment_payload.medic_id, target_date, medical_service.duration_minutes
         )
         available_slots={(slot.start, slot.end) for slot in available_slots_models}
         requested_slot=(f"{appointment_start.hour:02d}:{appointment_start.minute:02d}", f"{appointment_end.hour:02d}:{appointment_end.minute:02d}")
 
-        print(f"[DEBUG] Available slots={available_slots}, requested={requested_slot}")
+        logging.info(f"Available slots={available_slots}, requested={requested_slot}")
         if requested_slot not in available_slots:
-            print(f"[WARNING] Requested slot {requested_slot} unavailable for medic {appointment_payload.medic_id}")
+            logging.error(f"Requested slot {requested_slot} unavailable for medic {appointment_payload.medic_id}")
             raise HTTPException(409, "Unavailable time slot")
 
         encrypted_fields = encrypt_fields({
@@ -138,18 +139,18 @@ class AppointmentService:
 
 
     async def change_appointment_status(self, current_account: Union[Medic, User], appointment_id: int, new_appointment_status: str) -> AppointmentOutSchema:
-        print(f"[INFO] Changing status for appointment_id={appointment_id} to {new_appointment_status} by account_id={current_account.id}")
+        logging.info(f"Changing status for appointment_id={appointment_id} to {new_appointment_status} by account_id={current_account.id}")
 
         appointment_record = await self._appointment_repository.get_by_id(appointment_id)
         
         if not appointment_record:
-            print(f"[ERROR] Appointment {appointment_id} not found for status change")
+            logging.error(f"Appointment {appointment_id} not found for status change")
             raise HTTPException(404, "Appointment not found")
 
-        is_medic=isinstance(current_account, Medic)
+        is_medic = isinstance(current_account, Medic)
         
         if (is_medic and appointment_record.medic_id!=current_account.id) or (not is_medic and appointment_record.user_id!=current_account.id):
-            print(f"[WARNING] Account {current_account.id} unauthorized to change appointment {appointment_id}")
+            logging.error(f"Account {current_account.id} unauthorized to change appointment {appointment_id}")
             raise HTTPException(403, "Not permitted to change this appointment")
 
         encrypted_status = encrypt_data(new_appointment_status)

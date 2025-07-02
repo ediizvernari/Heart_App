@@ -1,3 +1,4 @@
+import logging
 import asyncio
 from typing import List
 from fastapi import HTTPException
@@ -30,22 +31,23 @@ class AppointmentSuggestionService:
         )
 
     async def get_user_appointment_suggestions(self, user_id: int) -> List[AppointmentSuggestionOutSchema]:
-        print(f"[INFO] Getting appointment suggestions for user_id={user_id}")
+        logging.debug(f"Getting appointment suggestions for user_id={user_id}")
         
         suggestion_records = await self._suggestion_repository.get_user_appointment_suggestions(user_id)
         return await asyncio.gather(*(self._map_suggestion_to_schema(r.id) for r in suggestion_records))
 
     async def get_medic_appointment_suggestions(self, medic_id: int) -> List[AppointmentSuggestionOutSchema]:
-        print(f"[INFO] Getting appointment suggestions for medic_id={medic_id}")
+        logging.debug(f"Getting appointment suggestions for medic_id={medic_id}")
 
         suggestion_records = await self._suggestion_repository.get_medic_appointment_suggestions(medic_id)
         return await asyncio.gather(*(self._map_suggestion_to_schema(r.id) for r in suggestion_records))
     
     async def get_appointment_suggestion_by_id(self, suggestion_id: int) -> AppointmentSuggestionOutSchema:
+        logging.debug(f"Getting appointment suggestion by id={suggestion_id}")
         return await self._map_suggestion_to_schema(suggestion_id)
 
     async def suggest_appointment(self, medic_id: int, user_id: int, payload: AppointmentSuggestionCreateSchema) -> AppointmentSuggestionOutSchema:
-        print(f"[INFO] Creating appointment suggestion for medic_id={medic_id}, user_id={user_id}")
+        logging.debug(f"Creating appointment suggestion for medic_id={medic_id}, user_id={user_id}")
 
         medical_service=await self._medical_service_service.get_medical_service_by_id(payload.medical_service_id)
         if not medical_service or medical_service.medic_id!=medic_id:
@@ -67,11 +69,11 @@ class AppointmentSuggestionService:
         return await self._map_suggestion_to_schema(new_suggestion.id)
 
     async def change_appointment_suggestion_status(self, suggestion_id: int, new_status: str) -> AppointmentSuggestionOutSchema:
-        print(f"[INFO] Changing appointment suggestion status id={suggestion_id} to {new_status}")
+        logging.debug(f"Changing appointment suggestion status id={suggestion_id} to {new_status}")
 
         suggestion_record = await self._suggestion_repository.get_by_id(suggestion_id)
         if not suggestion_record:
-            print(f"[ERROR] Appointment suggestion {suggestion_id} not found")
+            logging.error(f"Appointment suggestion {suggestion_id} not found")
             raise HTTPException(404, "Appointment suggestion not found")
 
         decrypted = decrypt_fields(suggestion_record, ENCRYPTED_APPOINTMENT_SUGGESTION_FIELDS)
@@ -89,5 +91,5 @@ class AppointmentSuggestionService:
         return await self._map_suggestion_to_schema(suggestion_id)
 
     async def delete_appointment_suggestion(self, suggestion_id: int) -> None:
-        print(f"[INFO] Deleting appointment suggestion id={suggestion_id}")
+        logging.debug(f"Deleting appointment suggestion id={suggestion_id}")
         await self._suggestion_repository.delete(suggestion_id)

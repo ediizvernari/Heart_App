@@ -1,3 +1,4 @@
+import logging
 from typing import List, Optional
 from fastapi import HTTPException
 from argon2 import PasswordHasher
@@ -20,13 +21,13 @@ class MedicService:
         self._medic_registry_repo = medic_registry_repo
 
     async def signup_medic(self, medic_payload: MedicCreateSchema) -> str:
-        print(f"[INFO] Signing up medic email={medic_payload.email}")
-        
+        logging.debug(f"Signing up medic email={medic_payload.email}")
+
         if await self._medic_repo.get_medic_by_email(medic_payload.email):
             raise HTTPException(status_code=409, detail="Email already registered")
 
         country_lookup = make_lookup_hash(medic_payload.country)
-        print(f"[DEBUG] country_lookup={country_lookup}")
+        logging.debug(f"country_lookup={country_lookup}")
         
         encrypted_country = encrypt_data(medic_payload.country)
 
@@ -36,7 +37,7 @@ class MedicService:
         country_id = country_obj.id
 
         city_lookup = make_lookup_hash(medic_payload.city)
-        print(f"[DEBUG] city_lookup={city_lookup}")
+        logging.debug(f"city_lookup={city_lookup}")
         encrypted_city = encrypt_data(medic_payload.city)
 
         city_obj = await self._location_service.repo.get_city_by_lookup_hash_and_country_id(city_lookup, country_id)
@@ -45,7 +46,7 @@ class MedicService:
         city_id = city_obj.id
 
         registry_lookup = make_lookup_hash(medic_payload.license_number)
-        print(f"[DEBUG] registry_lookup={registry_lookup}")
+        logging.debug(f"registry_lookup={registry_lookup}")
         registry_entry = await self._medic_registry_repo.get_registry_medic_by_lookup_hash(registry_lookup)
         
         if registry_entry is None:
@@ -66,14 +67,14 @@ class MedicService:
         return create_access_token({"sub": medic_record.id, "role": "medic"})
 
     async def check_medic_email_availability(self, email: str) -> dict:
-        print(f"[INFO] Checking medic email availability for email={email}")
+        logging.debug(f"Checking medic email availability for email={email}")
         existing = await self._medic_repo.get_medic_by_email(email)
         if existing:
             raise HTTPException(status_code=409, detail="Email already registered")
         return {"available": True}
 
     async def get_medic_by_id(self, medic_id: int) -> MedicOutSchema:
-        print(f"[INFO] Retrieving medic by id={medic_id}")
+        logging.debug(f"Retrieving medic by id={medic_id}")
         medic = await self._medic_repo.get_medic_by_id(medic_id)
         if medic is None:
             raise HTTPException(404, "Medic not found")
@@ -89,12 +90,12 @@ class MedicService:
         })
 
     async def filter_medics_by_location(self, city: Optional[str]=None, country: Optional[str]=None) -> List[MedicOutSchema]:
-        print(f"[INFO] Filtering medics by city={city}, country={country}")
+        logging.debug(f"Filtering medics by city={city}, country={country}")
         rows = await self._medic_repo.get_all_medics_with_location()
-        filtered: List[MedicOutSchema] = []
+        filtered_medics: List[MedicOutSchema] = []
 
         for medic, city_obj, country_obj in rows:
-            plain_city    = decrypt_data(city_obj.name)
+            plain_city = decrypt_data(city_obj.name)
             plain_country = decrypt_data(country_obj.name)
 
             if city and not plain_city.lower().startswith(city.lower()):
@@ -102,7 +103,7 @@ class MedicService:
             if country and not plain_country.lower().startswith(country.lower()):
                 continue
 
-            filtered.append(
+            filtered_medics.append(
                 MedicOutSchema.model_validate({
                     "id": medic.id,
                     "first_name": decrypt_data(medic.first_name),
@@ -113,11 +114,11 @@ class MedicService:
                     "country": plain_country
                 })
             )
-        return filtered
+        return filtered_medics
 
     async def get_medics_assigned_users(self, medic_id: int) -> List[AssignedUserOutSchema]:
-        print(f"[INFO] Fetching assigned users for medic_id={medic_id}")
-        assigned = await self._medic_repo.get_assigned_users(medic_id)
+        logging.debug(f"Getting assigned users for medic_id={medic_id}")
+        assigned_users = await self._medic_repo.get_assigned_users(medic_id)
         
         return [
             AssignedUserOutSchema.model_validate({
@@ -125,5 +126,5 @@ class MedicService:
                 "first_name": decrypt_data(user.first_name),
                 "last_name": decrypt_data(user.last_name)
             })
-            for user in assigned
+            for user in assigned_users
         ]

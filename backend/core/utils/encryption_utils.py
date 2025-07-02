@@ -3,6 +3,7 @@ import hashlib
 import hmac
 import unicodedata
 import os
+import logging
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 AES_KEY = os.getenv("AES_KEY")
@@ -32,12 +33,19 @@ def make_lookup_hash(plaintext: str) -> str:
     return hmac.new(lookup_key, canon.encode("utf-8"), hashlib.sha256).hexdigest()
 
 def encrypt_data(data: str) -> str:
-    iv = os.urandom(12)
-    cipher = Cipher(algorithms.AES(aes_key), modes.GCM(iv))
-    encryptor = cipher.encryptor()
-    encrypted = encryptor.update(data.encode()) + encryptor.finalize()
-    encrypted_data = iv + encryptor.tag + encrypted
-    return base64.b64encode(encrypted_data).decode()
+    try:
+        iv = os.urandom(12)
+        cipher = Cipher(algorithms.AES(aes_key), modes.GCM(iv))
+        encryptor = cipher.encryptor()
+
+        logging.debug(f"Encrypting data with IV: {iv.hex()} and message length: {len(data)} bytes")
+        encrypted = encryptor.update(data.encode()) + encryptor.finalize()
+        encrypted_data = iv + encryptor.tag + encrypted
+        return base64.b64encode(encrypted_data).decode()
+    except Exception as e:
+        logging.error(f"Encryption failed: {e}")
+        raise RuntimeError("Encryption failed") from e
+
 
 def encrypt_fields(obj: object | dict, fields: list[str]) -> dict:
     encrypted = {}
@@ -47,7 +55,7 @@ def encrypt_fields(obj: object | dict, fields: list[str]) -> dict:
             try:
                 encrypted[field] = encrypt_data(str(value))
             except Exception as e:
-                print(f"[ERROR] Encryption failed for '{field}': {e}")
+                logging.error(f"Encryption failed for '{field}': {e}")
                 encrypted[field] = "[ENCRYPTION ERROR]"
         else:
             encrypted[field] = None
@@ -60,13 +68,16 @@ def decrypt_data(encrypted_data_b64: str) -> str:
         iv = encrypted_data[:12]
         tag = encrypted_data[12:28]
         ciphertext = encrypted_data[28:]
-
         cipher = Cipher(algorithms.AES(aes_key), modes.GCM(iv, tag))
+        logging.debug(f"Decrypting data with IV: {iv.hex()} and tag: {tag.hex()}")
+
         decryptor = cipher.decryptor()
         decrypted = decryptor.update(ciphertext) + decryptor.finalize()
+        
+        logging.info(f"Decryption successful, length of decrypted data: {len(decrypted)} bytes")
         return decrypted.decode()
     except Exception as e:
-        print(f"[ERROR] Decryption failed: {e}")
+        logging.error(f"Decryption failed: {e}")
         return "[DECRYPTION ERROR]"
 
 def decrypt_fields(obj, fields: list[str]) -> dict:
@@ -76,6 +87,6 @@ def decrypt_fields(obj, fields: list[str]) -> dict:
             value = getattr(obj, field)
             decrypted[field] = decrypt_data(value) if value else None
         except Exception as e:
-            print(f"[ERROR] Decryption failed for field '{field}': {e}")
+            logging.error(f"Decryption failed for field '{field}': {e}")
             decrypted[field] = "[DECRYPTION ERROR]"
     return decrypted

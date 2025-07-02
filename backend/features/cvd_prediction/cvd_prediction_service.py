@@ -1,5 +1,6 @@
+import logging
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.features.user_health_data.user_health_data_service   import UserHealthDataService
@@ -35,10 +36,10 @@ class CVDPredictionService:
             )
 
             await self._user_medical_record_service.create_user_medical_record(user_medical_record_payload)
-            print(f"[INFO] Predicted CVD risk probability for user_id={user_id}: {probability}")
+            logging.info(f"Predicted CVD risk probability for user_id={user_id}")
             return probability
 
         except Exception as e:
-            print(f"[ERROR] Failed to predict CVD probability for user_id={user_id}: {e}")
+            logging.error(f"Failed to predict CVD probability for user_id={user_id}: {e}")
             raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
         

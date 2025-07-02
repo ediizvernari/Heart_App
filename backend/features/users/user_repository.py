@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.core.repository.generic_repository import GenericRepository
@@ -15,9 +16,9 @@ class UserRepository(GenericRepository[User]):
         return await self.get_by_id(user_id)
 
     async def assign_medic(self, user_id: int, medic_id: int) -> None:
-        print(f"[INFO] Assigning medic {medic_id} to user {user_id}")
+        logging.debug(f"Assigning medic {medic_id} to user {user_id}")
         await self.update(user_id, {"medic_id":medic_id})
 
     async def unassign_medic(self, user_id: int) -> None:
-        print(f"[INFO] Unassigning medic from user {user_id}")
+        logging.debug(f"Unassigning medic from user {user_id}")
         await self.update(user_id, {"medic_id":None})

@@ -1,3 +1,4 @@
+import logging
 import asyncio
 from typing import List
 from fastapi import HTTPException
@@ -36,7 +37,7 @@ class MedicAvailabilityService:
         return await asyncio.gather(*(self._map_to_schema(r.id) for r in raw_medic_availabilities))
 
     async def create_availability(self, medic_id: int, payload: MedicAvailabilityCreateSchema) -> MedicAvailabilityOutSchema:
-        print(f"[INFO] Creating availability for medic_id={medic_id}")
+        logging.debug(f"Creating availability for medic_id={medic_id}")
 
         medic_availability_dict = payload.model_dump()
         encrypted_data = encrypt_fields(medic_availability_dict, ENCRYPTED_MEDIC_AVAILABILITY_FIELDS)
@@ -47,10 +48,11 @@ class MedicAvailabilityService:
             start_time=encrypted_data["start_time"],
             end_time=encrypted_data["end_time"]
         )
+        logging.info(f"Created medic availability with id={raw_medic_availability.id}")
         return await self._map_to_schema(raw_medic_availability.id)
 
     async def update_medic_availability(self, medic_availability_id: int, medic_availability_payload: MedicAvailabilityUpdateSchema) -> MedicAvailabilityOutSchema:
-        print(f"[INFO] Updating availability id={medic_availability_id}")
+        logging.debug(f"Updating availability id={medic_availability_id}")
 
         updates = medic_availability_payload.model_dump(exclude_unset=True)
         if updates:
@@ -60,5 +62,6 @@ class MedicAvailabilityService:
         return await self._map_to_schema(medic_availability_id)
 
     async def delete_medic_availability(self, medic_availability_id: int) -> None:
-        print(f"[INFO] Deleting availability id={medic_availability_id}")
+        logging.debug(f"Deleting availability id={medic_availability_id}")
         await self._medic_availability_repo.delete(medic_availability_id)
+        logging.info(f"Deleted medic availability with id={medic_availability_id}")

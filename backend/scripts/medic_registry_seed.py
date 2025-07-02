@@ -1,3 +1,4 @@
+import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.database.connection import SessionLocal
@@ -15,18 +16,18 @@ async def seed_medic_registry(db: AsyncSession):
 
     count = await repo.count_medics_in_registry()
     if count > 0:
-        print(f"MedicRegistry already populated ({count} rows), skipping.")
+        logging.info(f"MedicRegistry already populated ({count} rows), skipping.")
         return
 
     for rec in MOCK_MEDICS:
         lookup = make_lookup_hash(rec["license_number"])
         encrypted_license = encrypt_data(rec["license_number"])
-        encrypted_first   = encrypt_data(rec["first_name"])
-        encrypted_last    = encrypt_data(rec["last_name"])
+        encrypted_first = encrypt_data(rec["first_name"])
+        encrypted_last = encrypt_data(rec["last_name"])
 
         await repo.create_medic_for_registry(
-            first_name     = encrypted_first,
-            last_name      = encrypted_last,
+            first_name = encrypted_first,
+            last_name = encrypted_last,
             license_number = encrypted_license,
-            lookup_hash    = lookup
+            lookup_hash = lookup
         )
