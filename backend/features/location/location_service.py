@@ -1,3 +1,4 @@
+import logging
 from typing import List
 from fastapi import HTTPException
 from backend.core.database.sql_models import City, Country
@@ -17,7 +18,7 @@ class LocationService:
     # ─── Countries ──────────────────────────────────────────────────────────
 
     async def create_country(self, payload: CountrySchema) -> CountryOutSchema:
-        print(f"[INFO] Creating country with name={payload.name}")
+        logging.debug(f"Creating country with name={payload.name}")
 
         encrypted_country_name = encrypt_data(payload.name)
         country_lookup_hash = make_lookup_hash(payload.name)
@@ -36,7 +37,7 @@ class LocationService:
         })
 
     async def get_all_countries(self) -> List[CountryOutSchema]:
-        print("[INFO] Fetching all countries")
+        logging.debug("Fetching all countries")
 
         country_records=await self.repo.get_all_countries()
         
@@ -51,7 +52,7 @@ class LocationService:
     # ─── Cities ─────────────────────────────────────────────────────────────
 
     async def create_city(self, payload: CityWithCountrySchema) -> CityWithCountryOutSchema:
-        print(f"[INFO] Creating city={payload.city} under country={payload.country}")
+        logging.debug(f"Creating city={payload.city} under country={payload.country}")
 
         country_hash = make_lookup_hash(payload.country)
         encrypted_country_name = encrypt_data(payload.country)
@@ -77,7 +78,7 @@ class LocationService:
         })
 
     async def get_city_name_by_id(self, city_id: int) -> str:
-        print(f"[INFO] Fetching city name for city_id={city_id}")
+        logging.debug(f"Fetching city name for city_id={city_id}")
 
         city_obj=await self.repo.get_city_by_id(city_id)
         
@@ -87,7 +88,7 @@ class LocationService:
         return decrypt_data(city_obj.name)
 
     async def get_country_name_by_city_id(self, city_id: int) -> str:
-        print(f"[INFO] Fetching country name for city_id={city_id}")
+        logging.debug(f"Fetching country name for city_id={city_id}")
 
         city_obj=await self.repo.get_city_by_id(city_id)
         if city_obj is None:
@@ -98,40 +99,3 @@ class LocationService:
             raise HTTPException(404,"Country not found")
 
         return decrypt_data(country_obj.name)
-
-    async def autocomplete_cities(self, query: str) -> List[CityWithCountryOutSchema]:
-        print(f"[INFO] Autocompleting cities for query={query}")
-
-        q=query.lower()
-        rows=await self.repo.get_all_cities_with_countries()
-        
-        suggestions:List[CityWithCountryOutSchema]=[]
-        
-        for city_obj,country_obj in rows:
-            city_name=decrypt_data(city_obj.name)
-            country_name=decrypt_data(country_obj.name)
-            
-            if city_name.lower().startswith(q):
-                suggestions.append(
-                    CityWithCountryOutSchema.model_validate({
-                        "id":city_obj.id,
-                        "city":city_name,
-                        "country":country_name
-                    })
-                )
-        
-        return suggestions
-
-    # ─── Helpers ────────────────────────────────────────────────────────────
-
-    @staticmethod
-    def matches_location(city_obj: City, country_obj: Country, filtered_city_name: str | None = None, filtered_country_name: str | None = None) -> bool:
-        city = decrypt_data(city_obj.name).lower()
-        country = decrypt_data(country_obj.name).lower()
-        if filtered_city_name and not city.startswith(filtered_city_name.lower()):
-            return False
-        
-        if filtered_country_name and not country.startswith(filtered_country_name.lower()):
-            return False
-        
-        return True
