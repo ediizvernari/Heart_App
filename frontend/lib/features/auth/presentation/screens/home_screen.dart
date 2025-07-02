@@ -33,7 +33,8 @@ class HomeScreen extends StatelessWidget {
       });
     }
 
-    const ekgData = <double>[0, 0, 0, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 1, -1, 0, 0, 0, 0, 0, 1, -1, 0];
+    const ekgData = <double>[
+                  0, 0, 1, -1, 0, 0, 0, 0, 0, 1, -1, 0, 0, 0, 0, 0, 1, -1, 0];
 
     return Scaffold(
       body: LayoutBuilder(

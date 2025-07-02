@@ -52,7 +52,7 @@ class TimeSlotList extends StatelessWidget {
               style: const TextStyle(color: Colors.black87),
             ),
             subtitle: Text(
-              '${slot.start} – ${slot.end}',
+              '${slot.start} - ${slot.end}',
               style: AppTextStyles.buttonText.copyWith(
                 color: Colors.black54,
               ),

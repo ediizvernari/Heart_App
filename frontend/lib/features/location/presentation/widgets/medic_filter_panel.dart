@@ -1,12 +1,18 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_colors.dart';
-import 'city_autocomplete_field.dart';
+
+class MedicFilter {
+  final String? city;
+  final String? country;
+
+  MedicFilter({this.city, this.country});
+}
 
 class MedicFilterPanel extends StatefulWidget {
   final TextEditingController cityController;
   final TextEditingController countryController;
-  final ValueChanged<String?> onFilterChanged;
+  final ValueChanged<MedicFilter> onFilterChanged;
 
   const MedicFilterPanel({
     Key? key,
@@ -25,7 +31,14 @@ class _MedicFilterPanelState extends State<MedicFilterPanel> {
   void _onAnyChange() {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 300), () {
-      widget.onFilterChanged(null);
+      final city = widget.cityController.text.trim().isEmpty
+          ? null
+          : widget.cityController.text.trim();
+      final country = widget.countryController.text.trim().isEmpty
+          ? null
+          : widget.countryController.text.trim();
+
+      widget.onFilterChanged(MedicFilter(city: city, country: country));
     });
   }
 
@@ -39,6 +52,8 @@ class _MedicFilterPanelState extends State<MedicFilterPanel> {
   @override
   void dispose() {
     _debounce?.cancel();
+    widget.cityController.removeListener(_onAnyChange);
+    widget.countryController.removeListener(_onAnyChange);
     super.dispose();
   }
 
@@ -46,7 +61,17 @@ class _MedicFilterPanelState extends State<MedicFilterPanel> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        CityAutocompleteField(controller: widget.cityController),
+        const SizedBox(height: 12),
+        TextField(
+          controller: widget.cityController,
+          style: const TextStyle(color: AppColors.textPrimary),
+          decoration: const InputDecoration(
+            labelText: 'City',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            ),
+          ),
+        ),
         const SizedBox(height: 12),
         TextField(
           controller: widget.countryController,

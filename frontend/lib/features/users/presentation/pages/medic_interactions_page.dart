@@ -85,7 +85,8 @@ class MedicInteractionsPage extends StatelessWidget {
               ),
 
               EkgSignal(
-                data: const <double>[0, 0, 0, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 1, -1, 0, 0, 0, 0, 0, 1, -1, 0],
+                data: const <double>[
+                  0, 0, 1, -1, 0, 0, 0, 0, 0, 1, -1, 0, 0, 0, 0, 0, 1, -1, 0],
                 bottomOffset: screenHeight * 0.15,
                 height: screenHeight * 0.1,
               ),

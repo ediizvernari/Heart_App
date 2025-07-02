@@ -11,7 +11,6 @@ import 'package:frontend/features/user_health_data/presentation/controllers/user
 import 'package:frontend/features/medical_services/presentation/controllers/medical_service_controller.dart';
 import 'package:frontend/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:frontend/features/appointments/scheduling/presentation/medic_schedule_controller.dart';
-import 'package:frontend/features/location/presentation/controller/location_controller.dart';
 import 'package:frontend/features/appointments/appointments_suggestions/presentation/controllers/medic_appointment_suggestion_controller.dart';
 import 'package:frontend/features/cvd_prediction/presentation/controllers/cvd_prediction_controller.dart';
 
@@ -20,7 +19,6 @@ import 'package:frontend/features/user_health_data/data/repositories/user_health
 import 'package:frontend/features/medical_services/data/repositories/medical_service_repository_impl.dart';
 import 'package:frontend/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:frontend/features/appointments/scheduling/data/repositories/schedule_repository_impl.dart';
-import 'package:frontend/features/location/data/repositories/location_repository_impl.dart';
 import 'package:frontend/features/appointments/appointments_suggestions/data/repositories/appointment_suggestion_repository_impl.dart';
 import 'package:frontend/features/cvd_prediction/data/repositories/cvd_prediction_repository_impl.dart';
 
@@ -45,11 +43,11 @@ void main() {
         Provider<AuthStore>(create: (_) => AuthStore()),
         ChangeNotifierProvider<UserController>(
           create: (_) {
-            final ctl = UserController(UserRepositoryImpl());
-            ctl.checkUserHasMedic();
-            ctl.getMyAssignmentStatus();
-            ctl.getMyAssignedMedic();
-            return ctl;
+            final userController = UserController(UserRepositoryImpl());
+            userController.checkUserHasMedic();
+            userController.getMyAssignmentStatus();
+            userController.getMyAssignedMedic();
+            return userController;
           },
         ),
 
@@ -64,9 +62,6 @@ void main() {
         ),
         ChangeNotifierProvider<MedicScheduleController>(
           create: (_) => MedicScheduleController(ScheduleRepositoryImpl()),
-        ),
-        ChangeNotifierProvider<LocationController>(
-          create: (_) => LocationController(LocationRepositoryImpl()),
         ),
         ChangeNotifierProvider<MedicAppointmentSuggestionController>(
           create: (_) => MedicAppointmentSuggestionController(

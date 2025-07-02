@@ -25,8 +25,7 @@ class UserAppointmentFormDialog extends StatefulWidget {
       _UserAppointmentFormDialogState();
 }
 
-class _UserAppointmentFormDialogState
-    extends State<UserAppointmentFormDialog> {
+class _UserAppointmentFormDialogState extends State<UserAppointmentFormDialog> {
   DateTime _selectedDate = DateTime.now();
   int? _selectedMedicalServiceId;
   bool _isLoading = true;

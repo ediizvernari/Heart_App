@@ -14,15 +14,15 @@ class UserMedicalRecordsPage extends StatefulWidget {
 }
 
 class _UserMedicalRecordsPageState extends State<UserMedicalRecordsPage> {
-  late UserMedicalRecordController _ctrl;
+  late UserMedicalRecordController _userMedicalRecordController;
   bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _ctrl = context.read<UserMedicalRecordController>();
+    _userMedicalRecordController = context.read<UserMedicalRecordController>();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _ctrl.getAllMedicalRecords();
+      await _userMedicalRecordController.getAllMedicalRecords();
       setState(() => _loading = false);
     });
   }

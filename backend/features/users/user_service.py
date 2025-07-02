@@ -1,3 +1,4 @@
+import logging
 from argon2 import PasswordHasher
 from fastapi import HTTPException, status
 from backend.config import ENCRYPTED_USER_FIELDS
@@ -29,7 +30,7 @@ class UserService:
         )
 
     async def create_user(self, user_payload: UserCreateSchema) -> UserOutSchema:
-        print(f"[INFO] Creating user account for email={user_payload.email}")
+        logging.debug(f"Creating user account for email={user_payload.email}")
         if await self._user_repo.get_by_email(user_payload.email):
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email already registered")
         
@@ -54,8 +55,8 @@ class UserService:
         return await self._map_user_to_schema(user_record)
 
     async def signup_user(self, user_payload: UserCreateSchema) -> str:
-        print(f"[INFO] Signing up user email={user_payload.email}")
-        
+        logging.debug(f"Signing up user email={user_payload.email}")
+
         if await self._user_repo.get_by_email(user_payload.email):
             raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
         
@@ -66,16 +67,17 @@ class UserService:
         return token
 
     async def get_user_email_availability(self, email: str) -> dict:
-        print(f"[INFO] Checking email availability for {email}")
-        
+        logging.debug(f"Checking email availability for {email}")
+
         if await self._user_repo.get_by_email(email):
+            logging.error(f"Email {email} is already registered")
             raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
-        print(f"[INFO] Email {email} is available")
+        logging.info(f"Email {email} is available")
         return {"available":True}
 
     async def assign_user_to_medic(self, user_id: int, medic_id: int) -> UserOutSchema:
-        print(f"[INFO] Assigning user {user_id} to medic {medic_id}")
-        
+        logging.debug(f"Assigning user {user_id} to medic {medic_id}")
+
         user_record = await self._user_repo.get_user_by_id(user_id)
         if not user_record:
             raise HTTPException(404, "User not found")
@@ -90,30 +92,30 @@ class UserService:
         return await self._map_user_to_schema(updated)
 
     async def unassign_medic(self, user_id: int) -> UserOutSchema:
-        print(f"[INFO] Unassigning medic for user {user_id}")
+        logging.debug(f"Unassigning medic for user {user_id}")
         user_object = await self._user_repo.get_user_by_id(user_id)
         if not user_object:
             raise HTTPException(404, "User not found")
         
         await self._user_repo.unassign_medic(user_id)
         updated = await self._user_repo.get_user_by_id(user_id)
-        
-        print (f"[INFO] User {user_id} unassigned from medic, updated user: {updated}")
+
+        logging.info(f"User {user_id} unassigned from medic, updated user: {updated}")
         return await self._map_user_to_schema(updated)
 
     async def get_user_assignment_status(self, user_id: int) -> UserAssignmentStatus:
-        print(f"[INFO] Checking assignment status for user {user_id}")
-        
+        logging.debug(f"Checking assignment status for user {user_id}")
+
         user_object = await self._user_repo.get_user_by_id(user_id)
         
         if not user_object:
             raise HTTPException(404, "User not found")
-        
-        print(f"[INFO] User {user_id} has assigned medic: {user_object.medic_id is not None}")
+
+        logging.info(f"User {user_id} has assigned medic: {user_object.medic_id is not None}")
         return UserAssignmentStatus(has_assigned_medic=user_object.medic_id is not None)
 
     async def get_assigned_medic(self, user_id: int) -> MedicOutSchema:
-        print(f"[INFO] Retrieving assigned medic for user {user_id}")
+        logging.debug(f"Retrieving assigned medic for user {user_id}")
         
         user_object = await self._user_repo.get_user_by_id(user_id)
         if not user_object:
@@ -122,5 +124,5 @@ class UserService:
         if not user_object.medic_id:
             raise HTTPException(404, "No medic assigned")
         
-        print(f"[INFO] User with id {user_id} is assigned to medic with id {user_object.medic_id}")
+        logging.info(f"User with id {user_id} is assigned to medic with id {user_object.medic_id}")
         return await self._medic_service.get_medic_by_id(user_object.medic_id)

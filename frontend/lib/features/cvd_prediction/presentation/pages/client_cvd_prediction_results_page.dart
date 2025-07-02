@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/cvd_prediction/presentation/widgets/minimal_cvd_gauge.dart';
+import 'package:frontend/features/users/presentation/controllers/user_controller.dart';
 import 'package:frontend/widgets/custom_app_bar.dart';
 import 'package:frontend/features/cvd_prediction/presentation/controllers/cvd_prediction_controller.dart';
 import 'package:frontend/widgets/rounded_button.dart';
@@ -33,6 +34,7 @@ class CvdPredictionResultsPage extends StatelessWidget {
 
     final value = ctrl.predictionResult!.prediction;
     final pct = value.toStringAsFixed(1);
+    final hasAssignedMedic = context.watch<UserController>().hasMedic;
 
     return Scaffold(
       body: Stack(
@@ -91,7 +93,8 @@ class CvdPredictionResultsPage extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(width: 16),
-                                  Expanded(
+                                  if (hasAssignedMedic) ...[
+                                    Expanded(
                                     child: RoundedButton(
                                       text: 'Make an Appointment',
                                       onPressed: () {
@@ -100,6 +103,17 @@ class CvdPredictionResultsPage extends StatelessWidget {
                                       },
                                     ),
                                   ),
+                                  ] else ...[
+                                    Expanded(
+                                      child: RoundedButton(
+                                        text: 'Assign to a Medic',
+                                        onPressed: () {
+                                          Navigator.of(context)
+                                              .pushNamed('/find-medic');
+                                        },
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ],

@@ -12,8 +12,6 @@ import '../features/auth/presentation/screens/signup_user_screen.dart';
 import '../features/cvd_prediction/data/repositories/cvd_prediction_repository_impl.dart';
 import '../features/cvd_prediction/presentation/controllers/cvd_prediction_controller.dart';
 import '../features/cvd_prediction/presentation/pages/client_cvd_prediction_results_page.dart';
-import '../features/location/data/repositories/location_repository_impl.dart';
-import '../features/location/presentation/controller/location_controller.dart';
 import '../features/medical_services/data/repositories/medical_service_repository_impl.dart';
 import '../features/medics/data/repositories/medic_repository_impl.dart';
 import '../features/medics/presentation/controllers/medic_filtering_controller.dart';
@@ -155,10 +153,6 @@ final Map<String, WidgetBuilder> appRoutes = {
     
     '/find-medic': (context) => MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => LocationController(LocationRepositoryImpl())
-            ..getAllCountriesWithMedics(),
-        ),
         ChangeNotifierProvider(
           create: (_) => MedicFilteringController(MedicRepositoryImpl()),
         ),

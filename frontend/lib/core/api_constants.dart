@@ -28,8 +28,7 @@ class APIConstants {
   
 
   //Location
-  static const autocompleteCitiesUrl = '$baseUrl/location/autocomplete_cities';
-  static const getCountriesUrl = '$baseUrl/location/countries';
+  static const autocompleteLocationsUrl = '$baseUrl/location/autocomplete_locations';
   
 
   //Medic
